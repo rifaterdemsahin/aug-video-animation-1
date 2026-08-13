@@ -1,0 +1,737 @@
+[
+  {
+    "file": "00_index.png",
+    "stage": "00",
+    "stageName": "Index",
+    "caption": "Master 16-stage table of contents for the whole production framework.",
+    "voiceoverDefault": true
+  },
+  {
+    "file": "01_architecture.png",
+    "stage": "01",
+    "stageName": "Architecture",
+    "caption": "DeliveryPilot Video Production Framework v1.0 \u2014 the full 14-stage flow diagram.",
+    "voiceoverDefault": true
+  },
+  {
+    "file": "02_plan_00_cover-title.png",
+    "stage": "02",
+    "stageName": "Plan",
+    "caption": "Title card: \"AI Second Brain Video Script \u2014 Complete Production Guide.\"",
+    "voiceoverDefault": true
+  },
+  {
+    "file": "02_plan_01_contents.png",
+    "stage": "02",
+    "stageName": "Plan",
+    "caption": "Table of contents for the flagship video's own script document.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "02_plan_02_timing-table.png",
+    "stage": "02",
+    "stageName": "Plan",
+    "caption": "Scene timing table \u2014 6 scenes, 2:58 total, ~475 words at 140-160 wpm.",
+    "voiceoverDefault": true
+  },
+  {
+    "file": "02_plan_03_voiceover-1.png",
+    "stage": "02",
+    "stageName": "Plan",
+    "caption": "Flagship voiceover script pt.1 \u2014 Hook through Dual-Agent Engine.",
+    "voiceoverDefault": true
+  },
+  {
+    "file": "02_plan_04_voiceover-2.png",
+    "stage": "02",
+    "stageName": "Plan",
+    "caption": "Flagship voiceover script pt.2 \u2014 4-Step Workflow through Call to Action.",
+    "voiceoverDefault": true
+  },
+  {
+    "file": "02_plan_05_anim-prompts-1.png",
+    "stage": "02",
+    "stageName": "Plan",
+    "caption": "Animation prompt \u2014 Scene 1 (chaos) and start of Scene 2 (organizing).",
+    "voiceoverDefault": true
+  },
+  {
+    "file": "02_plan_06_anim-prompts-2.png",
+    "stage": "02",
+    "stageName": "Plan",
+    "caption": "Animation prompt \u2014 Scene 2 conclusion and full Scene 3 (P.A.R.A. breakdown).",
+    "voiceoverDefault": true
+  },
+  {
+    "file": "02_plan_07_anim-prompts-3.png",
+    "stage": "02",
+    "stageName": "Plan",
+    "caption": "Animation prompt \u2014 Scene 4 (dual-agent engine) and start of Scene 5.",
+    "voiceoverDefault": true
+  },
+  {
+    "file": "02_plan_08_anim-prompts-4.png",
+    "stage": "02",
+    "stageName": "Plan",
+    "caption": "Animation prompt \u2014 Scene 5 conclusion (Apply step) and full Scene 6 (CTA).",
+    "voiceoverDefault": true
+  },
+  {
+    "file": "02_plan_09_delivery-notes-1.png",
+    "stage": "02",
+    "stageName": "Plan",
+    "caption": "Voiceover delivery notes \u2014 pacing/tone/energy per section, ElevenLabs config.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "02_plan_10_pronunciation.png",
+    "stage": "02",
+    "stageName": "Plan",
+    "caption": "Pronunciation guide: Obsidian, P.A.R.A., Gemini, Proxmox, CCAR-P.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "02_plan_11_integration-1.png",
+    "stage": "02",
+    "stageName": "Plan",
+    "caption": "Google Flow / Canva Bulk Create integration steps 1-2.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "02_plan_12_integration-2.png",
+    "stage": "02",
+    "stageName": "Plan",
+    "caption": "Integration steps continued + CSV template note.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "02_plan_13_tech-specs.png",
+    "stage": "02",
+    "stageName": "Plan",
+    "caption": "Technical specs: 1920x1080, 30fps, fonts, master color palette.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "02_plan_14_workflow-phases-1.png",
+    "stage": "02",
+    "stageName": "Plan",
+    "caption": "Production workflow \u2014 Phase 0-3 (plan, voiceover, assets, assembly).",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "02_plan_15_workflow-phases-2.png",
+    "stage": "02",
+    "stageName": "Plan",
+    "caption": "Production workflow \u2014 Phase 4 (upload/distribution) + tools required.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "02_plan_16_resources-final.png",
+    "stage": "02",
+    "stageName": "Plan",
+    "caption": "Success factors + full YouTube description template.",
+    "voiceoverDefault": true
+  },
+  {
+    "file": "02_plan_17_checklist.png",
+    "stage": "02",
+    "stageName": "Plan",
+    "caption": "Pre-production / during-production / before-upload checklist.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "02_plan_18_csv-master.png",
+    "stage": "02",
+    "stageName": "Plan",
+    "caption": "Canonical CSV of all 6 scenes for Canva Bulk Create.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "02_plan_19_music-audio.png",
+    "stage": "02",
+    "stageName": "Plan",
+    "caption": "Music mood/tempo/sources, SFX cues, DaVinci mix levels.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "03_assets_00_ref-google-flow.png",
+    "stage": "03",
+    "stageName": "Assets",
+    "caption": "Reference: Google Flow AI creative studio tool card.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "03_assets_01_para-vault-counts.png",
+    "stage": "03",
+    "stageName": "Assets",
+    "caption": "Real generated infographic \u2014 P.A.R.A. Vault with live note counts.",
+    "voiceoverDefault": true
+  },
+  {
+    "file": "03_assets_02_dashboard-screenshot.png",
+    "stage": "03",
+    "stageName": "Assets",
+    "caption": "Real Second Brain dashboard screenshot (localhost:8899).",
+    "voiceoverDefault": true
+  },
+  {
+    "file": "03_assets_03_4pillars-garbled.png",
+    "stage": "03",
+    "stageName": "Assets",
+    "caption": "AI-generated 4-pillar infographic \u2014 text render is garbled, needs redo.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "03_assets_unsorted-03.png",
+    "stage": "03",
+    "stageName": "Assets",
+    "caption": "Uncatalogued reference/visual asset \u2014 add a caption.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "03_assets_unsorted-04.png",
+    "stage": "03",
+    "stageName": "Assets",
+    "caption": "Uncatalogued reference/visual asset \u2014 add a caption.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "03_assets_unsorted-06.png",
+    "stage": "03",
+    "stageName": "Assets",
+    "caption": "Uncatalogued reference/visual asset \u2014 add a caption.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "03_assets_unsorted-07.png",
+    "stage": "03",
+    "stageName": "Assets",
+    "caption": "Uncatalogued reference/visual asset \u2014 add a caption.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "03_assets_unsorted-08.png",
+    "stage": "03",
+    "stageName": "Assets",
+    "caption": "Uncatalogued reference/visual asset \u2014 add a caption.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "03_assets_unsorted-09.png",
+    "stage": "03",
+    "stageName": "Assets",
+    "caption": "Uncatalogued reference/visual asset \u2014 add a caption.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "03_assets_unsorted-11.png",
+    "stage": "03",
+    "stageName": "Assets",
+    "caption": "Uncatalogued reference/visual asset \u2014 add a caption.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "03_assets_unsorted-12.png",
+    "stage": "03",
+    "stageName": "Assets",
+    "caption": "Uncatalogued reference/visual asset \u2014 add a caption.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "03_assets_unsorted-13.png",
+    "stage": "03",
+    "stageName": "Assets",
+    "caption": "Uncatalogued reference/visual asset \u2014 add a caption.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "03_assets_unsorted-14.png",
+    "stage": "03",
+    "stageName": "Assets",
+    "caption": "Uncatalogued reference/visual asset \u2014 add a caption.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "03_assets_unsorted-15.png",
+    "stage": "03",
+    "stageName": "Assets",
+    "caption": "Uncatalogued reference/visual asset \u2014 add a caption.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "03_assets_unsorted-16.png",
+    "stage": "03",
+    "stageName": "Assets",
+    "caption": "Uncatalogued reference/visual asset \u2014 add a caption.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "03_assets_unsorted-17.png",
+    "stage": "03",
+    "stageName": "Assets",
+    "caption": "Uncatalogued reference/visual asset \u2014 add a caption.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "03_assets_unsorted-18.png",
+    "stage": "03",
+    "stageName": "Assets",
+    "caption": "Uncatalogued reference/visual asset \u2014 add a caption.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "03_assets_unsorted-19.png",
+    "stage": "03",
+    "stageName": "Assets",
+    "caption": "Uncatalogued reference/visual asset \u2014 add a caption.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "03_assets_unsorted-20.png",
+    "stage": "03",
+    "stageName": "Assets",
+    "caption": "Uncatalogued reference/visual asset \u2014 add a caption.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "03_assets_unsorted-21.png",
+    "stage": "03",
+    "stageName": "Assets",
+    "caption": "Uncatalogued reference/visual asset \u2014 add a caption.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "03_assets_unsorted-22.png",
+    "stage": "03",
+    "stageName": "Assets",
+    "caption": "Uncatalogued reference/visual asset \u2014 add a caption.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "03_assets_unsorted-23.png",
+    "stage": "03",
+    "stageName": "Assets",
+    "caption": "Uncatalogued reference/visual asset \u2014 add a caption.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "03_assets_unsorted-24.png",
+    "stage": "03",
+    "stageName": "Assets",
+    "caption": "Uncatalogued reference/visual asset \u2014 add a caption.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "03_assets_unsorted-25.png",
+    "stage": "03",
+    "stageName": "Assets",
+    "caption": "Uncatalogued reference/visual asset \u2014 add a caption.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "03_assets_unsorted-26.png",
+    "stage": "03",
+    "stageName": "Assets",
+    "caption": "Uncatalogued reference/visual asset \u2014 add a caption.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "03_assets_unsorted-27.png",
+    "stage": "03",
+    "stageName": "Assets",
+    "caption": "Uncatalogued reference/visual asset \u2014 add a caption.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "03_assets_unsorted-28.png",
+    "stage": "03",
+    "stageName": "Assets",
+    "caption": "Uncatalogued reference/visual asset \u2014 add a caption.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "03_assets_unsorted-29.png",
+    "stage": "03",
+    "stageName": "Assets",
+    "caption": "Uncatalogued reference/visual asset \u2014 add a caption.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "03_assets_unsorted-30.png",
+    "stage": "03",
+    "stageName": "Assets",
+    "caption": "Uncatalogued reference/visual asset \u2014 add a caption.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "03_assets_unsorted-31.png",
+    "stage": "03",
+    "stageName": "Assets",
+    "caption": "Uncatalogued reference/visual asset \u2014 add a caption.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "03_assets_unsorted-32.png",
+    "stage": "03",
+    "stageName": "Assets",
+    "caption": "Uncatalogued reference/visual asset \u2014 add a caption.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "03_assets_unsorted-33.png",
+    "stage": "03",
+    "stageName": "Assets",
+    "caption": "Uncatalogued reference/visual asset \u2014 add a caption.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "03_assets_unsorted-34.png",
+    "stage": "03",
+    "stageName": "Assets",
+    "caption": "Uncatalogued reference/visual asset \u2014 add a caption.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "03_assets_unsorted-35.png",
+    "stage": "03",
+    "stageName": "Assets",
+    "caption": "Uncatalogued reference/visual asset \u2014 add a caption.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "03_assets_unsorted-36.png",
+    "stage": "03",
+    "stageName": "Assets",
+    "caption": "Uncatalogued reference/visual asset \u2014 add a caption.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "03_assets_unsorted-37.png",
+    "stage": "03",
+    "stageName": "Assets",
+    "caption": "Uncatalogued reference/visual asset \u2014 add a caption.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "03_assets_unsorted-38.png",
+    "stage": "03",
+    "stageName": "Assets",
+    "caption": "Uncatalogued reference/visual asset \u2014 add a caption.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "03_assets_unsorted-39.png",
+    "stage": "03",
+    "stageName": "Assets",
+    "caption": "Uncatalogued reference/visual asset \u2014 add a caption.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "03_assets_unsorted-40.png",
+    "stage": "03",
+    "stageName": "Assets",
+    "caption": "Uncatalogued reference/visual asset \u2014 add a caption.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "03_assets_unsorted-41.png",
+    "stage": "03",
+    "stageName": "Assets",
+    "caption": "Uncatalogued reference/visual asset \u2014 add a caption.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "03_assets_unsorted-42.png",
+    "stage": "03",
+    "stageName": "Assets",
+    "caption": "Uncatalogued reference/visual asset \u2014 add a caption.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "03_assets_unsorted-43.png",
+    "stage": "03",
+    "stageName": "Assets",
+    "caption": "Uncatalogued reference/visual asset \u2014 add a caption.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "03_assets_unsorted-44.png",
+    "stage": "03",
+    "stageName": "Assets",
+    "caption": "Uncatalogued reference/visual asset \u2014 add a caption.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "03_assets_unsorted-45.png",
+    "stage": "03",
+    "stageName": "Assets",
+    "caption": "Uncatalogued reference/visual asset \u2014 add a caption.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "03_assets_unsorted-46.png",
+    "stage": "03",
+    "stageName": "Assets",
+    "caption": "Uncatalogued reference/visual asset \u2014 add a caption.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "03_assets_unsorted-47.png",
+    "stage": "03",
+    "stageName": "Assets",
+    "caption": "Uncatalogued reference/visual asset \u2014 add a caption.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "03_assets_unsorted-48.png",
+    "stage": "03",
+    "stageName": "Assets",
+    "caption": "Uncatalogued reference/visual asset \u2014 add a caption.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "03_assets_unsorted-49.png",
+    "stage": "03",
+    "stageName": "Assets",
+    "caption": "Uncatalogued reference/visual asset \u2014 add a caption.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "03_assets_unsorted-50.png",
+    "stage": "03",
+    "stageName": "Assets",
+    "caption": "Uncatalogued reference/visual asset \u2014 add a caption.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "03_assets_unsorted-51.png",
+    "stage": "03",
+    "stageName": "Assets",
+    "caption": "Uncatalogued reference/visual asset \u2014 add a caption.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "03_assets_unsorted-52.png",
+    "stage": "03",
+    "stageName": "Assets",
+    "caption": "Uncatalogued reference/visual asset \u2014 add a caption.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "03_assets_unsorted-53.png",
+    "stage": "03",
+    "stageName": "Assets",
+    "caption": "Uncatalogued reference/visual asset \u2014 add a caption.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "03_assets_unsorted-54.png",
+    "stage": "03",
+    "stageName": "Assets",
+    "caption": "Uncatalogued reference/visual asset \u2014 add a caption.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "03_assets_unsorted-55.png",
+    "stage": "03",
+    "stageName": "Assets",
+    "caption": "Uncatalogued reference/visual asset \u2014 add a caption.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "03_assets_unsorted-56.png",
+    "stage": "03",
+    "stageName": "Assets",
+    "caption": "Uncatalogued reference/visual asset \u2014 add a caption.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "03_assets_unsorted-57.png",
+    "stage": "03",
+    "stageName": "Assets",
+    "caption": "Uncatalogued reference/visual asset \u2014 add a caption.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "04_cohort_00_week7-notes.png",
+    "stage": "04",
+    "stageName": "Cohort",
+    "caption": "Cohort workflow notes + real Week 7 cohort-call calendar entry.",
+    "voiceoverDefault": true
+  },
+  {
+    "file": "04_cohort_01_who-are-we.png",
+    "stage": "04",
+    "stageName": "Cohort",
+    "caption": "\"WHO ARE WE\" personal brand banner \u2014 no-experience-to-certified value prop.",
+    "voiceoverDefault": true
+  },
+  {
+    "file": "04_cohort_02_schedule.png",
+    "stage": "04",
+    "stageName": "Cohort",
+    "caption": "Cohort schedule \u2014 every Sunday, 9-11PM UK time, free.",
+    "voiceoverDefault": true
+  },
+  {
+    "file": "05_gaps_00_hallucination-vs-context.png",
+    "stage": "05",
+    "stageName": "Gaps",
+    "caption": "Strong before/after: low-context hallucination vs. high-context accurate AI.",
+    "voiceoverDefault": true
+  },
+  {
+    "file": "05_gaps_unsorted-03.png",
+    "stage": "05",
+    "stageName": "Gaps",
+    "caption": "Uncatalogued reference/visual asset \u2014 add a caption.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "05_gaps_unsorted-04.png",
+    "stage": "05",
+    "stageName": "Gaps",
+    "caption": "Uncatalogued reference/visual asset \u2014 add a caption.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "05_gaps_unsorted-05.png",
+    "stage": "05",
+    "stageName": "Gaps",
+    "caption": "Uncatalogued reference/visual asset \u2014 add a caption.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "05_gaps_unsorted-06.png",
+    "stage": "05",
+    "stageName": "Gaps",
+    "caption": "Uncatalogued reference/visual asset \u2014 add a caption.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "05_gaps_unsorted-08.png",
+    "stage": "05",
+    "stageName": "Gaps",
+    "caption": "Uncatalogued reference/visual asset \u2014 add a caption.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "05_gaps_unsorted-09.png",
+    "stage": "05",
+    "stageName": "Gaps",
+    "caption": "Uncatalogued reference/visual asset \u2014 add a caption.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "05_gaps_unsorted-10.png",
+    "stage": "05",
+    "stageName": "Gaps",
+    "caption": "Uncatalogued reference/visual asset \u2014 add a caption.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "05_gaps_unsorted-11.png",
+    "stage": "05",
+    "stageName": "Gaps",
+    "caption": "Uncatalogued reference/visual asset \u2014 add a caption.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "06_assembly_00_scene1-2-stills.png",
+    "stage": "06",
+    "stageName": "Assembly",
+    "caption": "Script recap + two real generated stills \u2014 candidate visuals for Scenes 1 & 2.",
+    "voiceoverDefault": true
+  },
+  {
+    "file": "06_assembly_01_divider-empty.png",
+    "stage": "06",
+    "stageName": "Assembly",
+    "caption": "Empty \"Assembly\" section-divider ribbon.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "07_polish_00_divider-empty.png",
+    "stage": "07",
+    "stageName": "Polish",
+    "caption": "Empty section-divider ribbon (Polish stage).",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "08_refinement_00_divider-empty.png",
+    "stage": "08",
+    "stageName": "Refinement",
+    "caption": "Empty \"Refinement\" section-divider ribbon.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "09_audio_00_divider-empty.png",
+    "stage": "09",
+    "stageName": "Audio",
+    "caption": "Empty \"Audio\" section-divider ribbon.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "10_editcolor_00_divider-empty.png",
+    "stage": "10",
+    "stageName": "Edit Color",
+    "caption": "Empty \"Edit Color\" section-divider ribbon.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "11_thumbnail_00_divider-empty.png",
+    "stage": "11",
+    "stageName": "Thumbnail",
+    "caption": "Empty \"Publish/Thumbnail\" section-divider ribbon.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "12_export_00_divider-empty.png",
+    "stage": "12",
+    "stageName": "Export",
+    "caption": "Empty \"Publish/Export\" section-divider ribbon.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "13_metadata_00_template-empty.png",
+    "stage": "13",
+    "stageName": "Metadata",
+    "caption": "Unfilled title/description template sticky note.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "13_metadata_01_followup-xpost.png",
+    "stage": "13",
+    "stageName": "Metadata",
+    "caption": "Real embedded X post \u2014 a Canva feature request, tangential follow-up note.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "15_tactics_00_editor-screenshot-stub.png",
+    "stage": "15",
+    "stageName": "Tactics",
+    "caption": "Screenshot of the Canva editor itself \u2014 unfinished \"Top Titles\" stub.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "15_tactics_unsorted-02.png",
+    "stage": "15",
+    "stageName": "Tactics",
+    "caption": "Uncatalogued reference/visual asset \u2014 add a caption.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "15_tactics_unsorted-03.png",
+    "stage": "15",
+    "stageName": "Tactics",
+    "caption": "Uncatalogued reference/visual asset \u2014 add a caption.",
+    "voiceoverDefault": false
+  },
+  {
+    "file": "15_tactics_unsorted-04.png",
+    "stage": "15",
+    "stageName": "Tactics",
+    "caption": "Uncatalogued reference/visual asset \u2014 add a caption.",
+    "voiceoverDefault": false
+  }
+]

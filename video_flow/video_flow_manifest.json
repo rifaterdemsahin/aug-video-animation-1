@@ -1,0 +1,241 @@
+{
+  "folder": "/Users/rifaterdemsahin/secondbrain-azurefiles/secondbrain/1_Projects_Deadline/WIGAnimation/video_flow",
+  "count": 26,
+  "naming": "NN_first-frame-slug.mp4 (slug from OpenRouter vision of first frame)",
+  "files": [
+    {
+      "seq": 1,
+      "orig_num": 1,
+      "from": "2asset.mp4",
+      "slug": "colorful-file-icons-background",
+      "to": "01_colorful-file-icons-background.mp4",
+      "frame": "01_colorful-file-icons-background.jpg",
+      "source_index": 26
+    },
+    {
+      "seq": 2,
+      "orig_num": 2,
+      "from": "2asset (2).mp4",
+      "slug": "futuristic-network-grid",
+      "to": "02_futuristic-network-grid.mp4",
+      "frame": "02_futuristic-network-grid.jpg",
+      "source_index": 11
+    },
+    {
+      "seq": 3,
+      "orig_num": 3,
+      "from": "2asset (3).mp4",
+      "slug": "data-vault-galaxy",
+      "to": "03_data-vault-galaxy.mp4",
+      "frame": "03_data-vault-galaxy.jpg",
+      "source_index": 19
+    },
+    {
+      "seq": 4,
+      "orig_num": 4,
+      "from": "2asset (4).mp4",
+      "slug": "black-diamond-vortex",
+      "to": "04_black-diamond-vortex.mp4",
+      "frame": "04_black-diamond-vortex.jpg",
+      "source_index": 20
+    },
+    {
+      "seq": 5,
+      "orig_num": 5,
+      "from": "2asset (5).mp4",
+      "slug": "bright-light-in-darkness",
+      "to": "05_bright-light-in-darkness.mp4",
+      "frame": "05_bright-light-in-darkness.jpg",
+      "source_index": 21
+    },
+    {
+      "seq": 6,
+      "orig_num": 6,
+      "from": "2asset (6).mp4",
+      "slug": "abstract-geometry-animation",
+      "to": "06_abstract-geometry-animation.mp4",
+      "frame": "06_abstract-geometry-animation.jpg",
+      "source_index": 22
+    },
+    {
+      "seq": 7,
+      "orig_num": 7,
+      "from": "2asset (7).mp4",
+      "slug": "sparkling-light-explosion",
+      "to": "07_sparkling-light-explosion.mp4",
+      "frame": "07_sparkling-light-explosion.jpg",
+      "source_index": 23
+    },
+    {
+      "seq": 8,
+      "orig_num": 8,
+      "from": "2asset (8).mp4",
+      "slug": "gray-diagonal-plane",
+      "to": "08_gray-diagonal-plane.mp4",
+      "frame": "08_gray-diagonal-plane.jpg",
+      "source_index": 24
+    },
+    {
+      "seq": 9,
+      "orig_num": 9,
+      "from": "2asset (9).mp4",
+      "slug": "dark-screen-teal-bar",
+      "to": "09_dark-screen-teal-bar.mp4",
+      "frame": "09_dark-screen-teal-bar.jpg",
+      "source_index": 25
+    },
+    {
+      "seq": 10,
+      "orig_num": 10,
+      "from": "2asset (10).mp4",
+      "slug": "glowing-red-horizon",
+      "to": "10_glowing-red-horizon.mp4",
+      "frame": "10_glowing-red-horizon.jpg",
+      "source_index": 1
+    },
+    {
+      "seq": 11,
+      "orig_num": 11,
+      "from": "2asset (11).mp4",
+      "slug": "blue-title-card-garbled-text",
+      "to": "11_blue-title-card-garbled-text.mp4",
+      "frame": "11_blue-title-card-garbled-text.jpg",
+      "source_index": 2
+    },
+    {
+      "seq": 12,
+      "orig_num": 12,
+      "from": "2asset (12).mp4",
+      "slug": "dark-grid-visualization",
+      "to": "12_dark-grid-visualization.mp4",
+      "frame": "12_dark-grid-visualization.jpg",
+      "source_index": 3
+    },
+    {
+      "seq": 13,
+      "orig_num": 13,
+      "from": "2asset (13).mp4",
+      "slug": "red-code-glitch",
+      "to": "13_red-code-glitch.mp4",
+      "frame": "13_red-code-glitch.jpg",
+      "source_index": 4
+    },
+    {
+      "seq": 14,
+      "orig_num": 14,
+      "from": "2asset (14).mp4",
+      "slug": "data-interface-dashboard",
+      "to": "14_data-interface-dashboard.mp4",
+      "frame": "14_data-interface-dashboard.jpg",
+      "source_index": 5
+    },
+    {
+      "seq": 15,
+      "orig_num": 15,
+      "from": "2asset (15).mp4",
+      "slug": "gold-blue-logos-sync",
+      "to": "15_gold-blue-logos-sync.mp4",
+      "frame": "15_gold-blue-logos-sync.jpg",
+      "source_index": 6
+    },
+    {
+      "seq": 16,
+      "orig_num": 16,
+      "from": "2asset (16).mp4",
+      "slug": "grid-interface-display",
+      "to": "16_grid-interface-display.mp4",
+      "frame": "16_grid-interface-display.jpg",
+      "source_index": 7
+    },
+    {
+      "seq": 17,
+      "orig_num": 17,
+      "from": "2asset (17).mp4",
+      "slug": "digital-asset-interface",
+      "to": "17_digital-asset-interface.mp4",
+      "frame": "17_digital-asset-interface.jpg",
+      "source_index": 8
+    },
+    {
+      "seq": 18,
+      "orig_num": 18,
+      "from": "2asset (18).mp4",
+      "slug": "golden-brain-lightning",
+      "to": "18_golden-brain-lightning.mp4",
+      "frame": "18_golden-brain-lightning.jpg",
+      "source_index": 9
+    },
+    {
+      "seq": 19,
+      "orig_num": 19,
+      "from": "2asset (19).mp4",
+      "slug": "tell-show-animation",
+      "to": "19_tell-show-animation.mp4",
+      "frame": "19_tell-show-animation.jpg",
+      "source_index": 10
+    },
+    {
+      "seq": 20,
+      "orig_num": 20,
+      "from": "2asset (20).mp4",
+      "slug": "golden-brain-lightning-2",
+      "to": "20_golden-brain-lightning-2.mp4",
+      "frame": "20_golden-brain-lightning-2.jpg",
+      "source_index": 12
+    },
+    {
+      "seq": 21,
+      "orig_num": 21,
+      "from": "2asset (21).mp4",
+      "slug": "glowing-arrow-motion",
+      "to": "21_glowing-arrow-motion.mp4",
+      "frame": "21_glowing-arrow-motion.jpg",
+      "source_index": 13
+    },
+    {
+      "seq": 22,
+      "orig_num": 22,
+      "from": "2asset (22).mp4",
+      "slug": "animated-arrow-grid",
+      "to": "22_animated-arrow-grid.mp4",
+      "frame": "22_animated-arrow-grid.jpg",
+      "source_index": 14
+    },
+    {
+      "seq": 23,
+      "orig_num": 23,
+      "from": "2asset (23).mp4",
+      "slug": "golden-brain-animation",
+      "to": "23_golden-brain-animation.mp4",
+      "frame": "23_golden-brain-animation.jpg",
+      "source_index": 15
+    },
+    {
+      "seq": 24,
+      "orig_num": 24,
+      "from": "2asset (24).mp4",
+      "slug": "golden-brain-apps",
+      "to": "24_golden-brain-apps.mp4",
+      "frame": "24_golden-brain-apps.jpg",
+      "source_index": 16
+    },
+    {
+      "seq": 25,
+      "orig_num": 25,
+      "from": "2asset (25).mp4",
+      "slug": "golden-brain-animation-2",
+      "to": "25_golden-brain-animation-2.mp4",
+      "frame": "25_golden-brain-animation-2.jpg",
+      "source_index": 17
+    },
+    {
+      "seq": 26,
+      "orig_num": 26,
+      "from": "2asset (26).mp4",
+      "slug": "geometric-play-button-background",
+      "to": "26_geometric-play-button-background.mp4",
+      "frame": "26_geometric-play-button-background.jpg",
+      "source_index": 18
+    }
+  ]
+}

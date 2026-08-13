@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>August Video Animation #1 — AI Second Brain</title>
+  <meta name="description" content="Rifat Erdem Sahin is building a 2:58 animated video about the AI Second Brain — shotlist, Google Flow clips, and the 16-stage production framework, published as a public work-in-progress.">
+  <meta name="author" content="Rifat Erdem Sahin">
+  <link rel="canonical" href="https://rifaterdemsahin.github.io/aug-video-animation-1/">
+  <style>
+    :root{
+      --bg:#09090d; --panel:#14141c; --ink:#f4f1ea; --muted:#9a958b;
+      --gold:#e8b84a; --cyan:#6ee7f5; --line:#2a2a36; --accent:#e74c3c;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;background:var(--bg);color:var(--ink);font-family:Georgia,"Times New Roman",serif}
+    a{color:var(--cyan)}
+    a:hover{color:var(--gold)}
+    .wrap{max-width:980px;margin:0 auto;padding:28px 20px 80px}
+    header.hero{padding:36px 0 28px}
+    .kicker{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin:0 0 10px}
+    h1{font-size:clamp(32px,6vw,56px);line-height:1.05;font-weight:700;margin:0 0 14px;letter-spacing:-.02em}
+    h1 em{font-style:italic;color:var(--gold);font-weight:600}
+    .lede{font-size:20px;line-height:1.45;color:#ddd8ce;max-width:38em;margin:0 0 22px}
+    .actions{display:flex;flex-wrap:wrap;gap:10px;margin:22px 0 8px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    .btn{display:inline-block;text-decoration:none;padding:11px 16px;border-radius:8px;font-size:14px;font-weight:650}
+    .btn.primary{background:var(--gold);color:#1a1406}
+    .btn.ghost{border:1px solid var(--line);color:var(--ink)}
+    .hero-art{margin:28px 0 8px;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#000}
+    .hero-art img{display:block;width:100%;height:auto}
+    .cap{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:12px;color:var(--muted);margin:8px 0 0}
+    section{margin:42px 0}
+    h2{font-size:26px;margin:0 0 12px}
+    p,li{font-size:17.5px;line-height:1.55;color:#e6e1d6}
+    ul{padding-left:1.2em}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-top:16px}
+    .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px}
+    .card h3{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);margin:0 0 8px}
+    .card p{margin:0;font-size:15.5px;color:#d8d3c8}
+    .stages{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    .stages span{border:1px solid var(--line);border-radius:999px;padding:4px 9px;font-size:11.5px;color:var(--muted)}
+    .clip-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin-top:14px}
+    .clip-grid a{display:block;border-radius:8px;overflow:hidden;border:1px solid var(--line);background:#111}
+    .clip-grid img{display:block;width:100%;height:88px;object-fit:cover}
+    .player{margin-top:16px;background:#000;border-radius:12px;overflow:hidden;border:1px solid var(--line)}
+    .player video{display:block;width:100%;max-height:420px;background:#000}
+    footer{margin-top:56px;padding-top:20px;border-top:1px solid var(--line);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:13px;color:var(--muted)}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="hero">
+      <p class="kicker">August 2026 · DeliveryPilot · public WIP</p>
+      <h1>I am making an animated film about my <em>AI Second Brain</em>.</h1>
+      <p class="lede">
+        This repo is the workbench for that film: a timed 2:58 script, a shotlist you can edit in the browser,
+        Canva stills, and 26 Google Flow animation clips. I am not publishing a finished YouTube video yet —
+        I am publishing the production itself.
+      </p>
+      <div class="actions">
+        <a class="btn primary" href="storyboard.html">Open the shotlist</a>
+        <a class="btn ghost" href="_script.md">Read the voiceover script</a>
+        <a class="btn ghost" href="https://github.com/rifaterdemsahin/aug-video-animation-1">GitHub source</a>
+      </div>
+      <figure class="hero-art">
+        <img src="video_flow/_first_frames/18_golden-brain-lightning.jpg" alt="Golden brain with a cyan lightning bolt — a Google Flow still from the film">
+      </figure>
+      <p class="cap">First frame of a Flow clip I generated for the engine / CTA beats. The gold brain is the visual hook for “a second brain that actually works.”</p>
+    </header>
+
+    <section>
+      <h2>What I am doing</h2>
+      <p>
+        I have ~46,000 notes in Obsidian. Searching them used to feel like a haystack.
+        I built a machine-readable second brain (P.A.R.A. vault, dual agents, live dashboard)
+        so AI can query, update, and apply that knowledge. This video is how I explain that
+        system in under three minutes — then invite people into a free Sunday cohort.
+      </p>
+      <p>
+        August’s job is to turn the plan into pictures that move. I wrote the flagship script
+        from the Canva deck (nothing invented), reserved Stage 14 for my real WIG story
+        (SRE → agentic operations), and I am now cutting stills and Flow loops against a
+        shotlist with timecode, voiceover, and YouTube structure tags (hook, cold open, B-roll, CTA).
+      </p>
+    </section>
+
+    <section>
+      <h2>What is in this project</h2>
+      <div class="grid">
+        <article class="card">
+          <h3>01 · The film</h3>
+          <p>Flagship cut: <strong>AI Second Brain</strong>, 2:58, six scenes, ~475 words at 140–160 wpm. YouTube + LinkedIn, 1080p.</p>
+        </article>
+        <article class="card">
+          <h3>02 · The shotlist</h3>
+          <p><a href="storyboard.html">storyboard.html</a> is the editor: scenes, VO, types, hide/undo, playable Flow clips with first-frame posters.</p>
+        </article>
+        <article class="card">
+          <h3>03 · The clips</h3>
+          <p>26 Google Flow MP4s in <code>video_flow/</code>, renamed from their first frame. Each shot shows the still and the playable loop.</p>
+        </article>
+      </div>
+      <div class="stages">
+        <span>00 Index</span><span>01 Architecture</span><span>02 Plan</span><span>03 Assets</span>
+        <span>04 Cohort</span><span>05 Gaps</span><span>06 Assembly</span><span>07 Polish</span>
+        <span>08 Refinement</span><span>09 Audio</span><span>10 Edit Color</span><span>11 Thumbnail</span>
+        <span>12 Export</span><span>13 Metadata</span><span>14 WIG</span><span>15 Tactics</span>
+        <span>16 Video Flow</span>
+      </div>
+    </section>
+
+    <section>
+      <h2>A clip from the pile</h2>
+      <p>This is one of the Flow loops — first frame as poster, then play. The rest live on Stage 16 of the shotlist.</p>
+      <div class="player">
+        <video controls playsinline preload="metadata" poster="video_flow/_first_frames/18_golden-brain-lightning.jpg">
+          <source src="video_flow/18_golden-brain-lightning.mp4" type="video/mp4">
+        </video>
+      </div>
+      <div class="clip-grid" aria-label="First frames of the Flow clips">
+        <a href="video_flow/01_colorful-file-icons-background.mp4"><img src="video_flow/_first_frames/01_colorful-file-icons-background.jpg" alt="Colorful file icons"></a>
+        <a href="video_flow/03_data-vault-galaxy.mp4"><img src="video_flow/_first_frames/03_data-vault-galaxy.jpg" alt="Data vault galaxy"></a>
+        <a href="video_flow/13_red-code-glitch.mp4"><img src="video_flow/_first_frames/13_red-code-glitch.jpg" alt="Red code glitch"></a>
+        <a href="video_flow/14_data-interface-dashboard.mp4"><img src="video_flow/_first_frames/14_data-interface-dashboard.jpg" alt="Dashboard interface"></a>
+        <a href="video_flow/19_tell-show-animation.mp4"><img src="video_flow/_first_frames/19_tell-show-animation.jpg" alt="Tell / Show animation"></a>
+        <a href="video_flow/26_geometric-play-button-background.mp4"><img src="video_flow/_first_frames/26_geometric-play-button-background.jpg" alt="Geometric play button"></a>
+      </div>
+    </section>
+
+    <section>
+      <h2>How to look around</h2>
+      <ul>
+        <li><a href="storyboard.html">Shotlist</a> — the live editor. Grammar/rewrite and vault search need the local <code>server.py</code>; everything else is static.</li>
+        <li><a href="_script.md">_script.md</a> — Part A (flagship VO) and Part B (stage walkthrough + Stage 14 WIG).</li>
+        <li><code>02_plan_*.png</code> — the Canva planning deck I transcribed the script from.</li>
+        <li><code>video_flow/</code> — the 26 animation clips + <code>_first_frames/</code> stills.</li>
+      </ul>
+    </section>
+
+    <footer>
+      Rifat Erdem Sahin · DeliveryPilot · published from the Second Brain WIGAnimation project ·
+      <a href="https://github.com/rifaterdemsahin/aug-video-animation-1">rifaterdemsahin/aug-video-animation-1</a>
+    </footer>
+  </div>
+</body>
+</html>

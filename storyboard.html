@@ -1,0 +1,3042 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shotlist — WIG Animation MVP</title>
+<style>
+
+:root{
+  --bg:#f4f3ef; --panel:#fff; --ink:#1a1a2e; --muted:#6b6f7a; --line:#e2e0d8;
+  --accent:#e74c3c; --accent2:#3498db; --accent3:#27ae60; --gold:#f39c12;
+  --chip:#eef0f4; --tc:#2c3e50; --shadow:0 1px 3px rgba(20,20,30,.08);
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#0f0f14; --panel:#181822; --ink:#ecf0f1; --muted:#9aa0ac; --line:#2a2a38;
+    --chip:#22222f; --tc:#bdc3c7; --shadow:0 1px 3px rgba(0,0,0,.4);
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;line-height:1.45}
+a{color:var(--accent2)}
+header{position:sticky;top:0;z-index:50;background:var(--panel);border-bottom:1px solid var(--line);box-shadow:var(--shadow);padding:10px 16px}
+.bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;max-width:1200px;margin:0 auto}
+.title{font-weight:800;font-size:16px;margin-right:auto;letter-spacing:.02em}
+.title small{display:block;font-weight:400;color:var(--muted);font-size:11px;letter-spacing:0}
+.stat{font-size:12px;color:var(--muted);white-space:nowrap}
+.stat b{color:var(--ink);font-variant-numeric:tabular-nums}
+button.btn,.icon-btn{
+  font:inherit;font-size:12.5px;font-weight:600;cursor:pointer;
+  border:1px solid var(--line);background:var(--chip);color:var(--ink);
+  border-radius:7px;padding:7px 12px;white-space:nowrap
+}
+button.btn.sm{padding:4px 8px;font-size:11.5px}
+button.btn.primary{background:var(--accent2);border-color:var(--accent2);color:#fff}
+button.btn.ghost{background:transparent}
+button.btn:hover,.icon-btn:hover{filter:brightness(1.05)}
+button.btn.save-btn{background:var(--chip);border-color:var(--line);color:var(--ink)}
+button.btn.save-btn.has-unsaved{background:var(--accent3);border-color:var(--accent3);color:#fff}
+button.btn.save-btn.is-clean{opacity:.9}
+.icon-btn{min-width:28px;height:28px;padding:0 7px;display:inline-flex;align-items:center;justify-content:center}
+.icon-btn.danger{color:var(--accent)}
+.icon-btn.collapse-btn{font-weight:800}
+.drag-handle{cursor:grab;color:var(--muted);font-size:14px;letter-spacing:-2px;user-select:none;padding:2px 4px;border-radius:6px}
+.drag-handle:active{cursor:grabbing}
+.shot.dragging{opacity:.55}
+.shot.drag-over{outline:2px dashed var(--accent2)}
+#saveMsg{font-size:11px;color:var(--accent3);min-width:120px}
+.help-wrap{position:relative;display:inline-flex;align-items:center;gap:8px}
+.help-tip{border-radius:999px;width:28px;height:28px;font-weight:800;color:var(--muted)}
+.help-banner{display:none;margin:0 0 12px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);font-size:12.5px;color:var(--muted);line-height:1.5}
+.help-banner.open{display:block}
+.help-banner b{color:var(--ink)}
+.tag-compact{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:4px}
+.tag-selected{display:flex;flex-wrap:wrap;gap:5px;align-items:center;min-height:28px}
+.tag-empty{font-size:11px;color:var(--muted)}
+.tag-add{position:relative}
+.tag-add>summary{list-style:none;cursor:pointer}
+.tag-add>summary::-webkit-details-marker{display:none}
+.tag-menu{
+  position:absolute;z-index:20;top:calc(100% + 4px);left:0;min-width:160px;
+  background:var(--panel);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);
+  padding:6px;display:flex;flex-direction:column;gap:4px
+}
+.tag-menu .chip{justify-content:flex-start;text-align:left;width:100%}
+.chip.removable{padding-right:6px}
+.chip .x{opacity:.7;margin-left:4px;font-weight:700}
+.dur-field{position:relative}
+.dur-field.is-manual input{border-color:var(--gold);background:rgba(243,156,18,.08);font-weight:700}
+.dur-field.is-auto input{border-style:dashed}
+.dur-badge{
+  display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;
+  letter-spacing:.03em;text-transform:uppercase;border-radius:999px;padding:2px 8px;margin-bottom:4px
+}
+.dur-field.is-manual .dur-badge{background:rgba(243,156,18,.18);color:#b9770e}
+.dur-field.is-auto .dur-badge{background:var(--chip);color:var(--muted)}
+.tc-dur.is-manual{background:rgba(243,156,18,.2);color:#b9770e;font-weight:700}
+
+
+.menu{position:relative}
+.menu>summary{list-style:none;font:inherit;font-size:12.5px;font-weight:600;cursor:pointer;border:1px solid var(--line);background:var(--chip);color:var(--ink);border-radius:7px;padding:7px 12px;user-select:none}
+.menu>summary::-webkit-details-marker{display:none}
+.menu[open]>summary{border-color:var(--accent2)}
+.menu-panel{position:absolute;top:calc(100% + 6px);right:0;min-width:250px;background:var(--panel);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);padding:6px;z-index:60}
+.menu-panel a,.menu-panel button.menu-item{
+  display:block;width:100%;text-align:left;text-decoration:none;color:var(--ink);
+  font:inherit;font-size:12.5px;font-weight:600;padding:9px 11px;border-radius:7px;border:0;background:transparent;cursor:pointer
+}
+.menu-panel a:hover,.menu-panel button.menu-item:hover{background:var(--chip);color:var(--accent2)}
+.menu-panel a small,.menu-panel button.menu-item small{display:block;font-weight:400;color:var(--muted);font-size:10.5px;margin-top:2px}
+
+main{max-width:1200px;margin:0 auto;padding:16px 16px 80px}
+.view[hidden]{display:none!important}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:14px}
+h2{font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin:0 0 12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+h2 .hint{font-size:11px;font-weight:400;text-transform:none;letter-spacing:0}
+.toolbar-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.empty{padding:28px 12px;text-align:center;color:var(--muted);font-size:13px;border:1px dashed var(--line);border-radius:10px}
+
+/* scene */
+.scene{margin:0 0 18px;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--bg)}
+.scene-head{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:10px 12px;background:var(--panel);border-bottom:1px solid var(--line);position:sticky;top:54px;z-index:8}
+.scene-n{display:inline-flex;width:26px;height:26px;align-items:center;justify-content:center;border-radius:50%;background:var(--accent2);color:#fff;font-size:11px;font-weight:700}
+.scene-tags{display:flex;flex-wrap:wrap;gap:8px;margin-left:auto}
+.scene-body{padding:8px 10px 12px}
+.scene.is-min .scene-body{display:none}
+
+/* shot + timecode */
+.shot{display:grid;grid-template-columns:72px minmax(0,1fr);gap:0;margin:10px 0;border:1px solid var(--line);border-radius:12px;background:var(--panel);overflow:hidden;cursor:pointer}
+.shot.is-selected{border-color:var(--accent2);box-shadow:0 0 0 2px rgba(52,152,219,.25)}
+.scene.is-selected > .scene-head{box-shadow:inset 3px 0 0 var(--accent2);background:rgba(52,152,219,.06)}
+.path-line{font-size:11.5px;color:var(--muted);margin-top:6px;word-break:break-all}
+.path-line b{color:var(--ink)}
+.path-line a{color:var(--accent2)}
+.yaml-box{
+  width:100%;min-height:50vh;resize:vertical;
+  font:12px/1.45 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  background:var(--bg);color:var(--ink);border:1px solid var(--line);
+  border-radius:8px;padding:12px;white-space:pre
+}
+.tc-col{background:linear-gradient(180deg,rgba(52,152,219,.08),transparent);border-right:1px solid var(--line);padding:10px 6px;display:flex;flex-direction:column;align-items:center;gap:4px;font-variant-numeric:tabular-nums;color:var(--tc)}
+.tc-in,.tc-out{font-size:11px;font-weight:700}
+.tc-dur{font-size:10px;color:var(--muted);background:var(--chip);border-radius:999px;padding:2px 6px}
+.tc-line{width:2px;flex:1;min-height:16px;background:var(--line);border-radius:2px}
+.shot-body{padding:10px 12px;min-width:0}
+.shot-head{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:8px}
+.shot-num{font-size:11px;font-weight:800;color:var(--muted)}
+.shot-file{font-size:12px;font-weight:600;word-break:break-all}
+.shot-stage{font-size:11px;color:var(--muted)}
+.shot-actions{display:flex;flex-wrap:wrap;gap:4px;margin-left:auto}
+.min-summary{font-size:12.5px;color:var(--muted)}
+.shot-grid{display:grid;grid-template-columns:minmax(180px,.9fr) minmax(0,1.2fr);gap:14px}
+@media (max-width:820px){.shot{grid-template-columns:56px 1fr}.shot-grid{grid-template-columns:1fr}}
+.label{font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.label-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px}
+.vo-actions{display:flex;gap:6px}
+.vo-line{width:100%;min-height:100px;resize:vertical;font:12.5px/1.45 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+.media-zone{min-height:110px;border:1px dashed var(--line);border-radius:10px;padding:8px;display:flex;flex-wrap:wrap;gap:8px;align-content:flex-start;background:var(--bg);outline:none}
+.media-zone:focus{border-color:var(--accent2);box-shadow:0 0 0 2px rgba(52,152,219,.2)}
+.media-empty{font-size:12px;color:var(--muted);padding:18px 8px;width:100%;text-align:center}
+.thumb{width:120px;height:76px;border-radius:8px;overflow:hidden;border:1px solid var(--line);cursor:zoom-in;position:relative;background:#000}
+.thumb img,.thumb video{width:100%;height:100%;object-fit:cover;display:block}
+.thumb .badge{position:absolute;left:4px;bottom:4px;font-size:10px;background:rgba(0,0,0,.7);color:#fff;padding:1px 5px;border-radius:4px}
+.clip-pair{display:flex;flex-wrap:wrap;gap:8px;width:100%;align-items:flex-start}
+.clip-video{
+  flex:1 1 240px;width:100%;max-height:240px;min-height:140px;
+  background:#000;border-radius:8px;border:1px solid var(--line);display:block
+}
+.clip-still{flex:0 0 120px}
+.clip-still .thumb{width:120px;height:76px}
+.field{display:block;font-size:11px;color:var(--muted);margin-top:8px}
+.field input{display:block;width:100%;margin-top:4px;font:12px/1.4 inherit;padding:6px 8px;border:1px solid var(--line);border-radius:7px;background:var(--panel);color:var(--ink)}
+.caption{font-size:12px;color:var(--muted);margin-top:8px}
+.meta-line{font-size:11px;color:var(--muted);margin-top:6px}
+.tag-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+@media (max-width:640px){.tag-row{grid-template-columns:1fr}}
+.scene-tags{display:flex;flex-wrap:wrap;gap:10px;margin-left:auto;align-items:center}
+.chip{font:inherit;font-size:11px;padding:4px 8px;border-radius:999px;border:1px solid var(--line);background:var(--chip);color:var(--ink);cursor:pointer}
+.chip.on{background:var(--accent2);border-color:var(--accent2);color:#fff}
+
+.pill{display:inline-block;font-size:10.5px;padding:2px 7px;border-radius:999px;background:var(--chip);margin-left:4px}
+.pill.label{background:rgba(39,174,96,.15);color:var(--accent3)}
+
+/* voiceover page */
+.vo-block{border:1px solid var(--line);border-radius:10px;padding:12px;margin:0 0 10px;background:var(--bg)}
+.vo-block header{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px;font-size:12px}
+.vo-block .tc{font-variant-numeric:tabular-nums;font-weight:700;color:var(--tc)}
+.vo-block p{margin:0;white-space:pre-wrap;font-size:13.5px}
+
+/* modal */
+#mediaModal{position:fixed;inset:0;background:rgba(0,0,0,.88);display:none;align-items:center;justify-content:center;z-index:100;padding:24px;flex-direction:column;gap:10px}
+#mediaModal.open{display:flex}
+#mediaModalTitle{color:#fff;font-size:13px}
+#mediaModalClose{position:absolute;top:16px;right:16px}
+#mediaModalBody{max-width:95vw;max-height:85vh}
+
+
+.wpm-wrap{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);white-space:nowrap}
+.wpm-wrap input[type=range]{width:90px;accent-color:var(--accent2)}
+.wpm-wrap b{color:var(--ink);font-variant-numeric:tabular-nums;min-width:2.5em}
+.arc-bar{max-width:1200px;margin:0 auto;padding:8px 16px 0}
+.arc-track{display:flex;height:28px;border-radius:8px;overflow:hidden;border:1px solid var(--line);background:var(--chip)}
+.arc-seg{display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;min-width:0;overflow:hidden;white-space:nowrap;padding:0 4px;text-shadow:0 1px 1px rgba(0,0,0,.25)}
+.arc-empty{font-size:11px;color:var(--muted);padding:6px 0}
+.arc-legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;font-size:11px;color:var(--muted)}
+.arc-legend span{display:inline-flex;align-items:center;gap:4px}
+.arc-dot{width:8px;height:8px;border-radius:2px;display:inline-block}
+.parse-panel{margin:0 0 14px;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--bg)}
+.parse-panel textarea{width:100%;min-height:140px;resize:vertical;font:12.5px/1.45 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:10px}
+.parse-panel .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:8px}
+.parse-panel select,.parse-panel input[type=number]{font:inherit;font-size:12.5px;padding:6px 8px;border:1px solid var(--line);border-radius:7px;background:var(--panel);color:var(--ink)}
+.media-zone.drag-over{border-color:var(--accent2);box-shadow:0 0 0 2px rgba(52,152,219,.25);background:rgba(52,152,219,.06)}
+.ac-wrap{position:relative}
+.ac-menu{position:absolute;z-index:30;left:0;right:0;top:100%;max-height:200px;overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);display:none}
+.ac-menu.open{display:block}
+.ac-item{display:block;width:100%;text-align:left;border:0;background:transparent;padding:8px 10px;font:12px/1.3 inherit;color:var(--ink);cursor:pointer}
+.ac-item:hover,.ac-item.active{background:var(--chip)}
+.ac-item small{display:block;color:var(--muted);font-size:10.5px}
+.scene-wpm{font-size:11px;color:var(--muted);display:inline-flex;align-items:center;gap:4px;margin-left:8px}
+.scene-wpm input{width:56px;font:inherit;font-size:11px;padding:2px 4px;border:1px solid var(--line);border-radius:6px;background:var(--panel);color:var(--ink)}
+footer{max-width:1200px;margin:0 auto;padding:0 16px 50px;color:var(--muted);font-size:11.5px}
+
+
+/* ===== Shot card UX refactor ===== */
+:root{
+  --ink-secondary:#475569; /* slate-600 */
+  --ink-tertiary:#334155;  /* slate-700 */
+  --slate-100:#f1f5f9;
+  --slate-200:#e2e8f0;
+  --indigo-50:#eef2ff;
+  --indigo-100:#e0e7ff;
+  --indigo-600:#4f46e5;
+}
+.shot{
+  display:grid;
+  grid-template-columns:76px minmax(0,1fr);
+  gap:0;
+  margin:12px 0;
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:var(--panel);
+  overflow:visible;
+  cursor:default;
+}
+.shot.is-selected{border-color:var(--accent2);box-shadow:0 0 0 2px rgba(52,152,219,.22)}
+.shot-body{padding:12px 14px;min-width:0}
+.shot-head{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:10px;
+}
+.shot-head-main{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:10px;
+  min-width:0;
+  flex:1 1 auto;
+}
+.shot-num{font-size:12px;font-weight:800;color:var(--ink-secondary);font-variant-numeric:tabular-nums}
+.shot-file{font-size:13px;font-weight:600;color:var(--ink);word-break:break-all}
+.shot-stage{
+  font-size:11px;font-weight:600;color:var(--ink-secondary);
+  background:var(--slate-100);border:1px solid var(--slate-200);
+  border-radius:999px;padding:4px 10px;
+}
+.shot-actions{
+  display:inline-flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:8px;
+  margin-left:auto;
+  padding:4px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:var(--bg);
+}
+.action-btn{
+  box-sizing:border-box;
+  min-width:32px;
+  min-height:32px;
+  padding:6px 12px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:4px;
+  font:inherit;
+  font-size:12px;
+  font-weight:600;
+  line-height:1;
+  border:1px solid transparent;
+  border-radius:8px;
+  background:transparent;
+  color:var(--ink);
+  cursor:pointer;
+  transition:background-color .12s ease, border-color .12s ease, color .12s ease;
+  white-space:nowrap;
+}
+.action-btn:hover{background:var(--slate-200)}
+.action-btn:focus-visible{outline:2px solid var(--accent2);outline-offset:1px}
+.action-btn:disabled{opacity:.4;cursor:not-allowed}
+.action-btn:disabled:hover{background:transparent}
+.action-btn.action-danger{color:var(--accent)}
+.action-btn.action-danger:hover{background:rgba(231,76,60,.12)}
+.action-btn.collapse-btn{font-size:16px;font-weight:800;min-width:32px;padding:6px 10px}
+.undo-bar{
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  max-width:1200px;margin:0 auto;padding:8px 16px 0;
+  font-size:12.5px;color:var(--ink-secondary);
+}
+.undo-bar[hidden]{display:none!important}
+.undo-bar b{color:var(--ink)}
+
+/* timeline rail */
+.tc-col{
+  background:linear-gradient(180deg,rgba(52,152,219,.08),transparent);
+  border-right:1px solid var(--line);
+  padding:12px 8px;
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+  font-variant-numeric:tabular-nums;color:var(--tc);
+}
+.drag-handle{
+  cursor:grab;color:var(--ink-secondary);font-size:15px;letter-spacing:-1px;
+  user-select:none;padding:6px 8px;border-radius:8px;line-height:1;
+}
+.drag-handle:hover{background:var(--slate-200);color:var(--ink)}
+.drag-handle:active{cursor:grabbing}
+.tc-in,.tc-out{font-size:11px;font-weight:700;color:var(--ink-tertiary)}
+.tc-dur{
+  font-size:12px;font-weight:600;line-height:1;
+  color:var(--ink-tertiary);
+  background:var(--slate-100);
+  border:1px solid var(--slate-200);
+  border-radius:999px;
+  padding:4px 8px;
+  min-width:2.25rem;text-align:center;
+}
+.tc-dur.is-manual{background:rgba(243,156,18,.2);color:#b45309;border-color:rgba(243,156,18,.45);font-weight:700}
+.tc-line{width:2px;flex:1;min-height:12px;background:var(--line);border-radius:2px}
+
+/* tags */
+.tag-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+.tag-field .label{margin-bottom:6px}
+.tag-compact{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:0}
+.tag-selected{display:flex;flex-wrap:wrap;gap:6px;align-items:center;min-height:0}
+.tag-empty{display:none} /* never show raw "None" */
+.tag-add{position:relative}
+.tag-add>summary{list-style:none;cursor:pointer}
+.tag-add>summary::-webkit-details-marker{display:none}
+.tag-add-btn{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-height:28px;padding:4px 12px;
+  font:inherit;font-size:12px;font-weight:500;
+  color:var(--ink-tertiary);
+  background:var(--slate-100);
+  border:1px solid var(--slate-200);
+  border-radius:999px;
+  cursor:pointer;
+  transition:background-color .12s ease, border-color .12s ease;
+  user-select:none;
+}
+.tag-add-btn:hover{background:var(--slate-200)}
+.tag-add[open]>.tag-add-btn{background:var(--slate-200);border-color:#cbd5e1}
+.tag-menu{
+  position:absolute;z-index:40;top:calc(100% + 6px);left:0;min-width:280px;max-width:360px;
+  max-height:min(70vh, 420px);overflow:auto;
+  background:var(--panel);border:1px solid var(--line);border-radius:12px;
+  box-shadow:var(--shadow);padding:6px;
+  display:flex;flex-direction:column;gap:4px;
+}
+.chip{
+  font:inherit;font-size:12px;font-weight:500;
+  display:inline-flex;align-items:center;gap:4px;
+  padding:5px 10px;border-radius:999px;
+  border:1px solid var(--slate-200);background:var(--slate-100);color:var(--ink);
+  cursor:pointer;transition:background-color .12s ease, border-color .12s ease;
+  width:auto;text-align:left;justify-content:center;
+}
+.chip:hover{background:var(--slate-200)}
+.chip.on{background:rgba(52,152,219,.12);border-color:rgba(52,152,219,.35);color:#1d4ed8}
+.chip.removable{padding-right:8px}
+.chip .x{opacity:.65;margin-left:2px;font-weight:700;font-size:13px;line-height:1}
+.chip.menu-chip{
+  display:grid;grid-template-columns:1fr auto;grid-template-rows:auto auto;
+  width:100%;align-items:start;justify-content:stretch;gap:2px 8px;
+  border-radius:8px;padding:7px 10px;white-space:normal;
+}
+.chip.menu-chip.on{background:rgba(52,152,219,.14)}
+.chip.menu-chip .chip-text{grid-column:1;grid-row:1;font-weight:600}
+.chip.menu-chip .chip-check{grid-column:2;grid-row:1;font-size:11px;opacity:.8}
+.chip-help{grid-column:1 / -1;grid-row:2;display:block;font-size:10.5px;font-weight:400;line-height:1.35;color:var(--muted);white-space:normal}
+.chip.menu-chip.on .chip-help{color:inherit;opacity:.82}
+.chip.has-tip{position:relative}
+.chip.has-tip:not(.menu-chip)::after{
+  content:attr(data-tip);
+  position:absolute;left:0;bottom:calc(100% + 8px);
+  width:max(220px, 100%);max-width:300px;
+  padding:8px 10px;border-radius:8px;
+  background:#1a1a2e;color:#f4f3ef;font-size:11px;font-weight:500;line-height:1.4;
+  box-shadow:0 6px 18px rgba(0,0,0,.22);
+  opacity:0;pointer-events:none;transform:translateY(4px);
+  transition:opacity .12s ease, transform .12s ease;
+  z-index:90;white-space:normal;text-align:left;
+}
+.chip.has-tip:not(.menu-chip):hover::after,
+.chip.has-tip:not(.menu-chip):focus-visible::after{
+  opacity:1;transform:translateY(0);
+}
+.scene-tags{display:flex;flex-wrap:wrap;gap:10px;margin-left:auto;align-items:center}
+.scene-tags .tag-compact{gap:6px}
+
+/* VO soft buttons */
+.vo-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.soft-btn{
+  font:inherit;font-size:12px;font-weight:500;
+  padding:6px 10px;min-height:28px;
+  border:1px solid transparent;border-radius:8px;
+  cursor:pointer;transition:background-color .12s ease, color .12s ease;
+}
+.soft-btn-indigo{
+  background:var(--indigo-50);color:var(--indigo-600);
+}
+.soft-btn-indigo:hover{background:var(--indigo-100)}
+.soft-btn:disabled{opacity:.55;cursor:wait}
+
+/* contrast */
+.label{font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-secondary);margin-bottom:6px}
+.caption{font-size:12.5px;color:var(--ink-secondary);margin-top:8px;line-height:1.45}
+.meta-line{font-size:12px;color:var(--ink-secondary);margin-top:8px;font-weight:500}
+.min-summary{font-size:12.5px;color:var(--ink-secondary);line-height:1.45}
+.stat{color:var(--ink-secondary)}
+.stat b{color:var(--ink)}
+.path-line{color:var(--ink-secondary)}
+.media-empty{color:var(--ink-secondary);cursor:pointer}
+.media-zone{cursor:pointer}
+.media-zone:hover{border-color:#94a3b8}
+.thumb{cursor:zoom-in}
+.label-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;flex-wrap:wrap}
+
+@media (prefers-color-scheme: dark){
+  :root{
+    --ink-secondary:#94a3b8;
+    --ink-tertiary:#cbd5e1;
+    --slate-100:#1e293b;
+    --slate-200:#334155;
+    --indigo-50:rgba(79,70,229,.18);
+    --indigo-100:rgba(79,70,229,.28);
+    --indigo-600:#a5b4fc;
+  }
+  .chip.on{color:#93c5fd;background:rgba(59,130,246,.18);border-color:rgba(59,130,246,.35)}
+  .shot-stage{background:var(--slate-100);border-color:var(--slate-200);color:var(--ink-tertiary)}
+  .action-btn:hover{background:var(--slate-200)}
+  .tag-add-btn{background:var(--slate-100);border-color:var(--slate-200);color:var(--ink-tertiary)}
+  .tag-add-btn:hover,.tag-add[open]>.tag-add-btn{background:var(--slate-200)}
+}
+/* ===== end card UX refactor ===== */
+
+
+/* ===== Scene layout + color bands ===== */
+.scene{
+  margin:0 0 20px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  overflow:visible;
+  background:var(--bg);
+  border-left:4px solid var(--scene-accent, #3498db);
+  box-shadow:0 1px 2px rgba(20,20,30,.04);
+}
+.scene.is-selected{
+  box-shadow:0 0 0 2px color-mix(in srgb, var(--scene-accent, #3498db) 35%, transparent);
+}
+.scene-head{
+  display:flex;
+  flex-direction:column;
+  align-items:stretch;
+  gap:10px;
+  padding:12px 14px;
+  background:color-mix(in srgb, var(--scene-accent, #3498db) 10%, var(--panel));
+  border-bottom:1px solid color-mix(in srgb, var(--scene-accent, #3498db) 22%, var(--line));
+  position:sticky;
+  top:56px;
+  z-index:12;
+}
+.scene-head-top{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:10px;
+  min-width:0;
+}
+.scene-title{font-size:15px;font-weight:700;color:var(--ink)}
+.scene-n{
+  display:inline-flex;width:28px;height:28px;align-items:center;justify-content:center;
+  border-radius:50%;
+  background:var(--scene-accent, #3498db);
+  color:#fff;font-size:11px;font-weight:800;
+  box-shadow:0 0 0 3px color-mix(in srgb, var(--scene-accent, #3498db) 22%, transparent);
+}
+.scene-tags{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  align-items:center;
+  margin-left:0;
+  width:100%;
+  padding-top:2px;
+  border-top:1px dashed color-mix(in srgb, var(--scene-accent, #3498db) 25%, var(--line));
+}
+.scene-body{
+  padding:10px 12px 14px;
+  position:relative;
+  z-index:1;
+  background:var(--bg);
+}
+.scene.is-min .scene-body{display:none}
+.scene.is-min .scene-tags{display:none}
+/* keep shot action toolbar above sticky scene chrome when needed */
+.shot{position:relative;z-index:1}
+.shot-actions{position:relative;z-index:2}
+.shot-head{position:relative;z-index:2}
+/* color variants fallback without color-mix support */
+@supports not (background: color-mix(in srgb, red 10%, white)){
+  .scene-head{background:var(--panel)}
+  .scene-n{box-shadow:none}
+}
+/* ===== end scene layout ===== */
+
+
+/* scene hide/rename */
+.scene-actions{
+  display:inline-flex; flex-wrap:wrap; align-items:center; gap:8px;
+  margin-left:auto; padding:4px;
+  border:1px solid color-mix(in srgb, var(--scene-accent, #3498db) 25%, var(--line));
+  border-radius:12px;
+  background:color-mix(in srgb, var(--scene-accent, #3498db) 8%, var(--panel));
+}
+.scene-renamed-badge{
+  font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.04em;
+  color:var(--scene-accent, #3498db);
+  background:color-mix(in srgb, var(--scene-accent, #3498db) 14%, transparent);
+  border:1px solid color-mix(in srgb, var(--scene-accent, #3498db) 30%, transparent);
+  border-radius:999px; padding:3px 8px;
+}
+.scene-title{cursor:text}
+.hidden-section-title{
+  font-size:12px; text-transform:uppercase; letter-spacing:.04em;
+  color:var(--ink-secondary, #475569); margin:8px 0 10px;
+}
+.hidden-scene-card{
+  display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px;
+  padding:12px 14px; margin:0 0 10px;
+  border:1px solid var(--line); border-radius:12px;
+  border-left:4px solid var(--scene-accent, #95a5a6);
+  background:var(--panel);
+}
+.hidden-scene-main{display:flex; flex-wrap:wrap; align-items:center; gap:10px}
+.hidden-scenes{margin-bottom:18px}
+
+</style>
+</head>
+<body>
+<header>
+  <div class="bar">
+    <div class="title">Shotlist
+      <small>Animation MVP · WIGAnimation · scene/shot timeline</small>
+    </div>
+    <details class="menu" id="toolsMenu">
+      <summary>🧰 Tools ▾</summary>
+      <div class="menu-panel">
+        <a href="https://www.canva.com/design/DAHRZe5KBoA/OJU0sL318CozUaTBpkdT2g/edit" target="_blank" rel="noopener noreferrer">
+          🎨 Canva design
+          <small>Edit the source deck in Canva</small>
+        </a>
+        <button type="button" class="menu-item" id="btnClearCookies">
+          🍪 Clear leftover cookies
+          <small>Drop old state cookies + unhide all</small>
+        </button>
+        <button type="button" class="menu-item" id="btnCopyAllVo">
+          📋 Copy all voiceover
+          <small>Copy VO script to clipboard</small>
+        </button>
+        <button type="button" class="menu-item" id="btnCopyVoContinuous">
+          📜 Copy VO continuous
+          <small>Plain script for ElevenLabs / teleprompter</small>
+        </button>
+        <button type="button" class="menu-item" id="btnExportCsv">
+          📊 Export CSV timeline
+          <small>Shots, TC, VO, tags, paths</small>
+        </button>
+        <button type="button" class="menu-item" id="btnExportEdl">
+          🎞️ Export EDL
+          <small>CMX-style markers for editors</small>
+        </button>
+        <button type="button" class="menu-item" id="btnExportFcpxml">
+          🧩 Export FCPXML markers
+          <small>Basic marker XML for Resolve/Premiere</small>
+        </button>
+        <button type="button" class="menu-item" id="btnGoHidden">
+          🙈 Hidden items
+          <small>Restore hidden shots</small>
+        </button>
+        <button type="button" class="menu-item" id="btnGoShotlist">
+          🎬 Shotlist
+          <small>Timeline + scenes + shots</small>
+        </button>
+        <button type="button" class="menu-item" id="btnGoVoiceover">
+          🎙️ Show all voiceover
+          <small>VO + Obsidian/local paths + timecodes</small>
+        </button>
+        <button type="button" class="menu-item" id="btnGoMetadata">
+          📦 Show saved metadata
+          <small>YAML of localStorage shotlist state</small>
+        </button>
+        <button type="button" class="menu-item" id="btnParseMode">
+          ✂️ Split / Parse script
+          <small>Paste full script → shot cards</small>
+        </button>
+      </div>
+    </details>
+    <div class="stat">Visible: <b id="statVisible">0</b></div>
+    <div class="stat">Hidden: <b id="statHidden">0</b></div>
+    <div class="stat">Words: <b id="statWords">0</b></div>
+    <div class="stat">Length: <b id="statDuration">00:00</b></div>
+    <label class="wpm-wrap" title="Global target words per minute for auto duration">
+      WPM
+      <input type="range" id="wpmSlider" min="110" max="190" step="5" value="150">
+      <b id="statWpm">150</b>
+    </label>
+    <button class="btn" id="btnResetOrder" title="Reset order toward default">Reset order</button>
+    <button class="btn" id="btnDownloadMd" title="Download voiceover as markdown">⬇ Download .md</button>
+    <button class="btn" id="btnDownloadCookie" title="Download full shotlist backup (JSON + YAML)">⬇ Download backup</button>
+    <button class="btn save-btn is-clean" id="btnSave" title="Save to this browser (green when unsaved)">💾 Save</button>
+    <span id="saveMsg"></span>
+  </div>
+</header>
+<div class="undo-bar" id="hideUndoBar" hidden>
+  <span id="hideUndoMsg">Hidden</span>
+  <button type="button" class="btn" id="btnUndoHide" title="Restore the last hidden shot or scene">Undo</button>
+</div>
+<div class="arc-bar">
+  <div class="arc-track" id="storyArc" title="Story arc from shot tags / duration"></div>
+  <div class="arc-legend" id="storyArcLegend"></div>
+</div>
+
+<main>
+  <div id="viewShotlist" class="view">
+    <section class="panel">
+      <h2 class="help-wrap">Shotlist
+        <button type="button" class="icon-btn help-tip" id="btnHelp" title="Show layout help" aria-label="Help">?</button>
+      </h2>
+      <div class="help-banner" id="helpBanner">
+        <b>Layout:</b> left column is continuous timecode (in → duration → out).
+        <b>⋮⋮</b> drag to reorder · <b>−/＋</b> collapse/expand card · <b>＋ Shot</b> insert · <b>Hide</b> removes from timeline · <b>Undo</b> restores the last hide.
+        <b>Stage 16 Video Flow</b> has the 26 Google Flow clips — play inline, first-frame still beside the player.
+        <b>+ Type</b> tags YouTube structure (❄️ Cold Open, 📣 CTA, 🎬 B-Roll, 📌 Recap…). Hover a chip for the definition.
+        <b>Tools → Split / Parse script</b> pastes a full draft into shot cards. Drag files into Frame/Media. Type <code>[[</code> for vault path search.
+      </div>
+      <div class="parse-panel" id="parsePanel" hidden>
+        <div class="label">Split / Parse mode — paste continuous script (paragraphs, bullets, or markdown headings)</div>
+        <textarea id="parseScriptBox" placeholder="Paste full voiceover or markdown here…
+
+Each paragraph or bullet becomes a shot.
+# headings can set stage notes."></textarea>
+        <div class="row">
+          <label>Target stage
+            <select id="parseStage"></select>
+          </label>
+          <label>Insert
+            <select id="parseWhere">
+              <option value="end">At end of stage</option>
+              <option value="after">After selected shot</option>
+              <option value="start">Start of stage</option>
+            </select>
+          </label>
+          <button type="button" class="btn primary" id="btnParseScript">Create shots from script</button>
+          <button type="button" class="btn ghost" id="btnParseClose">Close</button>
+          <span class="stat" id="parseHint"></span>
+        </div>
+      </div>
+      <div id="shotlist"></div>
+    </section>
+  </div>
+
+  <div id="viewHidden" class="view" hidden>
+    <section class="panel">
+      <h2>Hidden items <span class="hint">saved in this browser</span></h2>
+      <div class="toolbar-row">
+        <span class="stat"><b id="statHiddenPage">0</b> hidden</span>
+        <button class="btn" id="btnUnhideAll">Unhide all</button>
+        <button class="btn ghost" id="btnBackShotlist">← Back to shotlist</button>
+      </div>
+      <div id="hiddenList"></div>
+    </section>
+  </div>
+
+  <div id="viewVoiceover" class="view" hidden>
+    <section class="panel">
+      <h2>All voiceover <span class="hint">visible shots · timecodes · Obsidian / local paths</span></h2>
+      <div class="toolbar-row">
+        <button class="btn primary" id="btnCopyFromVoPage">Copy all voiceover</button>
+        <button class="btn ghost" id="btnBackFromVo">← Back to shotlist</button>
+      </div>
+      <div id="voAllList"></div>
+    </section>
+  </div>
+
+  <div id="viewMetadata" class="view" hidden>
+    <section class="panel">
+      <h2>Saved metadata <span class="hint">YAML · localStorage shotlist state</span></h2>
+      <div class="toolbar-row">
+        <button class="btn primary" id="btnDownloadCookieMeta" title="Download full shotlist backup">⬇ Download backup</button>
+        <button class="btn" id="btnCopyYaml">Copy YAML</button>
+        <button class="btn save-btn" id="btnSaveMetadata">💾 Save metadata</button>
+        <button class="btn ghost" id="btnBackFromMeta">← Back to shotlist</button>
+      </div>
+      <textarea id="metaYaml" class="yaml-box" readonly spellcheck="false"></textarea>
+    </section>
+  </div>
+</main>
+
+<footer>
+  Shotlist stores <b>full state</b> in localStorage only (not cookies — large cookies tripped HTTP 431 on this server).
+  Use <b>⬇ Download backup</b> for a complete JSON+YAML export of all shots, scenes, VO, tags, and metadata.
+  Run <code>python3 server.py</code> then open http://localhost:8765/ (or :8766 if that port is taken).
+</footer>
+
+<div id="mediaModal">
+  <button type="button" class="btn" id="mediaModalClose">Close</button>
+  <div id="mediaModalTitle"></div>
+  <div id="mediaModalBody"></div>
+</div>
+
+<script>
+const MANIFEST = [{"file": "00_index.png", "stage": "00", "stageName": "Index", "caption": "Master 16-stage table of contents for the whole production framework.", "voiceoverDefault": true}, {"file": "01_architecture.png", "stage": "01", "stageName": "Architecture", "caption": "DeliveryPilot Video Production Framework v1.0 — the full 14-stage flow diagram.", "voiceoverDefault": true}, {"file": "02_plan_00_cover-title.png", "stage": "02", "stageName": "Plan", "caption": "Title card: \"AI Second Brain Video Script — Complete Production Guide.\"", "voiceoverDefault": true}, {"file": "02_plan_01_contents.png", "stage": "02", "stageName": "Plan", "caption": "Table of contents for the flagship video's own script document.", "voiceoverDefault": false}, {"file": "02_plan_02_timing-table.png", "stage": "02", "stageName": "Plan", "caption": "Scene timing table — 6 scenes, 2:58 total, ~475 words at 140-160 wpm.", "voiceoverDefault": true}, {"file": "02_plan_03_voiceover-1.png", "stage": "02", "stageName": "Plan", "caption": "Flagship voiceover script pt.1 — Hook through Dual-Agent Engine.", "voiceoverDefault": true}, {"file": "02_plan_04_voiceover-2.png", "stage": "02", "stageName": "Plan", "caption": "Flagship voiceover script pt.2 — 4-Step Workflow through Call to Action.", "voiceoverDefault": true}, {"file": "02_plan_05_anim-prompts-1.png", "stage": "02", "stageName": "Plan", "caption": "Animation prompt — Scene 1 (chaos) and start of Scene 2 (organizing).", "voiceoverDefault": true}, {"file": "02_plan_06_anim-prompts-2.png", "stage": "02", "stageName": "Plan", "caption": "Animation prompt — Scene 2 conclusion and full Scene 3 (P.A.R.A. breakdown).", "voiceoverDefault": true}, {"file": "02_plan_07_anim-prompts-3.png", "stage": "02", "stageName": "Plan", "caption": "Animation prompt — Scene 4 (dual-agent engine) and start of Scene 5.", "voiceoverDefault": true}, {"file": "02_plan_08_anim-prompts-4.png", "stage": "02", "stageName": "Plan", "caption": "Animation prompt — Scene 5 conclusion (Apply step) and full Scene 6 (CTA).", "voiceoverDefault": true}, {"file": "02_plan_09_delivery-notes-1.png", "stage": "02", "stageName": "Plan", "caption": "Voiceover delivery notes — pacing/tone/energy per section, ElevenLabs config.", "voiceoverDefault": false}, {"file": "02_plan_10_pronunciation.png", "stage": "02", "stageName": "Plan", "caption": "Pronunciation guide: Obsidian, P.A.R.A., Gemini, Proxmox, CCAR-P.", "voiceoverDefault": false}, {"file": "02_plan_11_integration-1.png", "stage": "02", "stageName": "Plan", "caption": "Google Flow / Canva Bulk Create integration steps 1-2.", "voiceoverDefault": false}, {"file": "02_plan_12_integration-2.png", "stage": "02", "stageName": "Plan", "caption": "Integration steps continued + CSV template note.", "voiceoverDefault": false}, {"file": "02_plan_13_tech-specs.png", "stage": "02", "stageName": "Plan", "caption": "Technical specs: 1920x1080, 30fps, fonts, master color palette.", "voiceoverDefault": false}, {"file": "02_plan_14_workflow-phases-1.png", "stage": "02", "stageName": "Plan", "caption": "Production workflow — Phase 0-3 (plan, voiceover, assets, assembly).", "voiceoverDefault": false}, {"file": "02_plan_15_workflow-phases-2.png", "stage": "02", "stageName": "Plan", "caption": "Production workflow — Phase 4 (upload/distribution) + tools required.", "voiceoverDefault": false}, {"file": "02_plan_16_resources-final.png", "stage": "02", "stageName": "Plan", "caption": "Success factors + full YouTube description template.", "voiceoverDefault": true}, {"file": "02_plan_17_checklist.png", "stage": "02", "stageName": "Plan", "caption": "Pre-production / during-production / before-upload checklist.", "voiceoverDefault": false}, {"file": "02_plan_18_csv-master.png", "stage": "02", "stageName": "Plan", "caption": "Canonical CSV of all 6 scenes for Canva Bulk Create.", "voiceoverDefault": false}, {"file": "02_plan_19_music-audio.png", "stage": "02", "stageName": "Plan", "caption": "Music mood/tempo/sources, SFX cues, DaVinci mix levels.", "voiceoverDefault": false}, {"file": "03_assets_00_ref-google-flow.png", "stage": "03", "stageName": "Assets", "caption": "Reference: Google Flow AI creative studio tool card.", "voiceoverDefault": false}, {"file": "03_assets_01_para-vault-counts.png", "stage": "03", "stageName": "Assets", "caption": "Real generated infographic — P.A.R.A. Vault with live note counts.", "voiceoverDefault": true}, {"file": "03_assets_02_dashboard-screenshot.png", "stage": "03", "stageName": "Assets", "caption": "Real Second Brain dashboard screenshot (localhost:8899).", "voiceoverDefault": true}, {"file": "03_assets_03_4pillars-garbled.png", "stage": "03", "stageName": "Assets", "caption": "AI-generated 4-pillar infographic — text render is garbled, needs redo.", "voiceoverDefault": false}, {"file": "03_assets_unsorted-03.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "03_assets_unsorted-04.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "03_assets_unsorted-06.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "03_assets_unsorted-07.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "03_assets_unsorted-08.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "03_assets_unsorted-09.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "03_assets_unsorted-11.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "03_assets_unsorted-12.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "03_assets_unsorted-13.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "03_assets_unsorted-14.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "03_assets_unsorted-15.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "03_assets_unsorted-16.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "03_assets_unsorted-17.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "03_assets_unsorted-18.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "03_assets_unsorted-19.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "03_assets_unsorted-20.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "03_assets_unsorted-21.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "03_assets_unsorted-22.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "03_assets_unsorted-23.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "03_assets_unsorted-24.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "03_assets_unsorted-25.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "03_assets_unsorted-26.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "03_assets_unsorted-27.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "03_assets_unsorted-28.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "03_assets_unsorted-29.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "03_assets_unsorted-30.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "03_assets_unsorted-31.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "03_assets_unsorted-32.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "03_assets_unsorted-33.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "03_assets_unsorted-34.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "03_assets_unsorted-35.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "03_assets_unsorted-36.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "03_assets_unsorted-37.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "03_assets_unsorted-38.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "03_assets_unsorted-39.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "03_assets_unsorted-40.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "03_assets_unsorted-41.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "03_assets_unsorted-42.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "03_assets_unsorted-43.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "03_assets_unsorted-44.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "03_assets_unsorted-45.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "03_assets_unsorted-46.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "03_assets_unsorted-47.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "03_assets_unsorted-48.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "03_assets_unsorted-49.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "03_assets_unsorted-50.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "03_assets_unsorted-51.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "03_assets_unsorted-52.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "03_assets_unsorted-53.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "03_assets_unsorted-54.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "03_assets_unsorted-55.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "03_assets_unsorted-56.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "03_assets_unsorted-57.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "04_cohort_00_week7-notes.png", "stage": "04", "stageName": "Cohort", "caption": "Cohort workflow notes + real Week 7 cohort-call calendar entry.", "voiceoverDefault": true}, {"file": "04_cohort_01_who-are-we.png", "stage": "04", "stageName": "Cohort", "caption": "\"WHO ARE WE\" personal brand banner — no-experience-to-certified value prop.", "voiceoverDefault": true}, {"file": "04_cohort_02_schedule.png", "stage": "04", "stageName": "Cohort", "caption": "Cohort schedule — every Sunday, 9-11PM UK time, free.", "voiceoverDefault": true}, {"file": "05_gaps_00_hallucination-vs-context.png", "stage": "05", "stageName": "Gaps", "caption": "Strong before/after: low-context hallucination vs. high-context accurate AI.", "voiceoverDefault": true}, {"file": "05_gaps_unsorted-03.png", "stage": "05", "stageName": "Gaps", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "05_gaps_unsorted-04.png", "stage": "05", "stageName": "Gaps", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "05_gaps_unsorted-05.png", "stage": "05", "stageName": "Gaps", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "05_gaps_unsorted-06.png", "stage": "05", "stageName": "Gaps", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "05_gaps_unsorted-08.png", "stage": "05", "stageName": "Gaps", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "05_gaps_unsorted-09.png", "stage": "05", "stageName": "Gaps", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "05_gaps_unsorted-10.png", "stage": "05", "stageName": "Gaps", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "05_gaps_unsorted-11.png", "stage": "05", "stageName": "Gaps", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "06_assembly_00_scene1-2-stills.png", "stage": "06", "stageName": "Assembly", "caption": "Script recap + two real generated stills — candidate visuals for Scenes 1 & 2.", "voiceoverDefault": true}, {"file": "06_assembly_01_divider-empty.png", "stage": "06", "stageName": "Assembly", "caption": "Empty \"Assembly\" section-divider ribbon.", "voiceoverDefault": false}, {"file": "07_polish_00_divider-empty.png", "stage": "07", "stageName": "Polish", "caption": "Empty section-divider ribbon (Polish stage).", "voiceoverDefault": false}, {"file": "08_refinement_00_divider-empty.png", "stage": "08", "stageName": "Refinement", "caption": "Empty \"Refinement\" section-divider ribbon.", "voiceoverDefault": false}, {"file": "09_audio_00_divider-empty.png", "stage": "09", "stageName": "Audio", "caption": "Empty \"Audio\" section-divider ribbon.", "voiceoverDefault": false}, {"file": "10_editcolor_00_divider-empty.png", "stage": "10", "stageName": "Edit Color", "caption": "Empty \"Edit Color\" section-divider ribbon.", "voiceoverDefault": false}, {"file": "11_thumbnail_00_divider-empty.png", "stage": "11", "stageName": "Thumbnail", "caption": "Empty \"Publish/Thumbnail\" section-divider ribbon.", "voiceoverDefault": false}, {"file": "12_export_00_divider-empty.png", "stage": "12", "stageName": "Export", "caption": "Empty \"Publish/Export\" section-divider ribbon.", "voiceoverDefault": false}, {"file": "13_metadata_00_template-empty.png", "stage": "13", "stageName": "Metadata", "caption": "Unfilled title/description template sticky note.", "voiceoverDefault": false}, {"file": "13_metadata_01_followup-xpost.png", "stage": "13", "stageName": "Metadata", "caption": "Real embedded X post — a Canva feature request, tangential follow-up note.", "voiceoverDefault": false}, {"file": "15_tactics_00_editor-screenshot-stub.png", "stage": "15", "stageName": "Tactics", "caption": "Screenshot of the Canva editor itself — unfinished \"Top Titles\" stub.", "voiceoverDefault": false}, {"file": "15_tactics_unsorted-02.png", "stage": "15", "stageName": "Tactics", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "15_tactics_unsorted-03.png", "stage": "15", "stageName": "Tactics", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "15_tactics_unsorted-04.png", "stage": "15", "stageName": "Tactics", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}];
+
+const SEED_SCRIPT = "---\ntitle: WIG Animation — Voiceover Script\ndate: 2026-08-11\ntags: [project, video, wiganimation, script]\nstatus: draft\n---\n\n# WIG Animation — Voiceover Script\n\nEditable from the storyboard page (`storyboard.html` in this folder) — that page loads this\nstructure into a textarea, shows live word count / marked-slide count, and saves your latest\nedits to browser storage. This file is the seed copy; after editing in the browser, use its\n\"Download .md\" button and overwrite this file to keep it in sync.\n\nTwo layers, on purpose:\n1. **Flagship script (Part A)** — the fully-written, ready-to-record 2:58 \"AI Second Brain\"\n   video script that was already drafted inside the Canva planning deck (`02_plan_*` slides).\n   Nothing invented — transcribed as-is.\n2. **Framework walkthrough (Part B)** — a stage-by-stage (00–15) narration matched to the\n   renamed image order, for a behind-the-scenes / process video that tours the whole\n   production framework, including a new **Stage 14 — WIG** scene built from your real\n   career story (found via vault search, not fabricated — see source note below Stage 14).\n\nUse whichever layer fits the cut you're actually making, or splice A into B's Stage 02 beat.\n\n---\n\n## Part A — Flagship script: \"AI Second Brain\" (2:58, 6 scenes)\n\n**Source**: `02_plan_00_cover-title.png` through `02_plan_19_music-audio.png`. Voice tone:\nenergetic/direct → thoughtful/strategic → instructor → motivational. Pace 140–160 wpm, ~475 words.\n\n### Scene 1 — Hook & Problem Setup [0:00–0:15]\n> \"I was drowning in 46,000 notes across Obsidian. Every search felt like looking for a needle\n> in a digital haystack. And then I realized—the problem wasn't the number of notes. It was\n> that they weren't **working for me**.\"\n\n*Animation*: chaotic dark workspace, glowing vault icon swirled by 46,000 note-icons, glitch\neffects, red accent (#e74c3c), zoom to red-X transition. Candidate stills: `06_assembly_00_scene1-2-stills.png`.\n\n### Scene 2 — The Realization Moment [0:15–0:45]\n> \"So I engineered something different: a machine-readable, AI-native knowledge engine. No\n> more chaos. No more manual digging. Instead, I built a system where AI agents can query,\n> synthesize, and update my entire knowledge base—automatically. And here's the best part:\n> it's designed to prepare you for modern AI certifications, like the Claude Certified\n> Architect Professional exam.\"\n\n*Animation*: vault icon glows gold, 46,000 notes snap into four P.A.R.A. zones (Projects\n#e74c3c, Areas #3498db, Resources #27ae60, Archive #95a5a6).\n\n### Scene 3 — P.A.R.A. Method Framework [0:45–1:20]\n> \"The foundation is the P.A.R.A. method—four zones that AI understands instantly:\n> **Projects**—short-term efforts with deadlines. **Areas**—long-term responsibilities you\n> own. **Resources**—reference material and topics of interest. And **Archive**—everything\n> inactive. Why this works: AI agents can navigate structured vaults 100x faster than messy\n> folders. Imagine your knowledge base talking back to you.\"\n\n*Animation*: split-screen carousel, 4 zones in sequence (5–7s dwell each), icon-driven.\nReference: `03_assets_01_para-vault-counts.png` (real live note counts).\n\n### Scene 4 — The Engine: Dual-Agent System [1:20–1:55]\n> \"Then comes the engine: a local dual-agent rig running Gemini and Claude in tandem. While\n> you're working, these agents are running in the background—syncing across GitHub, Google\n> Drive, Proxmox. Generating changelogs. Maintaining structure. You focus on execution. They\n> handle the busywork. It's automation that actually scales.\"\n\n*Animation*: terminal `localhost:8899`, two agent avatars (Gemini gold, Claude blue)\nexchanging data, streams to GitHub/Drive/Proxmox/Vault icons, sync % bottom-right.\nReference: `03_assets_02_dashboard-screenshot.png` (real dashboard).\n\n### Scene 5 — The 4-Step Workflow [1:55–2:25]\n> \"Raw knowledge isn't power—**applied** knowledge is. So I built a 4-step workflow: **Tell**\n> your thoughts into Obsidian. Brain-dump raw context. **Show** concepts visually in\n> Canva—map relationships, refine structure. **Do**—turn that into slides and presentations.\n> Make it consumable. **Apply**—ship it as code, assets, or implementations in GitHub. From\n> chaos to execution in four steps.\"\n\n*Animation*: 4 boxes left-to-right — Tell (purple #9b59b6), Show (orange #e67e22), Do (red\n#c0392b), Apply (green #27ae60) — arrows + checkmarks between steps.\n\n### Scene 6 — Call to Action & Closing [2:25–2:58]\n> \"This isn't just about note-taking anymore. It's about building a second brain that\n> actually **works for you**. And if you're serious about AI skills—whether you're prepping\n> for certifications or just want to think faster—this system accelerates everything. We're\n> launching a hands-on cohort where you'll build this from scratch, master the framework, and\n> unlock real AI execution skills. Links in the comments. Let's go.\"\n\n*Animation*: brain+lightning icon, orbiting cert/vault/GitHub/YouTube/Canva icons, gold pulse,\n\"Build Your AI Second Brain\" → \"Join the Hands-On Cohort\" → \"Links in the comments ↓\".\nReference: `04_cohort_02_schedule.png` (real: every Sunday, 9–11PM UK, free).\n\n**Delivery notes**: Opening energy 6/10 conversational · Framework 7/10 instructor tone · Workflow\n8/10 building momentum, chant \"Tell...Show...Do...Apply\" · CTA 9/10, \"Let's go\" as invitation not\ncommand. ElevenLabs: Multilingual v2, Voice Thomas/Aria, rate 1.0x, stability 0.75–0.85, similarity\n0.8. Pronunciation: Obsidian \"ob-SID-ee-un\", P.A.R.A. \"PAR-uh\", Gemini \"JEM-uh-nee\", Proxmox\n\"PROKS-moks\", CCAR-P \"See-car-P\".\n\n**Tech specs**: 1920×1080, 30fps (or 60fps), H.264 8–12Mbps, AAC 128kbps+, sRGB. Fonts: Inter Bold\n(headlines), Roboto/Montserrat (body), Courier New/Inconsolata (code). Full palette: bg #0a0a0f,\nUI #1a1a2e, red #e74c3c, blue #3498db, green #27ae60, gray #95a5a6, gold #f39c12, text #ecf0f1.\n\n---\n\n## Part B — Framework walkthrough (Stage 00–15, matched to renamed image order)\n\nShort narration beats, one per production stage, for a behind-the-scenes cut that tours the\nwhole `WIGAnimation` framework itself. Mark the ones you actually want voiced in\n`storyboard.html`; the rest can stay silent B-roll with on-screen text only.\n\n### 00 — Index\n> \"Every video I make now runs through the same sixteen-step pipeline. This is the map.\"\n\n### 01 — Architecture\n> \"Plan. Assets. Assembly. Polish. Publish. Each stage has one job, and one tool that does it.\"\n\n### 02 — Plan\n> \"The plan isn't a vibe — it's a script, timed to the second, with the animation prompt for\n> every scene written before I generate a single frame.\" *(→ splice in Part A here if doing the\n> full flagship cut.)*\n\n### 03 — Assets\n> \"46,000 notes, 210 live projects — the numbers on screen aren't mockups. That's my actual\n> second brain, queried live.\"\n\n### 04 — Cohort\n> \"Every Sunday, 9 to 11PM UK time, free — I open my screen and we push AI to its limits\n> together. No experience required. That's not a tagline, that's Week 7's calendar invite.\"\n\n### 05 — Gaps\n> \"The gap is context. Low-context AI hallucinates. Feed it your history, your preferences,\n> your own archive — and it stops guessing and starts knowing you.\"\n\n### 06 — Assembly\n> \"This is where the script and the first generated stills meet — chaos and clarity, side by\n> side, before they ever hit a timeline.\"\n\n### 07 — Polish\n> \"Every cut gets a pass in DaVinci before it's allowed to move on.\"\n\n### 08 — Refinement\n> \"Refinement is where I cut what doesn't earn its seconds.\"\n\n### 09 — Audio\n> \"Voiceover at minus six, music bed at minus eighteen to minus twenty-four — score it so the\n> words never fight the track.\"\n\n### 10 — Edit Color\n> \"Color and graphics last, once the timing already works — never the other way round.\"\n\n### 11 — Thumbnail\n> \"The thumbnail gets the same AI pipeline as everything else: generated, not stock.\"\n\n### 12 — Export\n> \"1080p, H.264, 8 to 12 megabits. One export setting, every time, so nothing downstream breaks.\"\n\n### 13 — Metadata\n> \"Title, description, tags — written by the same system that wrote the script, then reviewed\n> by me before it ships.\"\n\n### 14 — WIG — My Story\n*This stage was explicitly marked \"reserved for future expansion\" in the framework diagram —\nno image existed for it. This is that expansion: the real Wildly Important Goal behind the\nwhole framework, sourced from your Skool bio (`3_Resources_Constraints/personal/rifat-erdem-sahin-skool-bio.md`),*\n*not invented.*\n\n> \"For twenty years I was the SRE who fixed things by hand — critical national infrastructure,\n> National Grid, Goldman Sachs, Microsoft. Forty-plus enterprise projects, cleared for the work\n> that can't fail. Then the game changed. I stopped writing more scripts and started building\n> agentic operational models — Claude, Qdrant, n8n — systems that see drift and fix themselves\n> before I wake up. That's my Wildly Important Goal: from a manual, bottlenecked SRE, to an\n> agentic, self-remediating way of working, by teaching ten thousand people to build the same\n> thing. That's Delivery Pilot. This whole framework is that goal, running.\"\n\n*No slide exists for this stage yet — mark it voiceover-important in the storyboard page anyway,\nand either cut a new title card (\"WIG: From X to Y by When\") or run it under Scene 1's chaos\nvisual as a cold open.*\n\n### 15 — Tactics\n> \"Tactics are the small, unglamorous reps — the actual hands-on-keyboard work that makes the\n> other fifteen steps real.\"\n\n---\n\n## Production checklist (from `02_plan_17_checklist.png`)\n- [ ] Script reviewed aloud, timed to 2:58\n- [ ] Voice practice — tone shifts rehearsed\n- [ ] ElevenLabs set up (voice, stability, similarity)\n- [ ] Animation prompts reviewed against CSV (`02_plan_18_csv-master.png`)\n- [ ] Audio levels checked (-12dB peak)\n- [ ] Timing sync verified against the 6-scene table\n- [ ] Color consistency across scenes (master palette)\n- [ ] Text readability (16pt+)\n- [ ] Final export: H.264, 1920×1080, 30fps, 8–12Mbps, AAC\n- [ ] Subtitles / SRT\n- [ ] Thumbnail (1280×720)\n- [ ] Title, description, tags, YouTube chapters\n";
+
+
+const STAGE_ORDER = ["00","01","02","03","04","05","06","07","08","09","10","11","12","13","14","15","16"];
+const STAGE_NAMES = {
+  "00":"Index","01":"Architecture","02":"Plan","03":"Assets","04":"Cohort",
+  "05":"Gaps","06":"Assembly","07":"Polish","08":"Refinement","09":"Audio","10":"Edit Color",
+  "11":"Thumbnail","12":"Export","13":"Metadata","14":"WIG (My Story)","15":"Tactics",
+  "16":"Video Flow"
+};
+const SCENE_COLORS_DEFAULT = [
+  "#3498db","#9b59b6","#e67e22","#1abc9c","#e74c3c","#2980b9",
+  "#16a085","#8e44ad","#f39c12","#27ae60","#c0392b","#2c3e50",
+  "#d35400","#7f8c8d","#e91e63","#00bcd4","#6366f1"
+];
+const SCENE_COLORS = {
+  "00":"#3498db","01":"#9b59b6","02":"#e67e22","03":"#1abc9c","04":"#e74c3c",
+  "05":"#2980b9","06":"#16a085","07":"#8e44ad","08":"#f39c12","09":"#27ae60",
+  "10":"#c0392b","11":"#2c3e50","12":"#d35400","13":"#7f8c8d","14":"#e91e63","15":"#00bcd4",
+  "16":"#6366f1"
+};
+const VIDEO_FLOW = [
+  {file:"01_colorful-file-icons-background.mp4", slug:"colorful-file-icons-background"},
+  {file:"02_futuristic-network-grid.mp4", slug:"futuristic-network-grid"},
+  {file:"03_data-vault-galaxy.mp4", slug:"data-vault-galaxy"},
+  {file:"04_black-diamond-vortex.mp4", slug:"black-diamond-vortex"},
+  {file:"05_bright-light-in-darkness.mp4", slug:"bright-light-in-darkness"},
+  {file:"06_abstract-geometry-animation.mp4", slug:"abstract-geometry-animation"},
+  {file:"07_sparkling-light-explosion.mp4", slug:"sparkling-light-explosion"},
+  {file:"08_gray-diagonal-plane.mp4", slug:"gray-diagonal-plane"},
+  {file:"09_dark-screen-teal-bar.mp4", slug:"dark-screen-teal-bar"},
+  {file:"10_glowing-red-horizon.mp4", slug:"glowing-red-horizon"},
+  {file:"11_blue-title-card-garbled-text.mp4", slug:"blue-title-card-garbled-text"},
+  {file:"12_dark-grid-visualization.mp4", slug:"dark-grid-visualization"},
+  {file:"13_red-code-glitch.mp4", slug:"red-code-glitch"},
+  {file:"14_data-interface-dashboard.mp4", slug:"data-interface-dashboard"},
+  {file:"15_gold-blue-logos-sync.mp4", slug:"gold-blue-logos-sync"},
+  {file:"16_grid-interface-display.mp4", slug:"grid-interface-display"},
+  {file:"17_digital-asset-interface.mp4", slug:"digital-asset-interface"},
+  {file:"18_golden-brain-lightning.mp4", slug:"golden-brain-lightning"},
+  {file:"19_tell-show-animation.mp4", slug:"tell-show-animation"},
+  {file:"20_golden-brain-lightning-2.mp4", slug:"golden-brain-lightning-2"},
+  {file:"21_glowing-arrow-motion.mp4", slug:"glowing-arrow-motion"},
+  {file:"22_animated-arrow-grid.mp4", slug:"animated-arrow-grid"},
+  {file:"23_golden-brain-animation.mp4", slug:"golden-brain-animation"},
+  {file:"24_golden-brain-apps.mp4", slug:"golden-brain-apps"},
+  {file:"25_golden-brain-animation-2.mp4", slug:"golden-brain-animation-2"},
+  {file:"26_geometric-play-button-background.mp4", slug:"geometric-play-button-background"}
+].map(c => {
+  const stem = c.file.replace(/\.mp4$/i, "");
+  return {
+    file: c.file,
+    slug: c.slug,
+    src: "video_flow/" + c.file,
+    poster: "video_flow/_first_frames/" + stem + ".jpg",
+    frame: stem + ".jpg",
+    title: c.slug.replace(/-/g, " ").replace(/\b\w/g, ch => ch.toUpperCase())
+  };
+});
+
+// Acts only on scenes. Shots + scenes share YouTube structural types.
+const SHOT_TYPE_OPTIONS = [
+  "🎯 Hook",
+  "❄️ Intro / Cold Open",
+  "📣 Call to Action",
+  "⚡ Transition / Interrupt",
+  "🪝 Mid-roll / Cliffhanger",
+  "🎬 B-Roll / Cutaway",
+  "📌 Key Takeaways / Recap",
+  "💰 Sponsor / Integration",
+  "📺 Outro / End Screen",
+  "🏁 Closing"
+];
+const SCENE_TYPE_OPTIONS = ["1️⃣ Act I","2️⃣ Act II","3️⃣ Act III"].concat(SHOT_TYPE_OPTIONS);
+const LABEL_OPTIONS = ["😣 Pain","✨ Gain","✅ Solution"];
+const TYPE_HELP = {
+  "🎯 Hook": "Opening punch that names the problem and why the viewer should stay.",
+  "❄️ Intro / Cold Open": "A brief tease or punchy moment taken from later in the video to grab attention immediately before the Hook or title card.",
+  "📣 Call to Action": "Strategic prompt to subscribe, like, drop a comment, or check a link in the description.",
+  "⚡ Transition / Interrupt": "Planned visual or audio shift between acts or subsections (SFX, graphics, text overlays) to reset viewer retention.",
+  "🪝 Mid-roll / Cliffhanger": "A mini-hook placed right before a midpoint transition so viewers stay through ads or longer sections.",
+  "🎬 B-Roll / Cutaway": "Visual assets, screen recordings, stock footage, or second-camera angles that illustrate talking-head points.",
+  "📌 Key Takeaways / Recap": "A short list recapping the primary lessons before the final resolution or close.",
+  "💰 Sponsor / Integration": "A dedicated section (usually after Act I or midway through Act II) for brand integrations or sponsorships.",
+  "📺 Outro / End Screen": "Final sequence with video cards, playlists, and subscribe buttons overlaid on footage.",
+  "🏁 Closing": "Final beat that lands the message and wraps the story.",
+  "1️⃣ Act I": "Setup — world, problem, and stakes.",
+  "2️⃣ Act II": "Confrontation — the middle where the method or conflict plays out.",
+  "3️⃣ Act III": "Resolution — payoff, proof, and landing."
+};
+const LABEL_HELP = {
+  "😣 Pain": "The problem or frustration the viewer already feels.",
+  "✨ Gain": "The outcome or benefit they want.",
+  "✅ Solution": "The method or offer that closes the gap."
+};
+const TYPE_ALIASES = {
+  "Hook":"🎯 Hook","Closing":"🏁 Closing",
+  "Act I":"1️⃣ Act I","Act II":"2️⃣ Act II","Act III":"3️⃣ Act III",
+  "🎯 Hook":"🎯 Hook","🏁 Closing":"🏁 Closing",
+  "1️⃣ Act I":"1️⃣ Act I","2️⃣ Act II":"2️⃣ Act II","3️⃣ Act III":"3️⃣ Act III",
+  "Intro":"❄️ Intro / Cold Open","Cold Open":"❄️ Intro / Cold Open","Intro / Cold Open":"❄️ Intro / Cold Open",
+  "❄️ Intro / Cold Open":"❄️ Intro / Cold Open",
+  "Sponsor":"💰 Sponsor / Integration","Sponsor Read":"💰 Sponsor / Integration",
+  "Sponsor / Integration":"💰 Sponsor / Integration","💰 Sponsor / Integration":"💰 Sponsor / Integration",
+  "CTA":"📣 Call to Action","Call to Action":"📣 Call to Action","📣 Call to Action":"📣 Call to Action",
+  "Transition":"⚡ Transition / Interrupt","Pattern Interrupt":"⚡ Transition / Interrupt",
+  "Transition / Interrupt":"⚡ Transition / Interrupt","⚡ Transition / Interrupt":"⚡ Transition / Interrupt",
+  "Outro":"📺 Outro / End Screen","End Screen":"📺 Outro / End Screen",
+  "Outro / End Screen":"📺 Outro / End Screen","📺 Outro / End Screen":"📺 Outro / End Screen",
+  "Cliffhanger":"🪝 Mid-roll / Cliffhanger","Mid-roll":"🪝 Mid-roll / Cliffhanger",
+  "Mid-roll / Cliffhanger":"🪝 Mid-roll / Cliffhanger","🪝 Mid-roll / Cliffhanger":"🪝 Mid-roll / Cliffhanger",
+  "B-Roll":"🎬 B-Roll / Cutaway","Cutaway":"🎬 B-Roll / Cutaway",
+  "B-Roll / Cutaway":"🎬 B-Roll / Cutaway","🎬 B-Roll / Cutaway":"🎬 B-Roll / Cutaway",
+  "Recap":"📌 Key Takeaways / Recap","Key Takeaways":"📌 Key Takeaways / Recap",
+  "Key Takeaways / Recap":"📌 Key Takeaways / Recap","📌 Key Takeaways / Recap":"📌 Key Takeaways / Recap"
+};
+const LABEL_ALIASES = {
+  "Pain":"😣 Pain","Gain":"✨ Gain","Solution":"✅ Solution",
+  "😣 Pain":"😣 Pain","✨ Gain":"✨ Gain","✅ Solution":"✅ Solution"
+};
+const ACT_TAGS = new Set(["1️⃣ Act I","2️⃣ Act II","3️⃣ Act III","Act I","Act II","Act III"]);
+function normalizeTagList(list, aliases, allowed){
+  const out = [];
+  (list || []).forEach(v => {
+    const n = aliases[v] || v;
+    if(allowed.includes(n) && !out.includes(n)) out.push(n);
+  });
+  return out;
+}
+function tagHelp(opt){
+  return TYPE_HELP[opt] || LABEL_HELP[opt] || "";
+}
+function normalizeShotTypes(list){
+  // strip Act tags from shots
+  return normalizeTagList(list, TYPE_ALIASES, SHOT_TYPE_OPTIONS);
+}
+function normalizeSceneTypes(list){
+  return normalizeTagList(list, TYPE_ALIASES, SCENE_TYPE_OPTIONS);
+}
+
+const LS_KEY = "wiganimation_shotlist_v2";
+const HIDDEN_COOKIE = "wiganimation_hidden";
+const STATE_COOKIE = "wiganimation_state";
+const STATE_COOKIE_PARTS = "wiganimation_state_parts";
+const COOKIE_MAX_AGE = 365 * 24 * 60 * 60;
+let globalWpm = 150; // default target WPM; overridable per scene
+const DEFAULT_WPM = 150;
+
+/* ---------- Stage / file → voiceover seed map ---------- */
+const STAGE_VO = {
+  "00": "Every video I make now runs through the same sixteen-step pipeline. This is the map.",
+  "01": "Plan. Assets. Assembly. Polish. Publish. Each stage has one job, and one tool that does it.",
+  "02": "The plan isn't a vibe — it's a script, timed to the second, with the animation prompt for every scene written before I generate a single frame.",
+  "03": "46,000 notes, 210 live projects — the numbers on screen aren't mockups. That's my actual second brain, queried live.",
+  "04": "Every Sunday, 9 to 11PM UK time, free — I open my screen and we push AI to its limits together. No experience required.",
+  "05": "The gap is context. Low-context AI hallucinates. Feed it your history, your preferences, your own archive — and it stops guessing and starts knowing you.",
+  "06": "This is where the script and the first generated stills meet — chaos and clarity, side by side, before they ever hit a timeline.",
+  "07": "Every cut gets a pass in DaVinci before it's allowed to move on.",
+  "08": "Refinement is where I cut what doesn't earn its seconds.",
+  "09": "Voiceover at minus six, music bed at minus eighteen to minus twenty-four — score it so the words never fight the track.",
+  "10": "Color and graphics last, once the timing already works — never the other way round.",
+  "11": "The thumbnail gets the same AI pipeline as everything else: generated, not stock.",
+  "12": "1080p, H.264, 8 to 12 megabits. One export setting, every time, so nothing downstream breaks.",
+  "13": "Title, description, tags — written by the same system that wrote the script, then reviewed by me before it ships.",
+  "14": "For twenty years I was the SRE who fixed things by hand — critical national infrastructure, National Grid, Goldman Sachs, Microsoft. Then the game changed: agentic operational models that see drift and fix themselves. That's my Wildly Important Goal — and Delivery Pilot.",
+  "15": "Tactics are the small, unglamorous reps — the actual hands-on-keyboard work that makes the other fifteen steps real.",
+  "16": "These are the Google Flow animation clips — first frame still plus the playable loop."
+};
+const FILE_VO = {
+  "00_index.png": STAGE_VO["00"],
+  "01_architecture.png": STAGE_VO["01"],
+  "02_plan_00_cover-title.png": "AI Second Brain — complete production guide. Six scenes, two minutes fifty-eight.",
+  "02_plan_02_timing-table.png": "Six scenes, two fifty-eight total, about four hundred seventy-five words at one-forty to one-sixty words per minute.",
+  "02_plan_03_voiceover-1.png": "I was drowning in 46,000 notes across Obsidian. Every search felt like looking for a needle in a digital haystack. And then I realized—the problem wasn't the number of notes. It was that they weren't working for me. So I engineered something different: a machine-readable, AI-native knowledge engine.",
+  "02_plan_04_voiceover-2.png": "Raw knowledge isn't power—applied knowledge is. Tell. Show. Do. Apply. From chaos to execution in four steps. This isn't just about note-taking anymore. Links in the comments. Let's go.",
+  "02_plan_05_anim-prompts-1.png": "Scene 1 — Hook: chaotic dark workspace, 46,000 note-icons, red accent. Scene 2 begins: vault organizes.",
+  "02_plan_06_anim-prompts-2.png": "Scene 2 closes; Scene 3 — P.A.R.A. four zones AI understands instantly: Projects, Areas, Resources, Archive.",
+  "02_plan_07_anim-prompts-3.png": "Scene 4 — dual-agent engine, Gemini and Claude in tandem, syncing GitHub, Drive, Proxmox.",
+  "02_plan_08_anim-prompts-4.png": "Scene 5 — Apply step. Scene 6 — call to action: Build Your AI Second Brain. Join the hands-on cohort.",
+  "02_plan_16_resources-final.png": "Success factors locked. Full YouTube description ready to ship.",
+  "03_assets_01_para-vault-counts.png": STAGE_VO["03"],
+  "03_assets_02_dashboard-screenshot.png": "Then comes the engine: a local dual-agent rig running Gemini and Claude in tandem — live on the Second Brain dashboard.",
+  "04_cohort_00_week7-notes.png": STAGE_VO["04"],
+  "04_cohort_01_who-are-we.png": "No experience to certified — that's the personal brand promise of this cohort.",
+  "04_cohort_02_schedule.png": "Every Sunday, 9 to 11PM UK time, free. That's not a tagline — that's Week 7's calendar invite.",
+  "05_gaps_00_hallucination-vs-context.png": STAGE_VO["05"],
+  "06_assembly_00_scene1-2-stills.png": STAGE_VO["06"]
+};
+
+function uid(){ return "s_" + Math.random().toString(36).slice(2, 10) + Date.now().toString(36); }
+function wordCount(text){
+  const t = (text || "").trim();
+  return t ? t.split(/\s+/).length : 0;
+}
+function escapeHtml(s){
+  return String(s == null ? "" : s)
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;");
+}
+function formatTC(totalSec){
+  totalSec = Math.max(0, Math.round(totalSec || 0));
+  const h = Math.floor(totalSec / 3600);
+  const m = Math.floor((totalSec % 3600) / 60);
+  const s = totalSec % 60;
+  const pad = n => String(n).padStart(2, "0");
+  return h > 0 ? `${pad(h)}:${pad(m)}:${pad(s)}` : `${pad(m)}:${pad(s)}`;
+}
+function durationFromVo(text, overrideSec, wpm){
+  if(overrideSec != null && overrideSec !== "" && !isNaN(Number(overrideSec))){
+    return Math.max(1, Number(overrideSec));
+  }
+  const w = wordCount(text);
+  if(!w) return 2; // still holds a beat
+  const rate = Math.max(80, Number(wpm) || globalWpm || DEFAULT_WPM);
+  return Math.max(2, Math.round((w / rate) * 60));
+}
+function shotWpm(s){
+  if(s && s.wpm != null && s.wpm !== "" && !isNaN(Number(s.wpm))) return Number(s.wpm);
+  const sc = s && scenes[s.stage];
+  if(sc && sc.wpm != null && sc.wpm !== "" && !isNaN(Number(sc.wpm))) return Number(sc.wpm);
+  return globalWpm || DEFAULT_WPM;
+}
+function defaultVoFor(file, stage, caption){
+  if(FILE_VO[file]) return FILE_VO[file];
+  if(STAGE_VO[stage]) {
+    // first shot of stage later; for generic use stage + caption
+  }
+  return STAGE_VO[stage] || caption || "";
+}
+
+/* ---------- cookies ---------- */
+function setCookie(name, value, maxAge){
+  document.cookie = name + "=" + encodeURIComponent(value)
+    + "; path=/; max-age=" + maxAge + "; SameSite=Lax";
+}
+function getCookie(name){
+  const prefix = name + "=";
+  const parts = document.cookie ? document.cookie.split("; ") : [];
+  for(const p of parts){
+    if(p.indexOf(prefix) === 0){
+      try{ return decodeURIComponent(p.slice(prefix.length)); }
+      catch(e){ return p.slice(prefix.length); }
+    }
+  }
+  return null;
+}
+function clearCookie(name){
+  document.cookie = name + "=; path=/; max-age=0; SameSite=Lax";
+}
+
+function listCookieNames(){
+  if(!document.cookie) return [];
+  return document.cookie.split("; ").map(p => p.split("=")[0]).filter(Boolean);
+}
+function clearStateCookieChunks(){
+  const names = listCookieNames();
+  names.forEach(n => {
+    if(n === STATE_COOKIE_PARTS || n.indexOf(STATE_COOKIE + "_") === 0) clearCookie(n);
+  });
+  const n = parseInt(getCookie(STATE_COOKIE_PARTS) || "0", 10) || 0;
+  for(let i = 0; i < Math.max(n, 80); i++) clearCookie(STATE_COOKIE + "_" + i);
+  clearCookie(STATE_COOKIE_PARTS);
+}
+function clearStateCookies(){
+  clearStateCookieChunks();
+  clearCookie(HIDDEN_COOKIE);
+}
+(function purgeOversizedStateCookies(){
+  try{ clearStateCookieChunks(); }catch(e){}
+})();
+function utf8ToBase64(str){
+  return btoa(unescape(encodeURIComponent(str)));
+}
+function base64ToUtf8(b64){
+  return decodeURIComponent(escape(atob(b64)));
+}
+function mediaForExport(media, includeDataUrls){
+  return (media || []).map(m => {
+    const src = m && m.src ? String(m.src) : "";
+    const isData = src.indexOf("data:") === 0;
+    return {
+      kind: m.kind || "image",
+      name: m.name || "",
+      source: m.source || "",
+      src: (includeDataUrls || !isData) ? src : ("data-omitted:" + (m.name || "blob")),
+      poster: m.poster || "",
+      data_omitted: !!(isData && !includeDataUrls)
+    };
+  });
+}
+function shotForExport(s, includeDataUrls){
+  return {
+    id: s.id,
+    file: s.file || "",
+    stage: s.stage,
+    caption: s.caption || "",
+    vo: s.vo || "",
+    types: s.types || [],
+    labels: s.labels || [],
+    hidden: !!s.hidden,
+    minimized: !!s.minimized,
+    durationSec: s.durationSec == null ? null : s.durationSec,
+    wpm: s.wpm == null ? null : s.wpm,
+    obsidianPath: s.obsidianPath || "",
+    kind: s.kind || "shot",
+    media: mediaForExport(s.media, includeDataUrls)
+  };
+}
+function buildFullStateObject(includeDataUrls){
+  let tl = { total: 0, map: {} };
+  try { if(typeof computeTimeline === "function") tl = computeTimeline(); } catch(e) {}
+  return {
+    format: "wiganimation-shotlist-cookie",
+    version: 3,
+    generatedAt: new Date().toISOString(),
+    globalWpm: typeof globalWpm !== "undefined" ? globalWpm : 150,
+    selectedShotId: typeof selectedShotId !== "undefined" ? selectedShotId : null,
+    selectedSceneStage: typeof selectedSceneStage !== "undefined" ? selectedSceneStage : null,
+    sceneOpen: typeof sceneOpen !== "undefined" ? sceneOpen : {},
+    scenes: typeof scenes !== "undefined" ? scenes : {},
+    shots: (typeof shots !== "undefined" ? shots : []).map(s => shotForExport(s, !!includeDataUrls)),
+    stats: {
+      shot_count: (typeof shots !== "undefined" ? shots.length : 0),
+      visible: typeof visibleShots === "function" ? visibleShots().length : null,
+      hidden_shots: typeof shots !== "undefined" ? shots.filter(s => s.hidden).length : null,
+      hidden_scenes: typeof hiddenScenes === "function" ? hiddenScenes().length : null,
+      words: typeof totalWords === "function" ? totalWords() : null,
+      duration_tc: typeof formatTC === "function" ? formatTC(tl.total) : null,
+      duration_sec: tl.total,
+      wpm: typeof globalWpm !== "undefined" ? globalWpm : null
+    },
+    cookie: {
+      hidden_cookie_name: HIDDEN_COOKIE,
+      state_cookie_prefix: STATE_COOKIE,
+      state_parts_cookie: STATE_COOKIE_PARTS
+    }
+  };
+}
+function persistHiddenCookie(){
+  const parts = [];
+  if(typeof scenes !== "undefined"){
+    Object.keys(scenes).forEach(st => {
+      if(scenes[st] && scenes[st].hidden) parts.push("s:" + st);
+    });
+  }
+  (typeof shots !== "undefined" ? shots : []).forEach(s => {
+    if(!s.hidden) return;
+    if(s.file && typeof MANIFEST !== "undefined"){
+      const idx = MANIFEST.findIndex(m => m.file === s.file);
+      if(idx >= 0) parts.push(String(idx));
+      else parts.push("id:" + s.id);
+    } else {
+      parts.push("id:" + s.id);
+    }
+  });
+  const val = parts.join(",");
+  if(!val || val.length > 2000){
+    if(val.length > 2000) console.warn("Hidden index too large for a cookie; localStorage is the source of truth");
+    clearCookie(HIDDEN_COOKIE);
+    return;
+  }
+  setCookie(HIDDEN_COOKIE, val, COOKIE_MAX_AGE);
+}
+function persistFullStateCookies(){
+  // Full shotlist state lives in localStorage only. Writing it into chunked
+  // cookies made Chrome send a Cookie header >64KB and Python http.server
+  // answered HTTP 431 "Line too long".
+  try{
+    clearStateCookieChunks();
+    persistHiddenCookie();
+    return { ok: true, chunks: 0, bytes: 0, storage: "localStorage" };
+  }catch(e){
+    console.warn("persistFullStateCookies failed", e);
+    try{ persistHiddenCookie(); }catch(err){}
+    return { ok: false, error: String(e && e.message ? e.message : e) };
+  }
+}
+function loadStateFromCookies(){
+  try{
+    const n = parseInt(getCookie(STATE_COOKIE_PARTS) || "0", 10) || 0;
+    if(n <= 0) return null;
+    let encoded = "";
+    for(let i = 0; i < n; i++){
+      const part = getCookie(STATE_COOKIE + "_" + i);
+      if(part == null) return null;
+      encoded += part;
+    }
+    const raw = base64ToUtf8(encoded);
+    const obj = JSON.parse(raw);
+    return {
+      version: obj.version || 3,
+      shots: obj.shots || (obj.data && obj.data.shots) || [],
+      scenes: obj.scenes || (obj.data && obj.data.scenes) || {},
+      selectedShotId: obj.selectedShotId || (obj.data && obj.data.selectedShotId) || null,
+      selectedSceneStage: obj.selectedSceneStage || (obj.data && obj.data.selectedSceneStage) || null,
+      sceneOpen: obj.sceneOpen || (obj.data && obj.data.sceneOpen) || {},
+      globalWpm: obj.globalWpm != null ? obj.globalWpm : (obj.data && obj.data.globalWpm),
+      savedAt: obj.generatedAt || obj.savedAt || null,
+      fromCookie: true
+    };
+  }catch(e){
+    console.warn("loadStateFromCookies failed", e);
+    return null;
+  }
+}
+
+
+/* ---------- state ---------- */
+function loadState(){
+  try{
+    const raw = localStorage.getItem(LS_KEY);
+    if(raw) return JSON.parse(raw);
+  }catch(e){}
+  try{
+    const raw = localStorage.getItem("wiganimation_storyboard_v1");
+    if(raw) return JSON.parse(raw);
+  }catch(e){}
+  try{
+    const fromCookie = loadStateFromCookies();
+    if(fromCookie) return fromCookie;
+  }catch(e){}
+  return null;
+}
+
+function videoFlowShotId(clip){
+  return "vf_" + String(clip.file || "").replace(/[^a-zA-Z0-9]/g, "_").slice(0, 50);
+}
+function videoFlowMedia(clip){
+  return [
+    { kind: "image", src: clip.poster, name: clip.frame, source: "video_flow_frame" },
+    { kind: "video", src: clip.src, poster: clip.poster, name: clip.file, source: "video_flow" }
+  ];
+}
+function buildVideoFlowShot(clip){
+  return {
+    id: videoFlowShotId(clip),
+    file: clip.src,
+    stage: "16",
+    caption: "Google Flow clip — " + clip.title + " (first frame + playable).",
+    vo: "(B-roll · Video Flow) " + clip.title + ".",
+    types: ["🎬 B-Roll / Cutaway"],
+    labels: [],
+    hidden: false,
+    minimized: false,
+    durationSec: 4,
+    media: videoFlowMedia(clip),
+    obsidianPath: "1_Projects_Deadline/WIGAnimation/" + clip.src,
+    kind: "shot"
+  };
+}
+function buildVideoFlowShots(){
+  return VIDEO_FLOW.map(buildVideoFlowShot);
+}
+function ensureVideoFlowMedia(shot){
+  const clip = VIDEO_FLOW.find(c => shot.file === c.src || shot.id === videoFlowShotId(c));
+  if(!clip) return;
+  shot.media = Array.isArray(shot.media) ? shot.media : [];
+  if(!shot.media.some(m => m.kind === "image" && m.src === clip.poster)){
+    shot.media.unshift({ kind: "image", src: clip.poster, name: clip.frame, source: "video_flow_frame" });
+  }
+  const vid = shot.media.find(m => m.kind === "video" && (m.src === clip.src || m.name === clip.file));
+  if(vid){
+    vid.src = clip.src;
+    vid.poster = clip.poster;
+    vid.source = vid.source || "video_flow";
+  } else {
+    shot.media.push({ kind: "video", src: clip.src, poster: clip.poster, name: clip.file, source: "video_flow" });
+  }
+}
+function mergeVideoFlowShots(){
+  const have = new Set(shots.map(s => s.id));
+  const extras = [];
+  VIDEO_FLOW.forEach(clip => {
+    const id = videoFlowShotId(clip);
+    const existing = shots.find(s => s.id === id || s.file === clip.src);
+    if(existing){
+      ensureVideoFlowMedia(existing);
+      if(!existing.stage) existing.stage = "16";
+    } else if(!have.has(id)){
+      extras.push(buildVideoFlowShot(clip));
+    }
+  });
+  if(extras.length) shots = shots.concat(extras);
+}
+function buildDefaultShots(){
+  const stills = MANIFEST.map((m, i) => {
+    const stageFiles = MANIFEST.filter(x => x.stage === m.stage);
+    const isPrimary = stageFiles[0] && stageFiles[0].file === m.file;
+    let vo = FILE_VO[m.file];
+    if(!vo){
+      vo = isPrimary && STAGE_VO[m.stage]
+        ? STAGE_VO[m.stage]
+        : `(B-roll · Stage ${m.stage} ${STAGE_NAMES[m.stage] || ""}) ${m.caption}`;
+    }
+    return {
+      id: "m" + i + "_" + m.file.replace(/[^a-zA-Z0-9]/g, "_").slice(0, 40),
+      file: m.file,
+      stage: m.stage,
+      caption: m.caption,
+      vo,
+      types: m.voiceoverDefault ? (m.stage === "02" && m.file.includes("cover") ? ["Hook"] : []) : [],
+      labels: [],
+      hidden: false,
+      minimized: false,
+      durationSec: null, // auto from VO
+      media: m.file ? [{ kind: "image", src: m.file, name: m.file, source: "local" }] : [],
+      obsidianPath: "",
+      kind: "shot"
+    };
+  });
+  return stills.concat(buildVideoFlowShots());
+}
+
+let state = loadState();
+let shots = Array.isArray(state && state.shots) && state.shots.length
+  ? state.shots
+  : buildDefaultShots();
+
+// scene-level meta (minimize/types/labels/title/hidden per stage)
+let scenes = (state && state.scenes) ? state.scenes : {};
+STAGE_ORDER.forEach(st => {
+  if(!scenes[st]) scenes[st] = { minimized: false, hidden: false, title: "", types: [], labels: [], wpm: null };
+  if(scenes[st].hidden == null) scenes[st].hidden = false;
+  if(scenes[st].title == null) scenes[st].title = "";
+  if(scenes[st].wpm === undefined) scenes[st].wpm = null;
+  if(scenes[st].minimized == null) scenes[st].minimized = false;
+  if(!Array.isArray(scenes[st].types)) scenes[st].types = [];
+  if(!Array.isArray(scenes[st].labels)) scenes[st].labels = [];
+});
+
+// remembered UI click/focus state
+if(state && state.globalWpm != null && !isNaN(Number(state.globalWpm))) globalWpm = Number(state.globalWpm);
+let selectedShotId = (state && state.selectedShotId) || null;
+let selectedSceneStage = (state && state.selectedSceneStage) || null;
+let sceneOpen = (state && state.sceneOpen) ? Object.assign({}, state.sceneOpen) : {};
+// sceneOpen[stage] = true means expanded; default expanded unless scenes[st].minimized
+STAGE_ORDER.forEach(st => {
+  if(sceneOpen[st] === undefined){
+    sceneOpen[st] = !(scenes[st] && scenes[st].minimized);
+  }
+  // keep scenes.minimized in sync with sceneOpen (open = not minimized)
+  scenes[st].minimized = !sceneOpen[st];
+});
+
+// normalize emoji tags on load
+shots.forEach(s => {
+  s.types = normalizeShotTypes(s.types);
+  s.labels = normalizeTagList(s.labels, LABEL_ALIASES, LABEL_OPTIONS);
+});
+Object.keys(scenes).forEach(st => {
+  scenes[st].types = normalizeSceneTypes(scenes[st].types);
+  scenes[st].labels = normalizeTagList(scenes[st].labels, LABEL_ALIASES, LABEL_OPTIONS);
+});
+
+// migrate v1 hidden/marks/voLines into shots if needed
+if(state && !state.shots && (state.hidden || state.voLines || state.marks)){
+  shots.forEach(s => {
+    if(state.hidden && state.hidden[s.file]) s.hidden = true;
+    if(state.voLines && state.voLines[s.file]) s.vo = state.voLines[s.file];
+    if(state.marks && state.marks[s.file] === false){
+      // unmarked stays; types empty already
+    }
+  });
+}
+
+mergeVideoFlowShots();
+
+// cookie hidden override
+(function applyCookieHidden(){
+  const cookieVal = getCookie(HIDDEN_COOKIE);
+  if(cookieVal == null || cookieVal === "") return;
+  const set = new Set();
+  cookieVal.split(",").forEach(tok => {
+    const n = parseInt(tok, 10);
+    if(!isNaN(n) && n >= 0 && n < MANIFEST.length) set.add(MANIFEST[n].file);
+  });
+  // also support shot ids in future cookies: id:xxx
+  shots.forEach(s => {
+    if(s.file && set.has(s.file)) s.hidden = true;
+  });
+})();
+
+let currentView = "shotlist"; // shotlist | hidden | voiceover | metadata
+let isDirty = false;
+
+function updateSaveButton(){
+  const b = document.getElementById("btnSave");
+  if(!b) return;
+  b.classList.toggle("has-unsaved", isDirty);
+  b.classList.toggle("is-clean", !isDirty);
+  b.title = isDirty ? "Unsaved changes — click to save" : "All changes saved in this browser";
+}
+function markDirty(){
+  isDirty = true;
+  updateSaveButton();
+}
+
+function sceneTitle(stage){
+  const sc = scenes[stage] || {};
+  const custom = (sc.title || "").trim();
+  if(custom) return custom;
+  return STAGE_NAMES[stage] || ("Stage " + stage);
+}
+function isSceneHidden(stage){
+  return !!(scenes[stage] && scenes[stage].hidden);
+}
+function ensureScene(stage){
+  if(!scenes[stage]){
+    scenes[stage] = { minimized: false, hidden: false, title: "", types: [], labels: [], wpm: null };
+  }
+  const sc = scenes[stage];
+  if(sc.hidden == null) sc.hidden = false;
+  if(sc.title == null) sc.title = "";
+  if(sc.wpm === undefined) sc.wpm = null;
+  if(!Array.isArray(sc.types)) sc.types = [];
+  if(!Array.isArray(sc.labels)) sc.labels = [];
+  return sc;
+}
+function visibleShots(){
+  return shots.filter(s => !s.hidden && !isSceneHidden(s.stage));
+}
+function hiddenShots(){
+  return shots.filter(s => s.hidden || isSceneHidden(s.stage));
+}
+function hiddenScenes(){
+  return STAGE_ORDER.filter(st => isSceneHidden(st));
+}
+let hideUndoStack = [];
+let hideUndoBarTimer = null;
+function hideUndoLabel(entry){
+  if(!entry) return "";
+  if(entry.kind === "shot") return entry.label ? ("shot “" + entry.label + "”") : "shot";
+  return "scene " + entry.stage + (entry.label ? (" (“" + entry.label + "”)") : "");
+}
+function hideUndoStillHidden(entry){
+  if(!entry) return false;
+  if(entry.kind === "shot"){
+    const s = shots.find(x => x.id === entry.id);
+    return !!(s && s.hidden);
+  }
+  return isSceneHidden(entry.stage);
+}
+function canUndoHide(){
+  return hideUndoStack.some(hideUndoStillHidden);
+}
+function pushHideUndo(entry){
+  hideUndoStack.push(entry);
+  if(hideUndoStack.length > 40) hideUndoStack.shift();
+}
+function pruneHideUndo(){
+  hideUndoStack = hideUndoStack.filter(hideUndoStillHidden);
+}
+function undoButtonHTML(){
+  const on = canUndoHide();
+  const last = [...hideUndoStack].reverse().find(hideUndoStillHidden);
+  const tip = on ? ("Undo last hide — restore " + hideUndoLabel(last)) : "Nothing to undo";
+  return `<button type="button" class="action-btn" data-undo-hide ${on ? "" : "disabled"} title="${escapeHtml(tip)}">Undo</button>`;
+}
+function syncHideUndoBar(notice){
+  const bar = document.getElementById("hideUndoBar");
+  const msg = document.getElementById("hideUndoMsg");
+  if(!bar) return;
+  pruneHideUndo();
+  const last = [...hideUndoStack].reverse().find(hideUndoStillHidden);
+  if(!last){
+    bar.hidden = true;
+    if(hideUndoBarTimer){ clearTimeout(hideUndoBarTimer); hideUndoBarTimer = null; }
+    return;
+  }
+  if(msg) msg.innerHTML = (notice ? escapeHtml(notice) + " — " : "") + "Last hide: <b>" + escapeHtml(hideUndoLabel(last)) + "</b>";
+  bar.hidden = false;
+  if(hideUndoBarTimer) clearTimeout(hideUndoBarTimer);
+  hideUndoBarTimer = setTimeout(() => { bar.hidden = true; hideUndoBarTimer = null; }, 12000);
+}
+function undoLastHide(){
+  pruneHideUndo();
+  const last = hideUndoStack.pop();
+  if(!last){
+    flash("Nothing to undo");
+    syncHideUndoBar();
+    return;
+  }
+  if(last.kind === "shot"){
+    const s = shots.find(x => x.id === last.id);
+    if(!s || !s.hidden){ undoLastHide(); return; }
+    s.hidden = false;
+    persistHiddenCookie();
+    persistUI();
+    renderAll();
+    flash("Undo: shot restored");
+    syncHideUndoBar();
+    return;
+  }
+  if(!isSceneHidden(last.stage)){ undoLastHide(); return; }
+  const sc = ensureScene(last.stage);
+  sc.hidden = false;
+  sceneOpen[last.stage] = true;
+  sc.minimized = false;
+  persistUI();
+  renderAll();
+  flash("Undo: scene " + last.stage + " restored");
+  syncHideUndoBar();
+}
+function hideScene(stage){
+  const sc = ensureScene(stage);
+  sc.hidden = true;
+  sceneOpen[stage] = false;
+  sc.minimized = true;
+  if(selectedSceneStage === stage) selectedSceneStage = null;
+  if(selectedShotId){
+    const s = shots.find(x => x.id === selectedShotId);
+    if(s && s.stage === stage) selectedShotId = null;
+  }
+  pushHideUndo({ kind: "scene", stage: stage, label: sceneTitle(stage) });
+  persistUI();
+  renderAll();
+  flash("Scene " + stage + " hidden");
+  syncHideUndoBar("Scene hidden");
+}
+function unhideScene(stage){
+  const sc = ensureScene(stage);
+  sc.hidden = false;
+  sceneOpen[stage] = true;
+  sc.minimized = false;
+  persistUI();
+  renderAll();
+  flash("Scene " + stage + " restored");
+  pruneHideUndo();
+  syncHideUndoBar();
+}
+function renameScene(stage){
+  const sc = ensureScene(stage);
+  const current = sceneTitle(stage);
+  const next = prompt("Rename scene " + stage + ":", current);
+  if(next == null) return;
+  const trimmed = String(next).trim();
+  const defaultName = STAGE_NAMES[stage] || stage;
+  sc.title = (trimmed && trimmed !== defaultName) ? trimmed : "";
+  persistUI();
+  renderAll();
+  flash(sc.title ? ('Renamed to "' + sc.title + '"') : "Restored default scene name");
+}
+
+
+function saveAll(opts){
+  opts = opts || {};
+  // keep scene.minimized mirrored from sceneOpen (skip force-open of hidden scenes)
+  STAGE_ORDER.forEach(st => {
+    if(typeof ensureScene === "function") ensureScene(st);
+    else if(!scenes[st]) scenes[st] = { minimized: false, hidden: false, title: "", types: [], labels: [], wpm: null };
+    if(!(scenes[st] && scenes[st].hidden)){
+      scenes[st].minimized = sceneOpen[st] === false;
+    }
+  });
+  const payload = {
+    version: 3,
+    shots,
+    scenes,
+    selectedShotId,
+    selectedSceneStage,
+    sceneOpen,
+    globalWpm,
+    savedAt: new Date().toISOString()
+  };
+  localStorage.setItem(LS_KEY, JSON.stringify(payload));
+  // Drop leftover chunked state cookies; keep a compact hidden index if small.
+  if(typeof persistFullStateCookies === "function") persistFullStateCookies();
+  else persistHiddenCookie();
+  if(!opts.keepDirty){
+    isDirty = false;
+    updateSaveButton();
+  }
+  if(!opts.silent){
+    const msg = document.getElementById("saveMsg");
+    if(msg){
+      msg.textContent = "Saved " + new Date().toLocaleTimeString();
+      setTimeout(() => { msg.textContent = ""; }, 4000);
+    }
+  }
+}
+
+function persistUI(){
+  // auto-persist state but keep "unsaved" cue for intentional Save clicks... 
+  // Actually auto-save to localStorage while marking dirty until explicit Save? User wants green when unsaved.
+  // Auto-write localStorage for crash safety, still mark dirty until Save clicked.
+  saveAll({ silent: true, keepDirty: true });
+  markDirty();
+}
+function persistUIClean(){
+  saveAll({ silent: true });
+}
+
+function flash(msg){
+  const el = document.getElementById("saveMsg");
+  if(!el) return;
+  el.textContent = msg;
+  setTimeout(() => { if(el.textContent === msg) el.textContent = ""; }, 3500);
+}
+
+/* ---------- timeline math ---------- */
+function shotDuration(s){
+  return durationFromVo(s.vo, s.durationSec, shotWpm(s));
+}
+function computeTimeline(){
+  let t = 0;
+  const map = {}; // id -> {in, out, dur}
+  visibleShots().forEach(s => {
+    const dur = shotDuration(s);
+    map[s.id] = { in: t, out: t + dur, dur };
+    t += dur;
+  });
+  return { map, total: t };
+}
+function totalWords(){
+  return visibleShots().reduce((n, s) => n + wordCount(s.vo), 0);
+}
+function totalWordsAllVo(){
+  // all non-hidden VO text
+  return totalWords();
+}
+
+function renderStats(){
+  const tl = computeTimeline();
+  document.getElementById("statVisible").textContent = visibleShots().length;
+  document.getElementById("statHidden").textContent = String(shots.filter(s => s.hidden).length + hiddenScenes().length);
+  document.getElementById("statWords").textContent = totalWordsAllVo();
+  document.getElementById("statDuration").textContent = formatTC(tl.total);
+  const sw = document.getElementById("statWpm");
+  if(sw) sw.textContent = String(globalWpm);
+  const slider = document.getElementById("wpmSlider");
+  if(slider && Number(slider.value) !== globalWpm) slider.value = String(globalWpm);
+  const hp = document.getElementById("statHiddenPage");
+  if(hp) hp.textContent = hiddenShots().length;
+  renderStoryArc(tl);
+}
+
+const ARC_COLORS = {
+  "❄️ Intro / Cold Open": "#0ea5e9",
+  "🎯 Hook": "#e74c3c",
+  "1️⃣ Act I": "#3498db",
+  "😣 Pain": "#c0392b",
+  "✨ Gain": "#f39c12",
+  "✅ Solution": "#27ae60",
+  "💰 Sponsor / Integration": "#16a085",
+  "🎬 B-Roll / Cutaway": "#7f8c8d",
+  "⚡ Transition / Interrupt": "#8e44ad",
+  "🪝 Mid-roll / Cliffhanger": "#d35400",
+  "2️⃣ Act II": "#2980b9",
+  "📌 Key Takeaways / Recap": "#1abc9c",
+  "📣 Call to Action": "#e67e22",
+  "3️⃣ Act III": "#1abc9c",
+  "📺 Outro / End Screen": "#2c3e50",
+  "🏁 Closing": "#8e44ad",
+  "Other": "#95a5a6"
+};
+const ARC_TYPE_PRIORITY = [
+  "❄️ Intro / Cold Open","🎯 Hook","📣 Call to Action","⚡ Transition / Interrupt",
+  "🪝 Mid-roll / Cliffhanger","🎬 B-Roll / Cutaway","📌 Key Takeaways / Recap",
+  "💰 Sponsor / Integration","📺 Outro / End Screen","🏁 Closing"
+];
+function beatKeyForShot(s){
+  const types = s.types || [];
+  const labels = s.labels || [];
+  const sc = scenes[s.stage] || {};
+  const stTypes = sc.types || [];
+  for(const t of ARC_TYPE_PRIORITY) if(types.includes(t) || stTypes.includes(t)) return t;
+  for(const t of ["😣 Pain","✨ Gain","✅ Solution"]) if(labels.includes(t) || (sc.labels||[]).includes(t)) return t;
+  for(const t of ["1️⃣ Act I","2️⃣ Act II","3️⃣ Act III"]) if(stTypes.includes(t) || types.includes(t)) return t;
+  return "Other";
+}
+function renderStoryArc(tl){
+  const track = document.getElementById("storyArc");
+  const legend = document.getElementById("storyArcLegend");
+  if(!track) return;
+  const total = tl.total || 0;
+  if(!total){
+    track.innerHTML = "";
+    track.className = "arc-track";
+    if(legend) legend.innerHTML = '<span class="arc-empty">Tag shots (Hook, Cold Open, CTA, B-Roll, Recap…) to see the story arc.</span>';
+    return;
+  }
+  const buckets = {};
+  visibleShots().forEach(s => {
+    const key = beatKeyForShot(s);
+    const dur = (tl.map[s.id] && tl.map[s.id].dur) || shotDuration(s);
+    buckets[key] = (buckets[key] || 0) + dur;
+  });
+  const order = [
+    "❄️ Intro / Cold Open","🎯 Hook","1️⃣ Act I","😣 Pain","✨ Gain","✅ Solution",
+    "💰 Sponsor / Integration","🎬 B-Roll / Cutaway","⚡ Transition / Interrupt",
+    "🪝 Mid-roll / Cliffhanger","2️⃣ Act II","📌 Key Takeaways / Recap",
+    "📣 Call to Action","3️⃣ Act III","📺 Outro / End Screen","🏁 Closing","Other"
+  ];
+  const keys = order.filter(k => buckets[k] > 0).concat(Object.keys(buckets).filter(k => !order.includes(k) && buckets[k] > 0));
+  track.innerHTML = keys.map(k => {
+    const sec = buckets[k];
+    const pct = (sec / total) * 100;
+    const label = pct >= 8 ? (k + " " + Math.round(pct) + "%") : (pct >= 4 ? Math.round(pct) + "%" : "");
+    return '<div class="arc-seg" style="flex:' + sec + ';background:' + (ARC_COLORS[k] || ARC_COLORS.Other) + '" title="'
+      + escapeHtml(k) + " · " + formatTC(sec) + " · " + Math.round(pct) + '%">' + escapeHtml(label) + '</div>';
+  }).join("");
+  if(legend){
+    legend.innerHTML = keys.map(k => {
+      const sec = buckets[k];
+      const pct = Math.round((sec / total) * 100);
+      return '<span><i class="arc-dot" style="background:' + (ARC_COLORS[k] || ARC_COLORS.Other) + '"></i>'
+        + escapeHtml(k) + " (" + pct + "% · " + formatTC(sec) + ")</span>";
+    }).join("");
+  }
+}
+
+/* ---------- text actions ---------- */
+async function openRouterEdit(action, text){
+  const payload = { action: action, text: text || "" };
+  const res = await fetch("/api/text", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+  let data = null;
+  try { data = await res.json(); } catch(e) { data = null; }
+  if(!res.ok || !data || !data.ok){
+    const msg = (data && data.error) ? data.error : ("HTTP " + res.status);
+    throw new Error(msg);
+  }
+  return data.text || "";
+}
+async function grammarFix(text){
+  return openRouterEdit("grammar", text);
+}
+async function rewriteText(text){
+  return openRouterEdit("rewrite", text);
+}
+async function runVoAction(shotId, action, btn){
+  const s = shots.find(x => x.id === shotId);
+  if(!s) return;
+  const original = s.vo || "";
+  if(!original.trim()){
+    flash("No voiceover text on this shot");
+    return;
+  }
+  const label = action === "grammar" ? "Grammar Fix" : "Rewrite";
+  const prev = btn ? btn.textContent : "";
+  if(btn){
+    btn.disabled = true;
+    btn.textContent = "…";
+  }
+  flash(label + " via OpenRouter…");
+  try{
+    const out = action === "grammar" ? await grammarFix(original) : await rewriteText(original);
+    if(!out || !String(out).trim()){
+      throw new Error("Model returned empty text");
+    }
+    s.vo = String(out).trim();
+    persistUI();
+    renderAll();
+    flash(label + " done");
+  }catch(e){
+    const msg = (e && e.message) ? e.message : String(e);
+    flash(label + " failed");
+    alert(label + " failed.\\n\\n" + msg + "\\n\\nUse the shotlist Python server (python3 server.py) so /api/text can reach OpenRouter.");
+  }finally{
+    if(btn){
+      btn.disabled = false;
+      btn.textContent = prev || label;
+    }
+  }
+}
+
+
+/* ---------- media ---------- */
+function openMediaModal(src, kind, name, poster){
+  const modal = document.getElementById("mediaModal");
+  const body = document.getElementById("mediaModalBody");
+  const title = document.getElementById("mediaModalTitle");
+  title.textContent = name || src || "Media";
+  body.innerHTML = "";
+  if(kind === "video" || /\.(mp4|webm|mov)(\?|$)/i.test(src)){
+    const v = document.createElement("video");
+    v.src = src; v.controls = true; v.autoplay = true; v.playsInline = true;
+    if(poster) v.poster = poster;
+    v.style.maxWidth = "100%"; v.style.maxHeight = "80vh";
+    body.appendChild(v);
+  } else {
+    const img = document.createElement("img");
+    img.src = src; img.alt = name || ""; img.style.maxWidth = "100%"; img.style.maxHeight = "80vh";
+    body.appendChild(img);
+  }
+  modal.classList.add("open");
+}
+function closeMediaModal(){
+  document.getElementById("mediaModal").classList.remove("open");
+  document.getElementById("mediaModalBody").innerHTML = "";
+}
+
+async function handlePasteOnShot(shotId, e){
+  const items = e.clipboardData && e.clipboardData.items;
+  if(!items) return;
+  const shot = shots.find(s => s.id === shotId);
+  if(!shot) return;
+  let handled = false;
+  for(const item of items){
+    if(item.type && item.type.indexOf("image/") === 0){
+      handled = true;
+      const file = item.getAsFile();
+      if(!file) continue;
+      const dataUrl = await readFileAsDataURL(file);
+      shot.media = shot.media || [];
+      shot.media.push({ kind: "image", src: dataUrl, name: file.name || "pasted-image", source: "paste" });
+    } else if(item.type && item.type.indexOf("video/") === 0){
+      handled = true;
+      const file = item.getAsFile();
+      if(!file) continue;
+      const dataUrl = await readFileAsDataURL(file);
+      shot.media = shot.media || [];
+      shot.media.push({ kind: "video", src: dataUrl, name: file.name || "pasted-video", source: "paste" });
+    }
+  }
+  // plain text path paste (obsidian/local)
+  const text = e.clipboardData.getData("text/plain");
+  if(text && (/^\[\[.+\]\]$/.test(text.trim()) || /\.(png|jpe?g|gif|webp|mp4|webm|mov)$/i.test(text.trim()) || text.includes("1_Projects_Deadline") || text.includes("3_Resources"))){
+    handled = true;
+    const path = text.trim().replace(/^\[\[/, "").replace(/\]\]$/, "");
+    shot.obsidianPath = path;
+    if(/\.(png|jpe?g|gif|webp)$/i.test(path) && !path.startsWith("data:")){
+      // try relative name
+      const base = path.split("/").pop();
+      shot.media = shot.media || [];
+      shot.media.push({ kind: "image", src: base, name: path, source: "obsidian" });
+    }
+  }
+  if(handled){
+    e.preventDefault();
+    renderAll();
+    saveAll();
+    flash("Media pasted");
+  }
+}
+function readFileAsDataURL(file){
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(r.result);
+    r.onerror = reject;
+    r.readAsDataURL(file);
+  });
+}
+
+/* ---------- mutations ---------- */
+function findShotIndex(id){ return shots.findIndex(s => s.id === id); }
+
+function selectShot(id){
+  selectedShotId = id;
+  const s = shots.find(x => x.id === id);
+  if(s) selectedSceneStage = s.stage;
+  // remember selection without forcing "unsaved" cue
+  const wasDirty = isDirty;
+  saveAll({ silent: true, keepDirty: true });
+  isDirty = wasDirty;
+  updateSaveButton();
+  document.querySelectorAll(".shot.is-selected").forEach(el => el.classList.remove("is-selected"));
+  document.querySelectorAll(".scene.is-selected").forEach(el => el.classList.remove("is-selected"));
+  const card = document.querySelector('.shot[data-id="' + CSS.escape(id) + '"]');
+  if(card) card.classList.add("is-selected");
+  if(s){
+    const sc = document.querySelector('.scene[data-stage="' + s.stage + '"]');
+    if(sc) sc.classList.add("is-selected");
+  }
+}
+function selectScene(stage){
+  selectedSceneStage = stage;
+  const wasDirty = isDirty;
+  saveAll({ silent: true, keepDirty: true });
+  isDirty = wasDirty;
+  updateSaveButton();
+  document.querySelectorAll(".scene.is-selected").forEach(el => el.classList.remove("is-selected"));
+  const sc = document.querySelector('.scene[data-stage="' + stage + '"]');
+  if(sc) sc.classList.add("is-selected");
+}
+function hideShot(id){
+  const s = shots.find(x => x.id === id);
+  if(!s) return;
+  s.hidden = true;
+  if(selectedShotId === id) selectedShotId = null;
+  pushHideUndo({ kind: "shot", id: id, label: s.file || (s.caption || "").slice(0, 40) || id });
+  persistHiddenCookie();
+  persistUI();
+  renderAll();
+  flash("Shot hidden");
+  syncHideUndoBar("Shot hidden");
+}
+function unhideShot(id){
+  const s = shots.find(x => x.id === id);
+  if(!s) return;
+  s.hidden = false;
+  persistHiddenCookie();
+  persistUI();
+  renderAll();
+  pruneHideUndo();
+  syncHideUndoBar();
+}
+function unhideAll(){
+  shots.forEach(s => { s.hidden = false; });
+  hideUndoStack = hideUndoStack.filter(e => e.kind !== "shot");
+  persistHiddenCookie();
+  persistUI();
+  renderAll();
+  syncHideUndoBar();
+}
+function toggleMinimizeShot(id){
+  const s = shots.find(x => x.id === id);
+  if(!s) return;
+  s.minimized = !s.minimized;
+  selectShot(id);
+  persistUI();
+  renderAll();
+}
+function toggleMinimizeScene(stage){
+  const sc = ensureScene(stage);
+  if(sc.hidden) return;
+  const open = sceneOpen[stage] !== false;
+  sceneOpen[stage] = !open;
+  sc.minimized = !sceneOpen[stage];
+  selectScene(stage);
+  persistUI();
+  renderAll();
+}
+function insertShotAfter(id){
+  const i = findShotIndex(id);
+  if(i < 0) return;
+  const prev = shots[i];
+  const neu = {
+    id: uid(),
+    file: "",
+    stage: prev.stage,
+    caption: "New shot (inserted)",
+    vo: "",
+    types: [],
+    labels: [],
+    hidden: false,
+    minimized: false,
+    durationSec: 3,
+    media: [],
+    obsidianPath: "",
+    kind: "shot"
+  };
+  shots.splice(i + 1, 0, neu);
+  selectedShotId = neu.id;
+  selectedSceneStage = neu.stage;
+  persistUI();
+  renderAll();
+  flash("Shot inserted");
+}
+function moveShot(id, dir){
+  const vis = visibleShots();
+  const vi = vis.findIndex(s => s.id === id);
+  if(vi < 0) return;
+  const vj = vi + dir;
+  if(vj < 0 || vj >= vis.length) return;
+  const a = findShotIndex(vis[vi].id);
+  const b = findShotIndex(vis[vj].id);
+  [shots[a], shots[b]] = [shots[b], shots[a]];
+  persistUI();
+  renderAll();
+}
+
+function clearAllCookies(){
+  if(!confirm("Clear ALL shotlist cookies (full state chunks + hidden index) and unhide every shot/scene?")) return;
+  clearStateCookies();
+  shots.forEach(s => { s.hidden = false; });
+  STAGE_ORDER.forEach(st => { if(scenes[st]) scenes[st].hidden = false; });
+  hideUndoStack = [];
+  saveAll();
+  setView("shotlist");
+  flash("All shotlist cookies cleared");
+}
+
+function buildAllVoiceoverText(){
+  const list = visibleShots().filter(s => (s.vo || "").trim());
+  return list.map((s, i) => {
+    const tag = (s.types && s.types.length) ? " · " + s.types.join(", ") : "";
+    return (i + 1) + ". [Stage " + s.stage + tag + (s.file ? " · " + s.file : "") + "]\n" + s.vo.trim();
+  }).join("\n\n");
+}
+
+async function copyAllVoiceover(){
+  const text = buildAllVoiceoverText();
+  closeTools();
+  if(!text.trim()){ alert("No voiceover lines to copy."); return; }
+  try{
+    if(navigator.clipboard && navigator.clipboard.writeText) await navigator.clipboard.writeText(text);
+    else {
+      const ta = document.createElement("textarea");
+      ta.value = text; document.body.appendChild(ta); ta.select(); document.execCommand("copy"); document.body.removeChild(ta);
+    }
+    flash("Voiceover copied (" + wordCount(text) + " words)");
+  }catch(e){ alert("Copy failed: " + e.message); }
+}
+
+function closeTools(){
+  const menu = document.getElementById("toolsMenu");
+  if(menu) menu.removeAttribute("open");
+}
+
+/* ---------- render helpers ---------- */
+function compactTagPicker(options, selected, dataAttr, addLabel){
+  // addLabel e.g. "Type" or "Label" → empty state "+ Add Type"
+  const sel = selected || [];
+  const selectedSet = new Set(sel);
+  const noun = (addLabel || "Tag").replace(/^Add\s+/i, "");
+  const selectedHtml = sel.map(opt => {
+    const help = tagHelp(opt);
+    const tip = help || ("Remove " + opt);
+    return `<button type="button" class="chip on removable has-tip" data-msel="${dataAttr}" data-val="${escapeHtml(opt)}" data-tip="${escapeHtml(tip)}" title="${escapeHtml(tip)}">`
+      + `<span class="chip-text">${escapeHtml(opt)}</span><span class="x" aria-hidden="true">×</span></button>`;
+  }).join("");
+  const menuHtml = options.map(opt => {
+    const on = selectedSet.has(opt);
+    const help = tagHelp(opt);
+    return `<button type="button" class="chip menu-chip ${on ? "on" : ""}" data-msel="${dataAttr}" data-val="${escapeHtml(opt)}" title="${escapeHtml(help || opt)}">`
+      + `<span class="chip-text">${escapeHtml(opt)}</span>`
+      + (on ? '<span class="chip-check">✓</span>' : "")
+      + (help ? `<span class="chip-help">${escapeHtml(help)}</span>` : "")
+      + `</button>`;
+  }).join("");
+  const addText = sel.length ? ("+ " + noun) : ("+ Add " + noun);
+  return `<div class="tag-compact" data-msel-root="${dataAttr}">
+    <div class="tag-selected">${selectedHtml}</div>
+    <details class="tag-add">
+      <summary class="tag-add-btn" title="Add or toggle ${escapeHtml(noun).toLowerCase()}s">${escapeHtml(addText)}</summary>
+      <div class="tag-menu" role="menu">${menuHtml}</div>
+    </details>
+  </div>`;
+}
+
+function mediaThumbsHTML(shot){
+  const media = shot.media || [];
+  if(!media.length){
+    return `<div class="media-empty">Drop or paste image/video · type [[ for vault path</div>`;
+  }
+  const used = new Set();
+  const parts = [];
+  media.forEach((m, idx) => {
+    if(m.kind !== "video") return;
+    used.add(idx);
+    const poster = m.poster || "";
+    const stillIdx = media.findIndex((x, i) => x.kind === "image" && poster && x.src === poster);
+    if(stillIdx >= 0) used.add(stillIdx);
+    const still = stillIdx >= 0 ? media[stillIdx] : (poster ? { src: poster, name: "First frame" } : null);
+    parts.push(
+      `<div class="clip-pair">`
+      + `<video class="clip-video" src="${escapeHtml(m.src)}" ${poster ? `poster="${escapeHtml(poster)}"` : ""} controls playsinline preload="metadata" title="${escapeHtml(m.name || "Play clip")}"></video>`
+      + (still
+        ? `<div class="clip-still"><div class="thumb" data-media-shot="${shot.id}" data-media-idx="${stillIdx >= 0 ? stillIdx : idx}" title="First frame — ${escapeHtml(still.name || "")}">`
+          + `<img src="${escapeHtml(still.src)}" alt="First frame" loading="lazy">`
+          + `<span class="badge">First frame</span></div></div>`
+        : "")
+      + `</div>`
+    );
+  });
+  media.forEach((m, idx) => {
+    if(used.has(idx)) return;
+    if(m.kind === "video") return;
+    parts.push(
+      `<div class="thumb" data-media-shot="${shot.id}" data-media-idx="${idx}" title="${escapeHtml(m.name || "")}">`
+      + `<img src="${escapeHtml(m.src)}" alt="" loading="lazy"></div>`
+    );
+  });
+  return parts.join("");
+}
+
+function renderShotCard(shot, tc, globalIndex, mode){
+  const minimized = !!shot.minimized;
+  const types = shot.types || [];
+  const labels = shot.labels || [];
+  const card = document.createElement("div");
+  card.className = "shot"
+    + (minimized ? " is-min" : "")
+    + (types.length ? " has-type" : "")
+    + (selectedShotId === shot.id ? " is-selected" : "");
+  card.dataset.id = shot.id;
+
+  const tcIn = formatTC(tc.in);
+  const tcOut = formatTC(tc.out);
+  const dur = tc.dur;
+
+  if(mode === "hidden"){
+    card.innerHTML = `
+      <div class="tc-col">
+        <div class="tc-in">—</div>
+        <div class="tc-dur">hidden</div>
+      </div>
+      <div class="shot-body">
+        <div class="shot-head">
+          <span class="shot-num">#${globalIndex}</span>
+          <span class="shot-file">${escapeHtml(shot.file || "(custom shot)")}</span>
+          <button type="button" class="btn primary sm" data-unhide="${shot.id}">Unhide</button>
+        </div>
+        ${minimized ? "" : `<div class="shot-grid">
+          <div class="media-zone">${mediaThumbsHTML(shot)}</div>
+          <div class="vo-zone"><div class="vo-preview">${escapeHtml(shot.vo || "")}</div></div>
+        </div>`}
+      </div>`;
+    return card;
+  }
+
+  const manualDur = shot.durationSec != null && shot.durationSec !== "";
+  card.draggable = true;
+  card.innerHTML = `
+    <div class="tc-col">
+      <div class="drag-handle" title="Drag to reorder" draggable="false">⋮⋮</div>
+      <div class="tc-in" title="In">${tcIn}</div>
+      <div class="tc-line"></div>
+      <div class="tc-dur ${manualDur ? "is-manual" : ""}" title="${manualDur ? "Manual duration override" : "Auto from voiceover"}">${dur}s</div>
+      <div class="tc-out" title="Out">${tcOut}</div>
+    </div>
+    <div class="shot-body">
+      <div class="shot-head">
+        <div class="shot-head-main">
+          <span class="shot-num">#${globalIndex}</span>
+          <span class="shot-file" title="${escapeHtml(shot.file || "")}">${escapeHtml(shot.file || "Custom shot")}</span>
+          <span class="shot-stage">Stage ${shot.stage}</span>
+        </div>
+        <div class="shot-actions" role="group" aria-label="Shot actions">
+          <button type="button" class="action-btn collapse-btn" data-min="${shot.id}" title="${minimized ? "Expand shot" : "Collapse shot"}" aria-label="${minimized ? "Expand" : "Collapse"}">${minimized ? "＋" : "−"}</button>
+          <button type="button" class="action-btn" data-insert="${shot.id}" title="Insert shot after this one">+ Shot</button>
+          <button type="button" class="action-btn action-danger" data-hide="${shot.id}" title="Hide shot">Hide</button>
+          ${undoButtonHTML()}
+        </div>
+      </div>
+      ${minimized ? `<div class="min-summary">${escapeHtml((shot.vo || shot.caption || "").slice(0, 120))}${(shot.vo||"").length>120?"…":""} · ${dur}s · ${wordCount(shot.vo)}w${manualDur ? " · manual" : ""}</div>` : `
+      <div class="shot-grid">
+        <div class="media-col">
+          <div class="label">Frame / Media</div>
+          <div class="media-zone" data-paste="${shot.id}" tabindex="0" title="Click then paste image/video">
+            ${mediaThumbsHTML(shot)}
+          </div>
+          <label class="field">Obsidian / local path
+            <div class="ac-wrap">
+              <input type="text" class="path-input" data-path="${shot.id}" value="${escapeHtml(shot.obsidianPath || "")}" placeholder="Type [[ or filename — fuzzy vault search" autocomplete="off">
+              <div class="ac-menu" data-ac-for="${shot.id}"></div>
+            </div>
+          </label>
+          <div class="field dur-field ${manualDur ? "is-manual" : "is-auto"}">
+            <span class="dur-badge">${manualDur ? "⏱ Manual override" : "Auto from VO"}</span>
+            <label>Duration (sec)
+              <input type="number" min="1" step="1" class="dur-input" data-dur="${shot.id}" value="${manualDur ? shot.durationSec : ""}" placeholder="auto from VO">
+            </label>
+          </div>
+          <div class="caption">${escapeHtml(shot.caption || "")}</div>
+        </div>
+        <div class="vo-col">
+          <div class="label-row">
+            <div class="label">Voiceover</div>
+            <div class="vo-actions">
+              <button type="button" class="soft-btn soft-btn-indigo" data-grammar="${shot.id}" title="Fix grammar via OpenRouter">Grammar Fix</button>
+              <button type="button" class="soft-btn soft-btn-indigo" data-rewrite="${shot.id}" title="Rewrite via OpenRouter">Rewrite</button>
+            </div>
+          </div>
+          <textarea class="vo-line" data-vo="${shot.id}" spellcheck="true" placeholder="Voiceover for this shot…">${escapeHtml(shot.vo || "")}</textarea>
+          <div class="tag-row">
+            <div class="tag-field">
+              <div class="label">Type</div>
+              ${compactTagPicker(SHOT_TYPE_OPTIONS, types, "types:" + shot.id, "Type")}
+            </div>
+            <div class="tag-field">
+              <div class="label">Labels</div>
+              ${compactTagPicker(LABEL_OPTIONS, labels, "labels:" + shot.id, "Label")}
+            </div>
+          </div>
+          <div class="meta-line">${wordCount(shot.vo)} words · ${manualDur ? "manual" : "est."} ${dur}s @ ${shotWpm(shot)} wpm</div>
+        </div>
+      </div>`}
+    </div>`;
+  return card;
+}
+
+function renderShotlist(){
+  const root = document.getElementById("shotlist");
+  root.innerHTML = "";
+  const vis = visibleShots();
+  if(!vis.length){
+    root.innerHTML = `<div class="empty">All shots are hidden. ${undoButtonHTML()} or open <b>Tools → Hidden items</b>.</div>`;
+    wireShotlist(root);
+    return;
+  }
+  const tl = computeTimeline();
+  let lastStage = null;
+  let n = 0;
+  vis.forEach(shot => {
+    if(shot.stage !== lastStage){
+      lastStage = shot.stage;
+      if(isSceneHidden(shot.stage)) return;
+      const sc = ensureScene(shot.stage);
+      const isOpen = sceneOpen[shot.stage] !== false;
+      const scene = document.createElement("div");
+      const colorIdx = STAGE_ORDER.indexOf(shot.stage);
+      const title = sceneTitle(shot.stage);
+      const isCustomTitle = !!(sc.title && String(sc.title).trim());
+      scene.className = "scene scene-c" + (colorIdx >= 0 ? colorIdx : 0)
+        + (isOpen ? "" : " is-min")
+        + (selectedSceneStage === shot.stage ? " is-selected" : "");
+      scene.dataset.stage = shot.stage;
+      scene.style.setProperty("--scene-accent", SCENE_COLORS[shot.stage] || SCENE_COLORS_DEFAULT[(colorIdx >= 0 ? colorIdx : 0) % SCENE_COLORS_DEFAULT.length]);
+      scene.innerHTML = `
+        <div class="scene-head" data-select-scene="${shot.stage}">
+          <div class="scene-head-top">
+            <button type="button" class="action-btn collapse-btn scene-min" data-scene-min="${shot.stage}" title="${isOpen ? "Collapse scene" : "Expand scene"}">${isOpen ? "−" : "＋"}</button>
+            <span class="scene-n">${shot.stage}</span>
+            <strong class="scene-title" title="${escapeHtml(isCustomTitle ? ("Custom name · default: " + (STAGE_NAMES[shot.stage] || shot.stage)) : "Double-click to rename")}">${escapeHtml(title)}</strong>
+            ${isCustomTitle ? '<span class="scene-renamed-badge" title="Custom name">renamed</span>' : ""}
+            <label class="scene-wpm" title="Scene target WPM (blank = global)">WPM
+              <input type="number" min="100" max="200" step="5" data-scene-wpm="${shot.stage}" value="${sc.wpm == null ? "" : sc.wpm}" placeholder="${globalWpm}">
+            </label>
+            <div class="scene-actions" role="group" aria-label="Scene actions">
+              <button type="button" class="action-btn" data-scene-rename="${shot.stage}" title="Rename scene">Rename</button>
+              <button type="button" class="action-btn action-danger" data-scene-hide="${shot.stage}" title="Hide entire scene">Hide</button>
+              ${undoButtonHTML()}
+            </div>
+          </div>
+          <div class="scene-tags" data-scene-tags="${shot.stage}">
+            ${compactTagPicker(SCENE_TYPE_OPTIONS, sc.types || [], "scene-types:" + shot.stage, "Type")}
+            ${compactTagPicker(LABEL_OPTIONS, sc.labels || [], "scene-labels:" + shot.stage, "Label")}
+          </div>
+        </div>
+        <div class="scene-body" ${isOpen ? "" : "hidden"}></div>`;
+      root.appendChild(scene)
+    }
+    const body = root.querySelector(`.scene[data-stage="${shot.stage}"] .scene-body`);
+    if(!body || body.hasAttribute("hidden")) { n++; return; }
+    n++;
+    const card = renderShotCard(shot, tl.map[shot.id] || {in:0,out:0,dur:0}, n, "visible");
+    body.appendChild(card);
+  });
+  wireShotlist(root);
+}
+
+function renderHidden(){
+  const root = document.getElementById("hiddenList");
+  root.innerHTML = "";
+  const hidScenes = hiddenScenes();
+  const hidShotsOnly = shots.filter(s => s.hidden);
+  if(!hidScenes.length && !hidShotsOnly.length){
+    root.innerHTML = `<div class="empty">Nothing hidden. Use <b>Hide</b> on a shot or scene.</div>`;
+    return;
+  }
+  if(hidScenes.length){
+    const wrap = document.createElement("div");
+    wrap.className = "hidden-scenes";
+    wrap.innerHTML = '<h3 class="hidden-section-title">Hidden scenes</h3>';
+    hidScenes.forEach(st => {
+      const color = SCENE_COLORS[st] || "#95a5a6";
+      const card = document.createElement("div");
+      card.className = "hidden-scene-card";
+      card.style.setProperty("--scene-accent", color);
+      const shotCount = shots.filter(s => s.stage === st).length;
+      card.innerHTML = `
+        <div class="hidden-scene-main">
+          <span class="scene-n">${st}</span>
+          <strong>${escapeHtml(sceneTitle(st))}</strong>
+          <span class="meta-line">${shotCount} shot${shotCount === 1 ? "" : "s"}</span>
+        </div>
+        <button type="button" class="btn primary sm" data-scene-unhide="${st}">Unhide scene</button>`;
+      wrap.appendChild(card);
+    });
+    root.appendChild(wrap);
+  }
+  if(hidShotsOnly.length){
+    const wrap = document.createElement("div");
+    wrap.className = "hidden-shots";
+    wrap.innerHTML = '<h3 class="hidden-section-title">Hidden shots</h3>';
+    root.appendChild(wrap);
+    hidShotsOnly.forEach((shot, i) => {
+      wrap.appendChild(renderShotCard(shot, {in:0,out:0,dur:0}, i + 1, "hidden"));
+    });
+  }
+  wireShotlist(root);
+}
+
+function renderVoiceoverPage(){
+  const root = document.getElementById("voAllList");
+  const list = visibleShots().filter(s => (s.vo || "").trim() || (s.obsidianPath || "").trim() || s.file);
+  if(!list.length){
+    root.innerHTML = `<div class="empty">No voiceover on visible shots yet.</div>`;
+    return;
+  }
+  const tl = computeTimeline();
+  root.innerHTML = list.map((s, i) => {
+    const tc = tl.map[s.id] || {in:0,out:0,dur:0};
+    const path = (s.obsidianPath || "").trim();
+    const localFile = s.file || "";
+    let pathHtml = "";
+    if(path){
+      pathHtml += `<div class="path-line"><b>Obsidian / path:</b> <code>${escapeHtml(path)}</code></div>`;
+    }
+    if(localFile){
+      pathHtml += `<div class="path-line"><b>Local file:</b> <code>${escapeHtml(localFile)}</code></div>`;
+    }
+    if(!path && !localFile){
+      pathHtml = `<div class="path-line"><b>Path:</b> <em>none set</em></div>`;
+    }
+    return `<article class="vo-block">
+      <header>
+        <span class="shot-num">#${i+1}</span>
+        <span class="tc">${formatTC(tc.in)} → ${formatTC(tc.out)} (${tc.dur}s)</span>
+        <span class="shot-file">Stage ${s.stage}${s.file ? " · " + escapeHtml(s.file) : ""}</span>
+        ${(s.types||[]).map(t => `<span class="pill">${escapeHtml(t)}</span>`).join("")}
+        ${(s.labels||[]).map(t => `<span class="pill label">${escapeHtml(t)}</span>`).join("")}
+      </header>
+      ${pathHtml}
+      <p>${escapeHtml(s.vo || "")}</p>
+      <div class="meta-line">${wordCount(s.vo)} words</div>
+    </article>`;
+  }).join("");
+}
+
+function yamlEscape(s){
+  if(s == null) return "null";
+  if(typeof s === "number"){
+    if(!isFinite(s)) return "null";
+    return String(s);
+  }
+  if(typeof s === "boolean") return s ? "true" : "false";
+  const str = String(s);
+  if(str === "") return '""';
+  // quote if needed
+  if(/[\x00-\x1f:#\[\]{},&*!|>'"%@`\\]|^\s|\s$|^[-?:,\[\]{}#&*!|>'"%@`]/.test(str) || str !== str.trim()){
+    return '"' + str
+      .replace(/\\/g, "\\\\")
+      .replace(/"/g, '\\"')
+      .replace(/\n/g, "\\n")
+      .replace(/\r/g, "\\r")
+      .replace(/\t/g, "\\t") + '"';
+  }
+  return str;
+}
+
+function toYaml(obj, indent){
+  indent = indent || 0;
+  const sp = "  ".repeat(indent);
+  if(obj === null || obj === undefined) return sp + "null";
+  const t = typeof obj;
+  if(t === "string" || t === "number" || t === "boolean"){
+    // top-level scalars shouldn't get indent prefix when called nested for values
+    return yamlEscape(obj);
+  }
+  if(Array.isArray(obj)){
+    if(!obj.length) return "[]";
+    return obj.map(item => {
+      if(item !== null && typeof item === "object"){
+        const nested = toYaml(item, indent + 1);
+        const lines = nested.split("\n");
+        return sp + "- " + lines[0].replace(/^\s+/, "") + (lines.length > 1 ? "\n" + lines.slice(1).join("\n") : "");
+      }
+      return sp + "- " + yamlEscape(item);
+    }).join("\n");
+  }
+  // object
+  const keys = Object.keys(obj);
+  if(!keys.length) return "{}";
+  return keys.map(k => {
+    const v = obj[k];
+    if(v !== null && typeof v === "object"){
+      if(Array.isArray(v) && !v.length) return sp + k + ": []";
+      if(!Array.isArray(v) && !Object.keys(v).length) return sp + k + ": {}";
+      const nested = toYaml(v, indent + 1);
+      return sp + k + ":\n" + nested;
+    }
+    return sp + k + ": " + yamlEscape(v);
+  }).join("\n");
+}
+
+function buildCookieMetadata(){
+  try{
+    // Always rebuild from live in-memory state so export is never stale/empty
+    const full = buildFullStateObject(false);
+    const cookieRaw = getCookie(HIDDEN_COOKIE);
+    const partsN = parseInt(getCookie(STATE_COOKIE_PARTS) || "0", 10) || 0;
+    const stateCookies = [];
+    for(let i = 0; i < partsN; i++){
+      const p = getCookie(STATE_COOKIE + "_" + i);
+      stateCookies.push({ name: STATE_COOKIE + "_" + i, bytes: p ? p.length : 0, present: p != null });
+    }
+    let lsRaw = null;
+    try{ lsRaw = localStorage.getItem(LS_KEY); }catch(e){ lsRaw = null; }
+    const packageObj = {
+      format: "wiganimation-shotlist-cookie",
+      version: 3,
+      generatedAt: new Date().toISOString(),
+      note: "Complete shotlist package. Browser localStorage is the source of truth. Media data: URLs are omitted from this export. Restore from localStorage automatically on reload.",
+      browser_cookies: {
+        names: listCookieNames(),
+        hidden: {
+          name: HIDDEN_COOKIE,
+          raw: cookieRaw == null ? "" : String(cookieRaw)
+        },
+        state: {
+          parts_cookie: STATE_COOKIE_PARTS,
+          parts: partsN,
+          chunks: stateCookies,
+          total_chunk_bytes: stateCookies.reduce((n, c) => n + (c.bytes || 0), 0)
+        }
+      },
+      localStorage: {
+        key: LS_KEY,
+        present: !!lsRaw,
+        bytes: lsRaw ? lsRaw.length : 0
+      },
+      data: full
+    };
+    return "# WIGAnimation shotlist FULL metadata export\n" + toYaml(packageObj, 0) + "\n";
+  }catch(err){
+    return "# ERROR building metadata\nerror: " + yamlEscape(err && err.message ? err.message : String(err)) + "\nstack: " + yamlEscape(err && err.stack ? err.stack : "") + "\n";
+  }
+}
+
+function downloadCookiePackage(){
+  try{
+    if(typeof persistFullStateCookies === "function") persistFullStateCookies();
+    else if(typeof persistHiddenCookie === "function") persistHiddenCookie();
+    const full = buildFullStateObject(false);
+    const yaml = buildCookieMetadata();
+    const stamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
+    // JSON (machine-friendly full package)
+    const jsonPayload = {
+      format: "wiganimation-shotlist-cookie",
+      version: 3,
+      generatedAt: new Date().toISOString(),
+      browser_cookies: {
+        names: listCookieNames(),
+        hidden_raw: getCookie(HIDDEN_COOKIE) || "",
+        state_parts: parseInt(getCookie(STATE_COOKIE_PARTS) || "0", 10) || 0
+      },
+      data: full
+    };
+    downloadTextFile(
+      "shotlist-cookie-" + stamp + ".json",
+      JSON.stringify(jsonPayload, null, 2),
+      "application/json"
+    );
+    downloadTextFile(
+      "shotlist-cookie-" + stamp + ".yaml",
+      yaml,
+      "text/yaml"
+    );
+    // refresh metadata view if open
+    const ta = document.getElementById("metaYaml");
+    if(ta) ta.value = yaml;
+    flash("Backup downloaded (JSON + YAML)");
+  }catch(e){
+    alert("Download backup failed: " + (e && e.message ? e.message : e));
+  }
+}
+
+function renderMetadataPage(){
+  const ta = document.getElementById("metaYaml");
+  if(!ta) return;
+  try{
+    ta.value = buildCookieMetadata();
+  }catch(err){
+    ta.value = "# ERROR\n" + String(err && err.stack ? err.stack : err);
+  }
+}
+
+/* ---------- Parse script → shots ---------- */
+function splitScriptChunks(text){
+  const raw = (text || "").replace(/\r\n/g, "\n").trim();
+  if(!raw) return [];
+  // Prefer blank-line paragraphs; else bullet/heading lines; else single lines
+  let parts = raw.split(/\n\s*\n+/).map(p => p.trim()).filter(Boolean);
+  if(parts.length === 1){
+    const lines = raw.split("\n").map(l => l.trim()).filter(Boolean);
+    const bulletish = lines.filter(l => /^([-*+]|\d+\.)\s+/.test(l) || /^#{1,3}\s+/.test(l));
+    if(bulletish.length >= 2){
+      parts = lines.map(l => l.replace(/^([-*+]|\d+\.)\s+/, "").replace(/^#{1,3}\s+/, "").trim()).filter(Boolean);
+    } else if(lines.length >= 2){
+      parts = lines;
+    }
+  }
+  return parts;
+}
+function parseScriptToShots(){
+  const box = document.getElementById("parseScriptBox");
+  const stageEl = document.getElementById("parseStage");
+  const whereEl = document.getElementById("parseWhere");
+  const hint = document.getElementById("parseHint");
+  if(!box) return;
+  const chunks = splitScriptChunks(box.value);
+  if(!chunks.length){
+    if(hint) hint.textContent = "Nothing to parse";
+    return;
+  }
+  const stage = (stageEl && stageEl.value) || selectedSceneStage || "02";
+  const where = (whereEl && whereEl.value) || "end";
+  const newShots = chunks.map((vo, i) => ({
+    id: uid(),
+    file: "",
+    stage: stage,
+    caption: "Parsed shot " + (i + 1),
+    vo: vo,
+    types: [],
+    labels: [],
+    hidden: false,
+    minimized: false,
+    durationSec: null,
+    media: [],
+    obsidianPath: "",
+    kind: "shot",
+    wpm: null
+  }));
+  // find insertion index among full shots array
+  let insertAt = shots.length;
+  if(where === "start"){
+    const first = shots.findIndex(s => s.stage === stage);
+    insertAt = first >= 0 ? first : shots.length;
+  } else if(where === "after" && selectedShotId){
+    const si = findShotIndex(selectedShotId);
+    insertAt = si >= 0 ? si + 1 : shots.length;
+  } else {
+    // end of stage
+    let last = -1;
+    shots.forEach((s, i) => { if(s.stage === stage) last = i; });
+    insertAt = last >= 0 ? last + 1 : shots.length;
+  }
+  shots.splice(insertAt, 0, ...newShots);
+  selectedShotId = newShots[0].id;
+  selectedSceneStage = stage;
+  sceneOpen[stage] = true;
+  persistUI();
+  renderAll();
+  if(hint) hint.textContent = "Created " + newShots.length + " shots in stage " + stage;
+  flash("Parsed " + newShots.length + " shots");
+}
+function fillParseStageSelect(){
+  const sel = document.getElementById("parseStage");
+  if(!sel) return;
+  const cur = sel.value || selectedSceneStage || "02";
+  sel.innerHTML = STAGE_ORDER.map(st =>
+    '<option value="' + st + '">' + st + " — " + (STAGE_NAMES[st] || st) + "</option>"
+  ).join("");
+  sel.value = STAGE_ORDER.includes(cur) ? cur : "02";
+}
+function showParsePanel(show){
+  const panel = document.getElementById("parsePanel");
+  if(!panel) return;
+  panel.hidden = !show;
+  if(show){
+    fillParseStageSelect();
+    const box = document.getElementById("parseScriptBox");
+    if(box) box.focus();
+  }
+  closeTools();
+}
+
+/* ---------- Vault autocomplete + drag/drop media ---------- */
+let acTimer = null;
+async function vaultSearch(q, limit){
+  const url = "/api/vault-search?q=" + encodeURIComponent(q) + "&limit=" + (limit || 12);
+  const res = await fetch(url);
+  if(!res.ok) throw new Error("vault search HTTP " + res.status);
+  const data = await res.json();
+  if(!data.ok) throw new Error(data.error || "search failed");
+  return data.results || [];
+}
+function hideAllAcMenus(root){
+  (root || document).querySelectorAll(".ac-menu.open").forEach(m => m.classList.remove("open"));
+}
+function wirePathAutocomplete(root){
+  root.querySelectorAll("input.path-input").forEach(inp => {
+    const wrap = inp.closest(".ac-wrap");
+    const menu = wrap && wrap.querySelector(".ac-menu");
+    if(!menu) return;
+    const runSearch = async () => {
+      let q = inp.value.trim();
+      if(q.startsWith("[[")) q = q.replace(/^\[\[/, "").replace(/\]\].*$/, "");
+      if(q.length < 1){ menu.classList.remove("open"); menu.innerHTML = ""; return; }
+      try{
+        const results = await vaultSearch(q, 12);
+        if(!results.length){
+          menu.innerHTML = '<div class="ac-item"><small>No vault matches</small></div>';
+          menu.classList.add("open");
+          return;
+        }
+        menu.innerHTML = results.map((r, i) =>
+          '<button type="button" class="ac-item' + (i===0?" active":"") + '" data-path-val="' + escapeHtml(r.path) + '">'
+          + escapeHtml(r.name) + "<small>" + escapeHtml(r.path) + "</small></button>"
+        ).join("");
+        menu.classList.add("open");
+        menu.querySelectorAll(".ac-item[data-path-val]").forEach(btn => {
+          btn.addEventListener("mousedown", (e) => {
+            e.preventDefault();
+            const path = btn.dataset.pathVal;
+            inp.value = "[[" + path + "]]";
+            const s = shots.find(x => x.id === inp.dataset.path);
+            if(s){
+              s.obsidianPath = path;
+              // if image filename matches local media naming, try relative file
+              const base = path.split("/").pop();
+              if(/\.(png|jpe?g|gif|webp)$/i.test(base)){
+                s.media = s.media || [];
+                if(!s.media.some(m => m.name === path || m.src === base)){
+                  s.media.unshift({ kind: "image", src: base, name: path, source: "vault" });
+                }
+              }
+              persistUI();
+            }
+            menu.classList.remove("open");
+            flash("Path linked");
+            renderAll();
+          });
+        });
+      }catch(e){
+        menu.innerHTML = '<div class="ac-item"><small>Search unavailable — is server.py running?</small></div>';
+        menu.classList.add("open");
+      }
+    };
+    inp.addEventListener("input", () => {
+      clearTimeout(acTimer);
+      acTimer = setTimeout(runSearch, 180);
+    });
+    inp.addEventListener("focus", () => {
+      if(inp.value.trim().length) runSearch();
+    });
+    inp.addEventListener("blur", () => setTimeout(() => menu.classList.remove("open"), 150));
+  });
+}
+async function handleDropOnShot(shotId, e){
+  const shot = shots.find(s => s.id === shotId);
+  if(!shot) return;
+  e.preventDefault();
+  const zone = e.currentTarget;
+  zone.classList.remove("drag-over");
+  let handled = false;
+  const dt = e.dataTransfer;
+  if(dt && dt.files && dt.files.length){
+    for(const file of Array.from(dt.files)){
+      if(file.type && (file.type.indexOf("image/") === 0 || file.type.indexOf("video/") === 0)){
+        handled = true;
+        const dataUrl = await readFileAsDataURL(file);
+        shot.media = shot.media || [];
+        shot.media.unshift({
+          kind: file.type.indexOf("video/") === 0 ? "video" : "image",
+          src: dataUrl,
+          name: file.name,
+          source: "drop"
+        });
+        // try vault path match by filename
+        try{
+          const hits = await vaultSearch(file.name, 5);
+          const exact = hits.find(h => h.name.toLowerCase() === file.name.toLowerCase()) || hits[0];
+          if(exact) shot.obsidianPath = exact.path;
+        }catch(err){}
+      }
+    }
+  }
+  const uri = dt && (dt.getData("text/uri-list") || dt.getData("text/plain"));
+  if(uri && /^(file:|https?:|\[\[)/i.test(uri.trim()) || (uri && /\.(png|jpe?g|gif|webp|mp4|md)$/i.test(uri.trim()))){
+    handled = true;
+    let p = uri.trim().split("\n")[0].replace(/^file:\/\//, "");
+    try{ p = decodeURIComponent(p); }catch(err){}
+    // if absolute path under vault, make relative
+    shot.obsidianPath = p;
+  }
+  if(handled){
+    persistUI();
+    renderAll();
+    flash("Media / path linked");
+  }
+}
+function wireMediaDrop(root){
+  root.querySelectorAll("[data-paste]").forEach(zone => {
+    zone.addEventListener("dragenter", (e) => { e.preventDefault(); zone.classList.add("drag-over"); });
+    zone.addEventListener("dragover", (e) => { e.preventDefault(); zone.classList.add("drag-over"); });
+    zone.addEventListener("dragleave", () => zone.classList.remove("drag-over"));
+    zone.addEventListener("drop", (e) => handleDropOnShot(zone.dataset.paste, e));
+  });
+}
+
+/* ---------- Exports ---------- */
+function continuousVoiceoverText(){
+  return visibleShots()
+    .map(s => (s.vo || "").trim())
+    .filter(Boolean)
+    .join("\n\n");
+}
+async function copyContinuousVo(){
+  closeTools();
+  const text = continuousVoiceoverText();
+  if(!text){ alert("No voiceover on visible shots."); return; }
+  try{
+    if(navigator.clipboard && navigator.clipboard.writeText) await navigator.clipboard.writeText(text);
+    else {
+      const ta = document.createElement("textarea");
+      ta.value = text; document.body.appendChild(ta); ta.select(); document.execCommand("copy"); document.body.removeChild(ta);
+    }
+    flash("Continuous VO copied (" + wordCount(text) + " words)");
+  }catch(e){ alert("Copy failed: " + e.message); }
+}
+function downloadTextFile(filename, text, mime){
+  const blob = new Blob([text], { type: mime || "text/plain" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+function csvEscape(s){
+  const t = String(s == null ? "" : s);
+  if(/[",\n]/.test(t)) return '"' + t.replace(/"/g, '""') + '"';
+  return t;
+}
+function framesFromSec(sec, fps){
+  return Math.round(Math.max(0, sec) * fps);
+}
+function formatTCFrames(totalSec, fps){
+  fps = fps || 30;
+  let f = framesFromSec(totalSec, fps);
+  const ff = f % fps; f = (f - ff) / fps;
+  const ss = f % 60; f = (f - ss) / 60;
+  const mm = f % 60; const hh = (f - mm) / 60;
+  const pad = n => String(n).padStart(2, "0");
+  return pad(hh) + ":" + pad(mm) + ":" + pad(ss) + ":" + pad(ff);
+}
+function exportCsv(){
+  closeTools();
+  const tl = computeTimeline();
+  const fps = 30;
+  const rows = [["index","shot_id","stage","file","in_tc","out_tc","duration_sec","words","wpm","types","labels","obsidian_path","voiceover"]];
+  visibleShots().forEach((s, i) => {
+    const tc = tl.map[s.id] || {in:0,out:0,dur:0};
+    rows.push([
+      i+1, s.id, s.stage, s.file || "",
+      formatTCFrames(tc.in, fps), formatTCFrames(tc.out, fps), tc.dur,
+      wordCount(s.vo), shotWpm(s),
+      (s.types||[]).join("|"), (s.labels||[]).join("|"),
+      s.obsidianPath || "", s.vo || ""
+    ].map(csvEscape).join(","));
+  });
+  downloadTextFile("shotlist-timeline.csv", rows.map(r => Array.isArray(r)?r.join(","):r).join("\n"), "text/csv");
+  flash("CSV exported");
+}
+function exportEdl(){
+  closeTools();
+  const tl = computeTimeline();
+  const fps = 30;
+  let edl = "TITLE: WIGAnimation Shotlist\nFCM: NON-DROP FRAME\n\n";
+  visibleShots().forEach((s, i) => {
+    const tc = tl.map[s.id] || {in:0,out:0,dur:shotDuration(s)};
+    const recIn = formatTCFrames(tc.in, fps);
+    const recOut = formatTCFrames(tc.out, fps);
+    const srcOut = formatTCFrames(tc.dur, fps);
+    const n = String(i+1).padStart(3, "0");
+    const name = (s.file || s.id || ("shot" + (i+1))).replace(/\s+/g, "_").slice(0, 40);
+    edl += n + "  AX       V     C        00:00:00:00 " + srcOut + " " + recIn + " " + recOut + "\n";
+    edl += "* FROM CLIP NAME: " + name + "\n";
+    if((s.vo||"").trim()) edl += "* COMMENT: " + s.vo.replace(/\n/g, " ").slice(0, 120) + "\n";
+    edl += "\n";
+  });
+  downloadTextFile("shotlist.edl", edl, "text/plain");
+  flash("EDL exported");
+}
+function exportFcpxml(){
+  closeTools();
+  const tl = computeTimeline();
+  const fps = 30;
+  const totalFrames = framesFromSec(tl.total, fps);
+  let markers = "";
+  visibleShots().forEach((s, i) => {
+    const tc = tl.map[s.id] || {in:0,out:0,dur:0};
+    const start = framesFromSec(tc.in, fps);
+    const name = escapeHtml((s.file || ("Shot " + (i+1))) + (s.types && s.types.length ? " · " + s.types.join(", ") : ""));
+    const note = escapeHtml((s.vo || "").slice(0, 200));
+    markers += '    <marker start="' + start + '/' + fps + 's" duration="1/' + fps + 's" value="' + name + '" note="' + note + '"/>\n';
+  });
+  const xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
+    + '<!DOCTYPE fcpxml>\n'
+    + '<fcpxml version="1.9">\n'
+    + '  <resources>\n'
+    + '    <format id="r1" name="FFVideoFormat1080p30" frameDuration="1/' + fps + 's" width="1920" height="1080"/>\n'
+    + '  </resources>\n'
+    + '  <library>\n'
+    + '    <event name="WIGAnimation Shotlist">\n'
+    + '      <project name="Shotlist Markers">\n'
+    + '        <sequence format="r1" duration="' + totalFrames + '/' + fps + 's" tcStart="0s">\n'
+    + '          <spine>\n'
+    + '            <gap name="Gap" offset="0s" duration="' + totalFrames + '/' + fps + 's">\n'
+    + markers
+    + '            </gap>\n'
+    + '          </spine>\n'
+    + '        </sequence>\n'
+    + '      </project>\n'
+    + '    </event>\n'
+    + '  </library>\n'
+    + '</fcpxml>\n';
+  downloadTextFile("shotlist-markers.fcpxml", xml, "application/xml");
+  flash("FCPXML markers exported");
+}
+
+function wireShotlist(root){
+  // media thumbs
+  root.querySelectorAll(".thumb[data-media-shot]").forEach(el => {
+    el.addEventListener("click", () => {
+      const shot = shots.find(s => s.id === el.dataset.mediaShot);
+      if(!shot) return;
+      const m = (shot.media || [])[Number(el.dataset.mediaIdx)];
+      if(!m) return;
+      openMediaModal(m.src, m.kind, m.name, m.poster);
+    });
+  });
+  // paste zones
+  root.querySelectorAll("[data-paste]").forEach(zone => {
+    zone.addEventListener("paste", (e) => handlePasteOnShot(zone.dataset.paste, e));
+    zone.addEventListener("click", (e) => {
+      if(e.target.closest("video, .clip-video")) return;
+      zone.focus();
+    });
+  });
+  root.querySelectorAll("video.clip-video").forEach(v => {
+    v.addEventListener("play", () => {
+      document.querySelectorAll("video.clip-video").forEach(other => {
+        if(other !== v) other.pause();
+      });
+    });
+    v.addEventListener("click", (e) => e.stopPropagation());
+  });
+  // VO text
+  root.querySelectorAll("textarea[data-vo]").forEach(ta => {
+    ta.addEventListener("input", () => {
+      const s = shots.find(x => x.id === ta.dataset.vo);
+      if(!s) return;
+      s.vo = ta.value;
+      renderStats();
+      // update meta line in card without full re-render for typing smoothness
+      const meta = ta.closest(".vo-col") && ta.closest(".vo-col").querySelector(".meta-line");
+      if(meta){
+        const dur = shotDuration(s);
+        meta.textContent = wordCount(s.vo) + " words · est. " + dur + "s @ " + WPM + " wpm";
+      }
+    });
+    ta.addEventListener("change", () => { persistUI(); renderAll(); }); // recalc timeline on blur/change
+  });
+  // path / duration
+  root.querySelectorAll("input[data-path]").forEach(inp => {
+    inp.addEventListener("change", () => {
+      const s = shots.find(x => x.id === inp.dataset.path);
+      if(s){ s.obsidianPath = inp.value.trim(); persistUI(); }
+    });
+  });
+  root.querySelectorAll("input[data-dur]").forEach(inp => {
+    inp.addEventListener("change", () => {
+      const s = shots.find(x => x.id === inp.dataset.dur);
+      if(!s) return;
+      s.durationSec = inp.value === "" ? null : Number(inp.value);
+      persistUI();
+      renderAll();
+    });
+  });
+  // grammar / rewrite
+  root.querySelectorAll("[data-grammar]").forEach(b => b.addEventListener("click", (e) => {
+    e.stopPropagation();
+    runVoAction(b.dataset.grammar, "grammar", b);
+  }));
+  root.querySelectorAll("[data-rewrite]").forEach(b => b.addEventListener("click", (e) => {
+    e.stopPropagation();
+    runVoAction(b.dataset.rewrite, "rewrite", b);
+  }));
+    // compact tag pickers
+  root.querySelectorAll("button.chip[data-msel]").forEach(chip => {
+    chip.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const key = chip.dataset.msel;
+      const val = chip.dataset.val;
+      if(key.startsWith("types:")){
+        const id = key.slice(6);
+        const s = shots.find(x => x.id === id);
+        if(!s) return;
+        s.types = s.types || [];
+        if(s.types.includes(val)) s.types = s.types.filter(t => t !== val);
+        else s.types = normalizeShotTypes(s.types.concat([val]));
+      } else if(key.startsWith("labels:")){
+        const id = key.slice(7);
+        const s = shots.find(x => x.id === id);
+        if(!s) return;
+        s.labels = s.labels || [];
+        if(s.labels.includes(val)) s.labels = s.labels.filter(t => t !== val);
+        else s.labels = normalizeTagList(s.labels.concat([val]), LABEL_ALIASES, LABEL_OPTIONS);
+      } else if(key.startsWith("scene-types:")){
+        const st = key.slice(12);
+        scenes[st] = scenes[st] || { minimized:false, types:[], labels:[] };
+        const arr = scenes[st].types || [];
+        scenes[st].types = arr.includes(val)
+          ? arr.filter(t => t !== val)
+          : normalizeSceneTypes(arr.concat([val]));
+      } else if(key.startsWith("scene-labels:")){
+        const st = key.slice(13);
+        scenes[st] = scenes[st] || { minimized:false, types:[], labels:[] };
+        const arr = scenes[st].labels || [];
+        scenes[st].labels = arr.includes(val)
+          ? arr.filter(t => t !== val)
+          : normalizeTagList(arr.concat([val]), LABEL_ALIASES, LABEL_OPTIONS);
+      }
+      persistUI();
+      renderAll();
+    });
+  });
+  // drag-reorder shots
+  root.querySelectorAll(".shot[draggable]").forEach(card => {
+    card.addEventListener("dragstart", (e) => {
+      if(e.target.closest("input, textarea, button, details, a, video, .clip-pair")) { e.preventDefault(); return; }
+      e.dataTransfer.setData("text/shot-id", card.dataset.id);
+      e.dataTransfer.effectAllowed = "move";
+      card.classList.add("dragging");
+    });
+    card.addEventListener("dragend", () => card.classList.remove("dragging"));
+    card.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      card.classList.add("drag-over");
+    });
+    card.addEventListener("dragleave", () => card.classList.remove("drag-over"));
+    card.addEventListener("drop", (e) => {
+      e.preventDefault();
+      card.classList.remove("drag-over");
+      const fromId = e.dataTransfer.getData("text/shot-id");
+      const toId = card.dataset.id;
+      if(!fromId || fromId === toId) return;
+      const from = findShotIndex(fromId);
+      const to = findShotIndex(toId);
+      if(from < 0 || to < 0) return;
+      const [item] = shots.splice(from, 1);
+      shots.splice(to, 0, item);
+      selectedShotId = item.id;
+      persistUI();
+      renderAll();
+    });
+  });
+  // actions
+  root.querySelectorAll("[data-hide]").forEach(b => b.addEventListener("click", (e) => { e.stopPropagation(); hideShot(b.dataset.hide); }));
+  root.querySelectorAll("[data-undo-hide]").forEach(b => b.addEventListener("click", (e) => { e.stopPropagation(); undoLastHide(); }));
+  root.querySelectorAll("[data-unhide]").forEach(b => b.addEventListener("click", (e) => { e.stopPropagation(); unhideShot(b.dataset.unhide); }));
+  root.querySelectorAll("[data-min]").forEach(b => b.addEventListener("click", (e) => { e.stopPropagation(); toggleMinimizeShot(b.dataset.min); }));
+  root.querySelectorAll("[data-scene-min]").forEach(b => b.addEventListener("click", (e) => { e.stopPropagation(); toggleMinimizeScene(b.dataset.sceneMin); }));
+  root.querySelectorAll("[data-scene-hide]").forEach(b => b.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const st = b.dataset.sceneHide;
+    if(confirm("Hide entire scene " + st + ' ("' + sceneTitle(st) + '")? Restore later from Tools → Hidden items.')){
+      hideScene(st);
+    }
+  }));
+  root.querySelectorAll("[data-scene-rename]").forEach(b => b.addEventListener("click", (e) => {
+    e.stopPropagation();
+    renameScene(b.dataset.sceneRename);
+  }));
+  root.querySelectorAll("[data-scene-unhide]").forEach(b => b.addEventListener("click", (e) => {
+    e.stopPropagation();
+    unhideScene(b.dataset.sceneUnhide);
+  }));
+  root.querySelectorAll(".scene-title").forEach(el => {
+    el.addEventListener("dblclick", (e) => {
+      e.stopPropagation();
+      const head = el.closest("[data-select-scene]");
+      if(head) renameScene(head.dataset.selectScene);
+    });
+  });
+  root.querySelectorAll("[data-insert]").forEach(b => b.addEventListener("click", (e) => { e.stopPropagation(); insertShotAfter(b.dataset.insert); }));
+  // remember clicked shot / scene
+  root.querySelectorAll(".shot").forEach(card => {
+    card.addEventListener("click", (e) => {
+      if(e.target.closest("button, a, input, textarea, .msel, .thumb, .media-zone, video, .clip-pair")) return;
+      selectShot(card.dataset.id);
+    });
+  });
+  root.querySelectorAll("[data-select-scene]").forEach(el => {
+    el.addEventListener("click", (e) => {
+      if(e.target.closest("button, .msel")) return;
+      selectScene(el.dataset.selectScene);
+    });
+  });
+}
+
+function setView(view){
+  currentView = view;
+  document.getElementById("viewShotlist").hidden = view !== "shotlist";
+  document.getElementById("viewHidden").hidden = view !== "hidden";
+  document.getElementById("viewVoiceover").hidden = view !== "voiceover";
+  const vm = document.getElementById("viewMetadata");
+  if(vm) vm.hidden = view !== "metadata";
+  closeTools();
+  if(view === "hidden") renderHidden();
+  else if(view === "voiceover") renderVoiceoverPage();
+  else if(view === "metadata") renderMetadataPage();
+  else renderShotlist();
+  renderStats();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function renderAll(){
+  if(currentView === "hidden") renderHidden();
+  else if(currentView === "voiceover") renderVoiceoverPage();
+  else if(currentView === "metadata") renderMetadataPage();
+  else renderShotlist();
+  renderStats();
+}
+
+/* ---------- wire chrome ---------- */
+document.getElementById("btnUndoHide").addEventListener("click", (e) => { e.preventDefault(); undoLastHide(); });
+document.getElementById("btnSave").addEventListener("click", saveAll);
+document.getElementById("btnResetOrder").addEventListener("click", () => {
+  if(!confirm("Reset shot order to default manifest order? Custom inserted shots stay at end of their stage.")) return;
+  const byFile = {};
+  shots.forEach(s => { if(s.file) byFile[s.file] = s; });
+  const rebuilt = [];
+  MANIFEST.forEach((m, i) => {
+    if(byFile[m.file]) rebuilt.push(byFile[m.file]);
+    else {
+      const d = buildDefaultShots()[i];
+      rebuilt.push(d);
+    }
+  });
+  buildVideoFlowShots().forEach(d => {
+    const existing = shots.find(s => s.id === d.id || s.file === d.file);
+    rebuilt.push(existing || d);
+  });
+  // append custom shots without files
+  const vfFiles = new Set(VIDEO_FLOW.map(c => c.src));
+  shots.filter(s => !s.file || (!MANIFEST.find(m => m.file === s.file) && !vfFiles.has(s.file))).forEach(s => {
+    if(!rebuilt.includes(s)) rebuilt.push(s);
+  });
+  shots = rebuilt;
+  renderAll();
+});
+document.getElementById("btnDownloadCookie").addEventListener("click", () => downloadCookiePackage());
+document.getElementById("btnDownloadCookieMeta") && document.getElementById("btnDownloadCookieMeta").addEventListener("click", () => downloadCookiePackage());
+document.getElementById("btnDownloadMd").addEventListener("click", () => {
+  let body = "# Shotlist — Voiceover\n\n";
+  body += `Total words: ${totalWords()} · Duration: ${formatTC(computeTimeline().total)} @ ${globalWpm} wpm\n\n`;
+  visibleShots().forEach((s, i) => {
+    const tc = computeTimeline().map[s.id];
+    body += `### ${i+1}. Stage ${s.stage}${s.file ? " — " + s.file : ""}\n`;
+    body += `TC ${formatTC(tc.in)}–${formatTC(tc.out)} (${tc.dur}s)`;
+    if(s.types && s.types.length) body += ` · ${s.types.join(", ")}`;
+    if(s.labels && s.labels.length) body += ` · ${s.labels.join(", ")}`;
+    body += `\n\n> ${s.vo || ""}\n\n`;
+  });
+  const blob = new Blob([body], { type: "text/markdown" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "_script.md";
+  a.click();
+  URL.revokeObjectURL(a.href);
+});
+
+document.getElementById("btnGoShotlist").addEventListener("click", () => setView("shotlist"));
+document.getElementById("btnGoHidden").addEventListener("click", () => setView("hidden"));
+document.getElementById("btnGoVoiceover").addEventListener("click", () => setView("voiceover"));
+document.getElementById("btnGoMetadata").addEventListener("click", () => setView("metadata"));
+document.getElementById("btnCopyAllVo").addEventListener("click", () => { copyAllVoiceover(); });
+document.getElementById("btnClearCookies").addEventListener("click", clearAllCookies);
+document.getElementById("btnUnhideAll").addEventListener("click", unhideAll);
+document.getElementById("btnBackShotlist").addEventListener("click", () => setView("shotlist"));
+document.getElementById("btnBackFromVo").addEventListener("click", () => setView("shotlist"));
+document.getElementById("btnCopyFromVoPage").addEventListener("click", () => { copyAllVoiceover(); });
+document.getElementById("btnBackFromMeta").addEventListener("click", () => setView("shotlist"));
+document.getElementById("btnCopyYaml").addEventListener("click", async () => {
+  const text = document.getElementById("metaYaml").value || buildCookieMetadata();
+  try{
+    if(navigator.clipboard && navigator.clipboard.writeText) await navigator.clipboard.writeText(text);
+    flash("YAML copied");
+  }catch(e){ alert("Copy failed: " + e.message); }
+});
+document.getElementById("btnSaveMetadata").addEventListener("click", () => {
+  saveAll({ silent: true });
+  downloadCookiePackage();
+  try{
+    localStorage.setItem(LS_KEY + "_metadata_yaml", buildCookieMetadata());
+    localStorage.setItem(LS_KEY + "_metadata_saved_at", new Date().toISOString());
+  }catch(e){}
+});
+const helpBtn = document.getElementById("btnHelp");
+const helpBanner = document.getElementById("helpBanner");
+if(helpBtn && helpBanner){
+  helpBtn.addEventListener("click", () => {
+    helpBanner.classList.toggle("open");
+  });
+}
+
+document.getElementById("btnParseMode").addEventListener("click", () => showParsePanel(true));
+document.getElementById("btnParseClose").addEventListener("click", () => showParsePanel(false));
+document.getElementById("btnParseScript").addEventListener("click", () => parseScriptToShots());
+document.getElementById("btnCopyVoContinuous").addEventListener("click", () => { copyContinuousVo(); });
+document.getElementById("btnExportCsv").addEventListener("click", () => exportCsv());
+document.getElementById("btnExportEdl").addEventListener("click", () => exportEdl());
+document.getElementById("btnExportFcpxml").addEventListener("click", () => exportFcpxml());
+const wpmSlider = document.getElementById("wpmSlider");
+if(wpmSlider){
+  wpmSlider.value = String(globalWpm);
+  wpmSlider.addEventListener("input", () => {
+    globalWpm = Number(wpmSlider.value) || DEFAULT_WPM;
+    document.getElementById("statWpm").textContent = String(globalWpm);
+    renderStats();
+  });
+  wpmSlider.addEventListener("change", () => {
+    globalWpm = Number(wpmSlider.value) || DEFAULT_WPM;
+    persistUI();
+    renderAll();
+  });
+}
+updateSaveButton();
+
+
+document.getElementById("mediaModal").addEventListener("click", (e) => {
+  if(e.target.id === "mediaModal" || e.target.id === "mediaModalClose") closeMediaModal();
+});
+document.addEventListener("keydown", (e) => {
+  if(e.key === "Escape") closeMediaModal();
+});
+document.addEventListener("click", (e) => {
+  const menu = document.getElementById("toolsMenu");
+  if(menu && !menu.contains(e.target)) menu.removeAttribute("open");
+});
+
+renderAll();
+
+</script>
+</body>
+</html>
