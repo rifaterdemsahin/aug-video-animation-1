@@ -7,14 +7,14 @@ status: draft
 
 # WIG Animation — Voiceover Script
 
-Editable from the storyboard page (`storyboard.html` in this folder) — that page loads this
+Editable from the storyboard page (`storyboard.html` at the repo root) — that page loads this
 structure into a textarea, shows live word count / marked-slide count, and saves your latest
 edits to browser storage. This file is the seed copy; after editing in the browser, use its
 "Download .md" button and overwrite this file to keep it in sync.
 
 Two layers, on purpose:
 1. **Flagship script (Part A)** — the fully-written, ready-to-record 2:58 "AI Second Brain"
-   video script that was already drafted inside the Canva planning deck (`02_plan_*` slides).
+   video script that was already drafted inside the Canva planning deck (`stills/02_plan/`).
    Nothing invented — transcribed as-is.
 2. **Framework walkthrough (Part B)** — a stage-by-stage (00–15) narration matched to the
    renamed image order, for a behind-the-scenes / process video that tours the whole
@@ -27,7 +27,7 @@ Use whichever layer fits the cut you're actually making, or splice A into B's St
 
 ## Part A — Flagship script: "AI Second Brain" (2:58, 6 scenes)
 
-**Source**: `02_plan_00_cover-title.png` through `02_plan_19_music-audio.png`. Voice tone:
+**Source**: `stills/02_plan/02_plan_00_cover-title.png` through `stills/02_plan/02_plan_19_music-audio.png`. Voice tone:
 energetic/direct → thoughtful/strategic → instructor → motivational. Pace 140–160 wpm, ~475 words.
 
 ### Scene 1 — Hook & Problem Setup [0:00–0:15]
@@ -36,7 +36,7 @@ energetic/direct → thoughtful/strategic → instructor → motivational. Pace 
 > that they weren't **working for me**."
 
 *Animation*: chaotic dark workspace, glowing vault icon swirled by 46,000 note-icons, glitch
-effects, red accent (#e74c3c), zoom to red-X transition. Candidate stills: `06_assembly_00_scene1-2-stills.png`.
+effects, red accent (#e74c3c), zoom to red-X transition. Candidate stills: `stills/06_assembly/06_assembly_00_scene1-2-stills.png`.
 
 ### Scene 2 — The Realization Moment [0:15–0:45]
 > "So I engineered something different: a machine-readable, AI-native knowledge engine. No
@@ -56,7 +56,7 @@ effects, red accent (#e74c3c), zoom to red-X transition. Candidate stills: `06_a
 > folders. Imagine your knowledge base talking back to you."
 
 *Animation*: split-screen carousel, 4 zones in sequence (5–7s dwell each), icon-driven.
-Reference: `03_assets_01_para-vault-counts.png` (real live note counts).
+Reference: `stills/03_assets/03_assets_01_para-vault-counts.png` (real live note counts).
 
 ### Scene 4 — The Engine: Dual-Agent System [1:20–1:55]
 > "Then comes the engine: a local dual-agent rig running Gemini and Claude in tandem. While
@@ -66,7 +66,7 @@ Reference: `03_assets_01_para-vault-counts.png` (real live note counts).
 
 *Animation*: terminal `localhost:8899`, two agent avatars (Gemini gold, Claude blue)
 exchanging data, streams to GitHub/Drive/Proxmox/Vault icons, sync % bottom-right.
-Reference: `03_assets_02_dashboard-screenshot.png` (real dashboard).
+Reference: `stills/03_assets/03_assets_02_dashboard-screenshot.png` (real dashboard).
 
 ### Scene 5 — The 4-Step Workflow [1:55–2:25]
 > "Raw knowledge isn't power—**applied** knowledge is. So I built a 4-step workflow: **Tell**
@@ -87,7 +87,7 @@ Reference: `03_assets_02_dashboard-screenshot.png` (real dashboard).
 
 *Animation*: brain+lightning icon, orbiting cert/vault/GitHub/YouTube/Canva icons, gold pulse,
 "Build Your AI Second Brain" → "Join the Hands-On Cohort" → "Links in the comments ↓".
-Reference: `04_cohort_02_schedule.png` (real: every Sunday, 9–11PM UK, free).
+Reference: `stills/04_cohort/04_cohort_02_schedule.png` (real: every Sunday, 9–11PM UK, free).
 
 **Delivery notes**: Opening energy 6/10 conversational · Framework 7/10 instructor tone · Workflow
 8/10 building momentum, chant "Tell...Show...Do...Apply" · CTA 9/10, "Let's go" as invitation not
@@ -181,11 +181,11 @@ visual as a cold open.*
 
 ---
 
-## Production checklist (from `02_plan_17_checklist.png`)
+## Production checklist (from `stills/02_plan/02_plan_17_checklist.png`)
 - [ ] Script reviewed aloud, timed to 2:58
 - [ ] Voice practice — tone shifts rehearsed
 - [ ] ElevenLabs set up (voice, stability, similarity)
-- [ ] Animation prompts reviewed against CSV (`02_plan_18_csv-master.png`)
+- [ ] Animation prompts reviewed against CSV (`stills/02_plan/02_plan_18_csv-master.png`)
 - [ ] Audio levels checked (-12dB peak)
 - [ ] Timing sync verified against the 6-scene table
 - [ ] Color consistency across scenes (master palette)

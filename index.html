@@ -7,36 +7,65 @@
   <meta name="description" content="Rifat Erdem Sahin is building a 2:58 animated video about the AI Second Brain — shotlist, Google Flow clips, and the 16-stage production framework, published as a public work-in-progress.">
   <meta name="author" content="Rifat Erdem Sahin">
   <link rel="canonical" href="https://rifaterdemsahin.github.io/aug-video-animation-1/">
+  <script>
+    (function(){
+      try{
+        var key = "aug-video-theme";
+        var theme = localStorage.getItem(key);
+        if(theme !== "light" && theme !== "dark"){
+          theme = window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+        }
+        document.documentElement.setAttribute("data-theme", theme);
+        document.documentElement.style.colorScheme = theme;
+      }catch(e){
+        document.documentElement.setAttribute("data-theme", "dark");
+      }
+    })();
+  </script>
   <style>
-    :root{
+    :root, html[data-theme="dark"]{
       --bg:#09090d; --panel:#14141c; --ink:#f4f1ea; --muted:#9a958b;
       --gold:#e8b84a; --cyan:#6ee7f5; --line:#2a2a36; --accent:#e74c3c;
+      --lede:#ddd8ce; --body:#e6e1d6; --card-ink:#d8d3c8; --btn-ink:#1a1406;
+    }
+    html[data-theme="light"]{
+      --bg:#f6f3ea; --panel:#fffdf7; --ink:#1a1406; --muted:#6d675c;
+      --gold:#8a5a0a; --cyan:#0b6e78; --line:#e0d8c8; --accent:#c0392b;
+      --lede:#3a3428; --body:#2c281f; --card-ink:#3a3428; --btn-ink:#1a1406;
     }
     *{box-sizing:border-box}
     html,body{margin:0;background:var(--bg);color:var(--ink);font-family:Georgia,"Times New Roman",serif}
     a{color:var(--cyan)}
     a:hover{color:var(--gold)}
+    .topbar{display:flex;justify-content:flex-end;margin:0 0 8px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    .theme-toggle{
+      font:inherit;font-size:13px;font-weight:650;cursor:pointer;
+      border:1px solid var(--line);background:var(--panel);color:var(--ink);
+      border-radius:999px;padding:7px 12px
+    }
+    .theme-toggle:hover{border-color:var(--gold);color:var(--gold)}
+    .theme-toggle:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
     .wrap{max-width:980px;margin:0 auto;padding:28px 20px 80px}
     header.hero{padding:36px 0 28px}
     .kicker{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin:0 0 10px}
     h1{font-size:clamp(32px,6vw,56px);line-height:1.05;font-weight:700;margin:0 0 14px;letter-spacing:-.02em}
     h1 em{font-style:italic;color:var(--gold);font-weight:600}
-    .lede{font-size:20px;line-height:1.45;color:#ddd8ce;max-width:38em;margin:0 0 22px}
+    .lede{font-size:20px;line-height:1.45;color:var(--lede);max-width:38em;margin:0 0 22px}
     .actions{display:flex;flex-wrap:wrap;gap:10px;margin:22px 0 8px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
     .btn{display:inline-block;text-decoration:none;padding:11px 16px;border-radius:8px;font-size:14px;font-weight:650}
-    .btn.primary{background:var(--gold);color:#1a1406}
+    .btn.primary{background:var(--gold);color:var(--btn-ink)}
     .btn.ghost{border:1px solid var(--line);color:var(--ink)}
     .hero-art{margin:28px 0 8px;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#000}
     .hero-art img{display:block;width:100%;height:auto}
     .cap{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:12px;color:var(--muted);margin:8px 0 0}
     section{margin:42px 0}
     h2{font-size:26px;margin:0 0 12px}
-    p,li{font-size:17.5px;line-height:1.55;color:#e6e1d6}
+    p,li{font-size:17.5px;line-height:1.55;color:var(--body)}
     ul{padding-left:1.2em}
     .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-top:16px}
     .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px}
     .card h3{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);margin:0 0 8px}
-    .card p{margin:0;font-size:15.5px;color:#d8d3c8}
+    .card p{margin:0;font-size:15.5px;color:var(--card-ink)}
     .stages{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
     .stages span{border:1px solid var(--line);border-radius:999px;padding:4px 9px;font-size:11.5px;color:var(--muted)}
     .clip-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin-top:14px}
@@ -44,11 +73,29 @@
     .clip-grid img{display:block;width:100%;height:88px;object-fit:cover}
     .player{margin-top:16px;background:#000;border-radius:12px;overflow:hidden;border:1px solid var(--line)}
     .player video{display:block;width:100%;max-height:420px;background:#000}
+    .map{width:100%;border-collapse:collapse;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:14.5px;margin-top:14px}
+    .map th,.map td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+    .map th{color:var(--muted);font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:650}
+    .map td:first-child{white-space:nowrap}
+    .map code{font-size:13px}
+    .still-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:10px;margin-top:16px}
+    .still-card{display:block;text-decoration:none;color:inherit;background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+    .still-card:hover{border-color:var(--gold)}
+    .still-card img{display:block;width:100%;height:92px;object-fit:cover;background:#000}
+    .still-card .meta{padding:8px 10px 10px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    .still-card .meta b{display:block;font-size:12px;color:var(--gold);letter-spacing:.04em}
+    .still-card .meta span{display:block;font-size:12px;color:var(--muted);margin-top:2px}
+    .still-card.empty{display:flex;align-items:center;min-height:92px;padding:12px}
+    .stages a{border:1px solid var(--line);border-radius:999px;padding:4px 9px;font-size:11.5px;color:var(--muted);text-decoration:none}
+    .stages a:hover{color:var(--gold);border-color:var(--gold)}
     footer{margin-top:56px;padding-top:20px;border-top:1px solid var(--line);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:13px;color:var(--muted)}
   </style>
 </head>
 <body>
   <div class="wrap">
+    <div class="topbar">
+      <button type="button" class="theme-toggle" id="themeToggle" aria-label="Switch color theme">Light</button>
+    </div>
     <header class="hero">
       <p class="kicker">August 2026 · DeliveryPilot · public WIP</p>
       <h1>I am making an animated film about my <em>AI Second Brain</em>.</h1>
@@ -96,20 +143,72 @@
           <p><a href="storyboard.html">storyboard.html</a> is the editor: scenes, VO, types, hide/undo, playable Flow clips with first-frame posters.</p>
         </article>
         <article class="card">
-          <h3>03 · The clips</h3>
+          <h3>03 · The stills</h3>
+          <p>Canva / production frames live in <code>stills/</code>, one folder per stage. Catalog: <a href="stills/images_manifest.json">images_manifest.json</a>.</p>
+        </article>
+        <article class="card">
+          <h3>04 · The clips</h3>
           <p>26 Google Flow MP4s in <code>video_flow/</code>, renamed from their first frame. Each shot shows the still and the playable loop.</p>
         </article>
       </div>
       <div class="stages">
-        <span>00 Index</span><span>01 Architecture</span><span>02 Plan</span><span>03 Assets</span>
-        <span>04 Cohort</span><span>05 Gaps</span><span>06 Assembly</span><span>07 Polish</span>
-        <span>08 Refinement</span><span>09 Audio</span><span>10 Edit Color</span><span>11 Thumbnail</span>
-        <span>12 Export</span><span>13 Metadata</span><span>14 WIG</span><span>15 Tactics</span>
-        <span>16 Video Flow</span>
+        <a href="stills/00_index/00_index.png">00 Index</a>
+        <a href="stills/01_architecture/01_architecture.png">01 Architecture</a>
+        <a href="stills/02_plan/02_plan_00_cover-title.png">02 Plan</a>
+        <a href="stills/03_assets/03_assets_00_ref-google-flow.png">03 Assets</a>
+        <a href="stills/04_cohort/04_cohort_00_week7-notes.png">04 Cohort</a>
+        <a href="stills/05_gaps/05_gaps_00_hallucination-vs-context.png">05 Gaps</a>
+        <a href="stills/06_assembly/06_assembly_00_scene1-2-stills.png">06 Assembly</a>
+        <a href="stills/07_polish/07_polish_00_divider-empty.png">07 Polish</a>
+        <a href="stills/08_refinement/08_refinement_00_divider-empty.png">08 Refinement</a>
+        <a href="stills/09_audio/09_audio_00_divider-empty.png">09 Audio</a>
+        <a href="stills/10_editcolor/10_editcolor_00_divider-empty.png">10 Edit Color</a>
+        <a href="stills/11_thumbnail/11_thumbnail_00_divider-empty.png">11 Thumbnail</a>
+        <a href="stills/12_export/12_export_00_divider-empty.png">12 Export</a>
+        <a href="stills/13_metadata/13_metadata_00_template-empty.png">13 Metadata</a>
+        <a href="_script.md">14 WIG</a>
+        <a href="stills/15_tactics/15_tactics_00_editor-screenshot-stub.png">15 Tactics</a>
+        <a href="#clips">16 Video Flow</a>
       </div>
     </section>
 
     <section>
+      <h2>Folder map</h2>
+      <p>Root holds the pages. Production stills are under <code>stills/</code> by stage. Animation clips stay in <code>video_flow/</code>.</p>
+      <table class="map">
+        <thead>
+          <tr><th>Path</th><th>What</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><a href="index.html"><code>index.html</code></a></td><td>This page</td></tr>
+          <tr><td><a href="storyboard.html"><code>storyboard.html</code></a></td><td>Shotlist editor</td></tr>
+          <tr><td><a href="_script.md"><code>_script.md</code></a></td><td>Flagship VO + stage walkthrough</td></tr>
+          <tr><td><a href="README.md"><code>README.md</code></a></td><td>Repo map and local run notes</td></tr>
+          <tr><td><a href="stills/images_manifest.json"><code>stills/</code></a></td><td>105 Canva stills, one folder per stage</td></tr>
+          <tr><td><a href="video_flow/video_flow_manifest.json"><code>video_flow/</code></a></td><td>26 Flow MP4s + first-frame posters</td></tr>
+        </tbody>
+      </table>
+      <div class="still-grid" aria-label="One still per production stage">
+        <a class="still-card" href="stills/00_index/00_index.png"><img src="stills/00_index/00_index.png" alt="Stage 00 index"><span class="meta"><b>00</b><span>Index · 1</span></span></a>
+        <a class="still-card" href="stills/01_architecture/01_architecture.png"><img src="stills/01_architecture/01_architecture.png" alt="Stage 01 architecture"><span class="meta"><b>01</b><span>Architecture · 1</span></span></a>
+        <a class="still-card" href="stills/02_plan/02_plan_00_cover-title.png"><img src="stills/02_plan/02_plan_00_cover-title.png" alt="Stage 02 plan cover"><span class="meta"><b>02</b><span>Plan · 20</span></span></a>
+        <a class="still-card" href="stills/03_assets/03_assets_01_para-vault-counts.png"><img src="stills/03_assets/03_assets_01_para-vault-counts.png" alt="Stage 03 P.A.R.A. vault counts"><span class="meta"><b>03</b><span>Assets · 57</span></span></a>
+        <a class="still-card" href="stills/04_cohort/04_cohort_02_schedule.png"><img src="stills/04_cohort/04_cohort_02_schedule.png" alt="Stage 04 cohort schedule"><span class="meta"><b>04</b><span>Cohort · 3</span></span></a>
+        <a class="still-card" href="stills/05_gaps/05_gaps_00_hallucination-vs-context.png"><img src="stills/05_gaps/05_gaps_00_hallucination-vs-context.png" alt="Stage 05 hallucination vs context"><span class="meta"><b>05</b><span>Gaps · 9</span></span></a>
+        <a class="still-card" href="stills/06_assembly/06_assembly_00_scene1-2-stills.png"><img src="stills/06_assembly/06_assembly_00_scene1-2-stills.png" alt="Stage 06 assembly stills"><span class="meta"><b>06</b><span>Assembly · 2</span></span></a>
+        <a class="still-card" href="stills/07_polish/07_polish_00_divider-empty.png"><img src="stills/07_polish/07_polish_00_divider-empty.png" alt="Stage 07 polish divider"><span class="meta"><b>07</b><span>Polish · 1</span></span></a>
+        <a class="still-card" href="stills/08_refinement/08_refinement_00_divider-empty.png"><img src="stills/08_refinement/08_refinement_00_divider-empty.png" alt="Stage 08 refinement divider"><span class="meta"><b>08</b><span>Refinement · 1</span></span></a>
+        <a class="still-card" href="stills/09_audio/09_audio_00_divider-empty.png"><img src="stills/09_audio/09_audio_00_divider-empty.png" alt="Stage 09 audio divider"><span class="meta"><b>09</b><span>Audio · 1</span></span></a>
+        <a class="still-card" href="stills/10_editcolor/10_editcolor_00_divider-empty.png"><img src="stills/10_editcolor/10_editcolor_00_divider-empty.png" alt="Stage 10 edit color divider"><span class="meta"><b>10</b><span>Edit Color · 1</span></span></a>
+        <a class="still-card" href="stills/11_thumbnail/11_thumbnail_00_divider-empty.png"><img src="stills/11_thumbnail/11_thumbnail_00_divider-empty.png" alt="Stage 11 thumbnail divider"><span class="meta"><b>11</b><span>Thumbnail · 1</span></span></a>
+        <a class="still-card" href="stills/12_export/12_export_00_divider-empty.png"><img src="stills/12_export/12_export_00_divider-empty.png" alt="Stage 12 export divider"><span class="meta"><b>12</b><span>Export · 1</span></span></a>
+        <a class="still-card" href="stills/13_metadata/13_metadata_00_template-empty.png"><img src="stills/13_metadata/13_metadata_00_template-empty.png" alt="Stage 13 metadata template"><span class="meta"><b>13</b><span>Metadata · 2</span></span></a>
+        <a class="still-card empty" href="_script.md"><span class="meta"><b>14</b><span>WIG — no still yet; VO in the script</span></span></a>
+        <a class="still-card" href="stills/15_tactics/15_tactics_00_editor-screenshot-stub.png"><img src="stills/15_tactics/15_tactics_00_editor-screenshot-stub.png" alt="Stage 15 tactics editor stub"><span class="meta"><b>15</b><span>Tactics · 4</span></span></a>
+      </div>
+    </section>
+
+    <section id="clips">
       <h2>A clip from the pile</h2>
       <p>This is one of the Flow loops — first frame as poster, then play. The rest live on Stage 16 of the shotlist.</p>
       <div class="player">
@@ -132,8 +231,9 @@
       <ul>
         <li><a href="storyboard.html">Shotlist</a> — the live editor. Grammar/rewrite and vault search need the local <code>server.py</code>; everything else is static.</li>
         <li><a href="_script.md">_script.md</a> — Part A (flagship VO) and Part B (stage walkthrough + Stage 14 WIG).</li>
-        <li><code>02_plan_*.png</code> — the Canva planning deck I transcribed the script from.</li>
-        <li><code>video_flow/</code> — the 26 animation clips + <code>_first_frames/</code> stills.</li>
+        <li><a href="stills/02_plan/02_plan_00_cover-title.png"><code>stills/02_plan/</code></a> — Canva deck the flagship script was transcribed from. Full catalog: <a href="stills/images_manifest.json">images_manifest.json</a>.</li>
+        <li><a href="video_flow/18_golden-brain-lightning.mp4"><code>video_flow/</code></a> — 26 clips + <code>_first_frames/</code>. Catalog: <a href="video_flow/video_flow_manifest.json">video_flow_manifest.json</a>.</li>
+        <li><a href="README.md">README.md</a> — folder map and how to run locally.</li>
       </ul>
     </section>
 
@@ -142,5 +242,26 @@
       <a href="https://github.com/rifaterdemsahin/aug-video-animation-1">rifaterdemsahin/aug-video-animation-1</a>
     </footer>
   </div>
+  <script>
+    (function(){
+      var KEY = "aug-video-theme";
+      var btn = document.getElementById("themeToggle");
+      function theme(){
+        return document.documentElement.getAttribute("data-theme") === "light" ? "light" : "dark";
+      }
+      function apply(next){
+        document.documentElement.setAttribute("data-theme", next);
+        document.documentElement.style.colorScheme = next;
+        try{ localStorage.setItem(KEY, next); }catch(e){}
+        if(!btn) return;
+        var other = next === "dark" ? "light" : "dark";
+        btn.textContent = other === "light" ? "Light" : "Dark";
+        btn.setAttribute("aria-label", "Switch to " + other + " mode");
+        btn.setAttribute("aria-pressed", next === "dark" ? "true" : "false");
+      }
+      apply(theme());
+      if(btn) btn.addEventListener("click", function(){ apply(theme() === "dark" ? "light" : "dark"); });
+    })();
+  </script>
 </body>
 </html>
