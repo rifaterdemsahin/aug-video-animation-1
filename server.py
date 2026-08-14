@@ -29,9 +29,10 @@ http.client._MAXLINE = 1024 * 1024
 http.client._MAXHEADERS = 400
 
 ROOT = Path(__file__).resolve().parent
-VAULT_ROOT = ROOT.parents[1]  # .../secondbrain
-DEFAULT_PORT = 8765
-DEFAULT_HOST = "127.0.0.1"
+VAULT_ROOT = ROOT.parents[1] if len(ROOT.parents) > 1 else ROOT
+DEFAULT_PORT = int(os.environ.get("PORT", "8765"))
+DEFAULT_HOST = os.environ.get("HOST", "127.0.0.1" if not os.environ.get("PORT") else "0.0.0.0")
+
 
 DEFAULT_MODEL = os.environ.get("OPENROUTER_MODEL", "openai/gpt-4o-mini")
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"

@@ -558,6 +558,83 @@ table.hidden-shots-table{width:100%;min-width:720px}
 table.hidden-shots-table th{cursor:default}
 table.hidden-shots-table th:hover{background:var(--chip);color:var(--muted)}
 
+/* Site Footer */
+.site-footer {
+  margin-top: 48px;
+  border-top: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--muted);
+  padding: 24px 16px;
+  font-size: 13px;
+}
+.site-footer-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.site-footer-brand {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.site-footer-title {
+  font-weight: 750;
+  color: var(--ink);
+}
+.site-footer-desc {
+  font-size: 12px;
+  color: var(--muted);
+}
+.site-footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+.footer-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--chip);
+  color: var(--ink);
+  text-decoration: none;
+  font-size: 12.5px;
+  font-weight: 600;
+  transition: all 0.15s ease;
+}
+.footer-btn:hover {
+  border-color: var(--accent2);
+  color: var(--accent2);
+}
+.footer-btn.live-btn {
+  background: rgba(39, 174, 96, 0.12);
+  border-color: rgba(39, 174, 96, 0.35);
+  color: var(--accent3);
+}
+.footer-btn.live-btn:hover {
+  background: rgba(39, 174, 96, 0.22);
+}
+.pulse-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent3);
+  box-shadow: 0 0 0 0 rgba(39, 174, 96, 0.7);
+  animation: pulse-green 1.8s infinite;
+}
+@keyframes pulse-green {
+  0% { box-shadow: 0 0 0 0 rgba(39, 174, 96, 0.7); }
+  70% { box-shadow: 0 0 0 6px rgba(39, 174, 96, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(39, 174, 96, 0); }
+}
+
 </style>
 </head>
 <body>
@@ -702,6 +779,26 @@ table.hidden-shots-table th:hover{background:var(--chip);color:var(--muted)}
     </div>
   </div>
 </main>
+
+<footer class="site-footer">
+  <div class="site-footer-inner">
+    <div class="site-footer-brand">
+      <span class="site-footer-title">WIG Animation · AI Second Brain</span>
+      <span class="site-footer-desc">Automated video production framework &amp; shotlist editor</span>
+    </div>
+    <div class="site-footer-links">
+      <a href="https://aug-video-animation-1.fly.dev/shotlist.html" target="_blank" rel="noopener" class="footer-btn live-btn">
+        <span class="pulse-dot"></span> Live App (Fly.io)
+      </a>
+      <a href="https://rifaterdemsahin.github.io/aug-video-animation-1/shotlist.html" target="_blank" rel="noopener" class="footer-btn">
+        <span>📄</span> GitHub Pages
+      </a>
+      <a href="https://github.com/rifaterdemsahin/aug-video-animation-1" target="_blank" rel="noopener" class="footer-btn">
+        <span>🐙</span> Source Code
+      </a>
+    </div>
+  </div>
+</footer>
 
 <div id="azureToast" role="status" aria-live="polite"></div>
 <div id="thumbHoverPreview" aria-hidden="true"><img alt=""></div>
@@ -1242,6 +1339,7 @@ async function resolveApiBase(){
     const cached = localStorage.getItem(API_BASE_KEY);
     if(cached) candidates.push(cached);
   }catch(e){}
+  candidates.push("https://aug-video-animation-1.fly.dev");
   for(let p = 8765; p <= 8775; p++) candidates.push("http://127.0.0.1:" + p);
   candidates.push("http://127.0.0.1:54965");
   const seen = new Set();

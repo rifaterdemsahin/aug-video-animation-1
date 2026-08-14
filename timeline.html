@@ -177,6 +177,84 @@ header{
   position:absolute;top:16px;right:16px
 }
 #saveNote{font-size:12px;color:var(--muted)}
+
+/* Site Footer */
+.site-footer {
+  margin-top: 48px;
+  border-top: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--muted);
+  padding: 24px 16px;
+  font-size: 13px;
+}
+.site-footer-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.site-footer-brand {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.site-footer-title {
+  font-weight: 750;
+  color: var(--ink);
+}
+.site-footer-desc {
+  font-size: 12px;
+  color: var(--muted);
+}
+.site-footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+.footer-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--chip);
+  color: var(--ink);
+  text-decoration: none;
+  font-size: 12.5px;
+  font-weight: 600;
+  transition: all 0.15s ease;
+}
+.footer-btn:hover {
+  border-color: var(--cyan);
+  color: var(--cyan);
+}
+.footer-btn.live-btn {
+  background: rgba(39, 174, 96, 0.12);
+  border-color: rgba(39, 174, 96, 0.35);
+  color: #27ae60;
+}
+.footer-btn.live-btn:hover {
+  background: rgba(39, 174, 96, 0.22);
+}
+.pulse-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #27ae60;
+  box-shadow: 0 0 0 0 rgba(39, 174, 96, 0.7);
+  animation: pulse-green 1.8s infinite;
+}
+@keyframes pulse-green {
+  0% { box-shadow: 0 0 0 0 rgba(39, 174, 96, 0.7); }
+  70% { box-shadow: 0 0 0 6px rgba(39, 174, 96, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(39, 174, 96, 0); }
+}
+
 </style>
 </head>
 <body>
@@ -208,6 +286,27 @@ header{
   <div id="playerStage"></div>
   <div class="cap" id="playerCap"></div>
 </div>
+
+<footer class="site-footer">
+  <div class="site-footer-inner">
+    <div class="site-footer-brand">
+      <span class="site-footer-title">WIG Animation · AI Second Brain</span>
+      <span class="site-footer-desc">Horizontal visual storyboard &amp; timing editor</span>
+    </div>
+    <div class="site-footer-links">
+      <a href="https://aug-video-animation-1.fly.dev/timeline.html" target="_blank" rel="noopener" class="footer-btn live-btn">
+        <span class="pulse-dot"></span> Live App (Fly.io)
+      </a>
+      <a href="https://rifaterdemsahin.github.io/aug-video-animation-1/timeline.html" target="_blank" rel="noopener" class="footer-btn">
+        <span>📄</span> GitHub Pages
+      </a>
+      <a href="https://github.com/rifaterdemsahin/aug-video-animation-1" target="_blank" rel="noopener" class="footer-btn">
+        <span>🐙</span> Source Code
+      </a>
+    </div>
+  </div>
+</footer>
+
 <script>
 const LS_KEY = "wiganimation_shotlist_v2";
 const PX = 22;

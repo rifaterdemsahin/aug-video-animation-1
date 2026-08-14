@@ -120,7 +120,82 @@
     .still-card.empty{display:flex;align-items:center;min-height:92px;padding:12px}
     .stages a{border:1px solid var(--line);border-radius:999px;padding:4px 9px;font-size:11.5px;color:var(--muted);text-decoration:none}
     .stages a:hover{color:var(--gold);border-color:var(--gold)}
-    footer{margin-top:56px;padding-top:20px;border-top:1px solid var(--line);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:13px;color:var(--muted)}
+    /* Site Footer */
+    .site-footer {
+      margin-top: 56px;
+      border-top: 1px solid var(--line);
+      background: var(--panel);
+      color: var(--muted);
+      padding: 24px 16px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    .site-footer-inner {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .site-footer-brand {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .site-footer-title {
+      font-weight: 750;
+      color: var(--ink);
+    }
+    .site-footer-desc {
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .site-footer-links {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+    }
+    .footer-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: var(--bg);
+      color: var(--ink);
+      text-decoration: none;
+      font-size: 12.5px;
+      font-weight: 600;
+      transition: all 0.15s ease;
+    }
+    .footer-btn:hover {
+      border-color: var(--cyan);
+      color: var(--cyan);
+    }
+    .footer-btn.live-btn {
+      background: rgba(39, 174, 96, 0.12);
+      border-color: rgba(39, 174, 96, 0.35);
+      color: #27ae60;
+    }
+    .footer-btn.live-btn:hover {
+      background: rgba(39, 174, 96, 0.22);
+    }
+    .pulse-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #27ae60;
+      box-shadow: 0 0 0 0 rgba(39, 174, 96, 0.7);
+      animation: pulse-green 1.8s infinite;
+    }
+    @keyframes pulse-green {
+      0% { box-shadow: 0 0 0 0 rgba(39, 174, 96, 0.7); }
+      70% { box-shadow: 0 0 0 6px rgba(39, 174, 96, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(39, 174, 96, 0); }
+    }
     #mediaHover{
       position:fixed;inset:0;z-index:80;display:none;
       align-items:center;justify-content:center;
@@ -290,10 +365,26 @@
       </ul>
     </section>
 
-    <footer>
-      Rifat Erdem Sahin · DeliveryPilot · published from the Second Brain WIGAnimation project ·
-      <a href="https://github.com/rifaterdemsahin/aug-video-animation-1">rifaterdemsahin/aug-video-animation-1</a>
+    <footer class="site-footer">
+      <div class="site-footer-inner">
+        <div class="site-footer-brand">
+          <span class="site-footer-title">WIG Animation · AI Second Brain</span>
+          <span class="site-footer-desc">Rifat Erdem Sahin · DeliveryPilot framework</span>
+        </div>
+        <div class="site-footer-links">
+          <a href="https://aug-video-animation-1.fly.dev" target="_blank" rel="noopener" class="footer-btn live-btn">
+            <span class="pulse-dot"></span> Live App (Fly.io)
+          </a>
+          <a href="https://rifaterdemsahin.github.io/aug-video-animation-1/" target="_blank" rel="noopener" class="footer-btn">
+            <span>📄</span> GitHub Pages
+          </a>
+          <a href="https://github.com/rifaterdemsahin/aug-video-animation-1" target="_blank" rel="noopener" class="footer-btn">
+            <span>🐙</span> Source Code
+          </a>
+        </div>
+      </div>
     </footer>
+
   </div>
   <div id="mediaHover" aria-hidden="true">
     <img alt="">
