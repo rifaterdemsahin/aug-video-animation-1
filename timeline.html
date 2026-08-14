@@ -1,0 +1,549 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Horizontal timeline — WIG Animation</title>
+<script>
+(function(){
+  try{
+    var theme = localStorage.getItem("aug-video-theme");
+    if(theme !== "light" && theme !== "dark"){
+      theme = window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+    }
+    document.documentElement.setAttribute("data-theme", theme);
+    document.documentElement.style.colorScheme = theme;
+  }catch(e){
+    document.documentElement.setAttribute("data-theme", "dark");
+  }
+})();
+</script>
+<style>
+:root, html[data-theme="dark"]{
+  --bg:#0b0b10; --panel:#16161f; --ink:#f3f1ea; --muted:#9aa0ac;
+  --line:#2a2a38; --gold:#e8b84a; --cyan:#6ee7f5; --chip:#22222f;
+}
+html[data-theme="light"]{
+  --bg:#f4f3ef; --panel:#fff; --ink:#1a1a2e; --muted:#6b6f7a;
+  --line:#e2e0d8; --gold:#8a5a0a; --cyan:#0b6e78; --chip:#eef0f4;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+a{color:var(--cyan)}
+header{
+  position:sticky;top:0;z-index:20;
+  display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;
+  padding:10px 16px;background:var(--panel);border-bottom:1px solid var(--line)
+}
+.title{font-weight:800}
+.shared-nav {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+  margin-right: auto;
+  background: var(--chip, var(--bg));
+  padding: 4px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+}
+.shared-nav a {
+  color: var(--muted);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 13px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.shared-nav a:hover {
+  color: var(--cyan);
+  background: var(--panel);
+}
+.shared-nav a.active {
+  color: var(--ink);
+  background: var(--panel);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  border: 1px solid var(--line);
+}
+.title small{display:block;font-weight:400;color:var(--muted);font-size:11px}
+.btn{
+  font:inherit;font-size:12.5px;font-weight:650;text-decoration:none;
+  border:1px solid var(--line);background:var(--chip);color:var(--ink);
+  border-radius:8px;padding:7px 12px
+}
+.btn.primary{background:var(--gold);border-color:var(--gold);color:#1a1406}
+.stat{font-size:12px;color:var(--muted)}
+.stat b{color:var(--ink)}
+.stage-lane{
+  display:flex;align-items:stretch;min-height:28px;
+  border-bottom:1px solid var(--line);background:var(--panel)
+}
+.stage-chip{
+  display:flex;align-items:center;gap:6px;padding:0 10px;
+  font-size:11px;font-weight:700;color:#fff;white-space:nowrap;
+  border-right:1px solid rgba(255,255,255,.15)
+}
+.ruler{
+  position:relative;height:28px;border-bottom:1px solid var(--line);
+  background:color-mix(in srgb, var(--panel) 88%, #000 12%);
+  font-variant-numeric:tabular-nums
+}
+.tick{position:absolute;top:0;bottom:0;border-left:1px solid var(--line);padding:4px 0 0 6px;font-size:10px;color:var(--muted)}
+.board{
+  overflow:auto;height:calc(100vh - 118px);
+  padding:16px 16px 140px
+}
+.row{display:flex;align-items:stretch;min-height:280px}
+.card{
+  flex:0 0 auto;display:flex;flex-direction:column;
+  margin-right:8px;border:1px solid var(--line);border-radius:12px;
+  background:var(--panel);overflow:hidden;min-width:140px;cursor:grab
+}
+.card:hover{border-color:var(--gold)}
+.card.is-on{box-shadow:0 0 0 2px var(--gold)}
+.card.is-mark{box-shadow:inset 3px 0 0 var(--gold)}
+.card.dragging{opacity:.45;cursor:grabbing}
+.card.drag-over{outline:2px dashed var(--gold)}
+.card-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:4px 8px;
+  background:var(--chip);
+  border-bottom:1px solid var(--line);
+}
+.handle{font-size:11px;color:var(--muted);letter-spacing:1px;cursor:grab}
+.hide-btn{
+  background:none;
+  border:none;
+  color:var(--muted);
+  font-size:10px;
+  font-weight:700;
+  cursor:pointer;
+  padding:2px 6px;
+  border-radius:4px;
+  text-transform:uppercase;
+  transition:all 0.15s ease;
+}
+.hide-btn:hover{
+  background:rgba(231,76,60,0.15);
+  color:#e74c3c;
+}
+.thumb{height:140px;background:#000;position:relative}
+.thumb img,.thumb video{width:100%;height:100%;object-fit:cover;display:block}
+.badge{position:absolute;left:6px;bottom:6px;font-size:10px;background:rgba(0,0,0,.7);color:#fff;padding:2px 6px;border-radius:4px}
+.body{padding:8px 10px 10px;min-width:0}
+.tc{font-size:11px;font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums}
+.file{font-size:12px;font-weight:650;margin:3px 0;word-break:break-all}
+.vo{
+  font-size:11px;
+  color:var(--ink);
+  opacity:0.85;
+  margin-top:6px;
+  max-height:80px;
+  overflow-y:auto;
+  white-space:pre-wrap;
+  font-style:italic;
+  border-left:2px solid var(--line);
+  padding-left:6px;
+  line-height:1.4;
+  word-break:break-word;
+}
+.tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.tags span{font-size:10px;padding:2px 6px;border-radius:999px;background:var(--chip)}
+.drawer{
+  position:fixed;left:0;right:0;bottom:0;z-index:30;
+  max-height:42vh;overflow:auto;
+  background:var(--panel);border-top:1px solid var(--line);
+  padding:12px 16px 16px;display:none
+}
+.drawer.open{display:block}
+.drawer h2{margin:0 0 6px;font-size:15px}
+.drawer p{margin:6px 0;white-space:pre-wrap;font-size:13.5px}
+.empty{padding:48px 16px;color:var(--muted)}
+#player{
+  position:fixed;inset:0;z-index:80;display:none;
+  align-items:center;justify-content:center;
+  background:rgba(0,0,0,.88);padding:24px;flex-direction:column;gap:10px
+}
+#player.open{display:flex}
+#player video,#player img{max-width:94vw;max-height:78vh;background:#000;border-radius:10px}
+#player .cap{color:#fff;font-size:13px;text-align:center}
+#player .close{
+  position:absolute;top:16px;right:16px
+}
+#saveNote{font-size:12px;color:var(--muted)}
+</style>
+</head>
+<body>
+<header>
+  <div class="title" style="margin-right: 20px;"><a href="index.html" style="color:inherit;text-decoration:none">WIG Animation</a></div>
+  <nav class="shared-nav" aria-label="Main Navigation">
+    <a href="index.html" class="nav-item"><span>🏠</span> Overview</a>
+    <a href="research.html" class="nav-item"><span>🎬</span> Vertical Editor</a>
+    <a href="timeline.html" class="nav-item active"><span>↔️</span> Horizontal Timeline</a>
+    <a href="shotlist.html" class="nav-item"><span>📊</span> Filter &amp; Sort Table</a>
+    <a href="scenes.html" class="nav-item"><span>🗂️</span> Scenes</a>
+    <a href="voice_over.html" class="nav-item"><span>📜</span> VO Script</a>
+  </nav>
+  <a class="btn" href="research.html">↕ Vertical</a>
+  <button type="button" class="btn" id="btnUnhideAll" style="display:none">Unhide All</button>
+  <div class="stat">Scenes <b id="statScenes">0</b></div>
+  <div class="stat">Shots <b id="statShots">0</b></div>
+  <div class="stat">Length <b id="statLen">00:00</b></div>
+  <div class="stat" id="saveNote">Drag a card to move it · click to play</div>
+</header>
+<div class="stage-lane" id="stageLane"></div>
+<div class="ruler" id="ruler"></div>
+<div class="board" id="board">
+  <div class="empty" id="empty">Loading timeline…</div>
+</div>
+<aside class="drawer" id="drawer"></aside>
+<div id="player">
+  <button type="button" class="btn close" id="playerClose">Close</button>
+  <div id="playerStage"></div>
+  <div class="cap" id="playerCap"></div>
+</div>
+<script>
+const LS_KEY = "wiganimation_shotlist_v2";
+const PX = 22;
+const STAGE_NAMES = {
+  "00":"Index","01":"Architecture","02":"Plan","03":"Assets","04":"Cohort",
+  "05":"Gaps","06":"Assembly","07":"Polish","08":"Refinement","09":"Audio","10":"Edit Color",
+  "11":"Thumbnail","12":"Export","13":"Metadata","14":"WIG (My Story)","15":"Tactics","16":"Video Flow"
+};
+const SCENE_COLORS = {
+  "00":"#3498db","01":"#9b59b6","02":"#e67e22","03":"#1abc9c","04":"#e74c3c",
+  "05":"#2980b9","06":"#16a085","07":"#8e44ad","08":"#f39c12","09":"#27ae60",
+  "10":"#c0392b","11":"#2c3e50","12":"#d35400","13":"#7f8c8d","14":"#e91e63","15":"#00bcd4","16":"#6366f1"
+};
+function wordCount(text){
+  const t = (text || "").trim();
+  return t ? t.split(/\s+/).length : 0;
+}
+function formatTC(totalSec){
+  totalSec = Math.max(0, Math.round(totalSec || 0));
+  const m = Math.floor(totalSec / 60);
+  const s = totalSec % 60;
+  return String(m).padStart(2,"0") + ":" + String(s).padStart(2,"0");
+}
+function durationOf(s){
+  if(s && s.durationSec != null && s.durationSec !== "" && !isNaN(Number(s.durationSec))){
+    return Math.max(1, Number(s.durationSec));
+  }
+  const w = wordCount(s && s.vo);
+  if(!w) return 2;
+  return Math.max(2, Math.round((w / 150) * 60));
+}
+function escapeHtml(s){
+  return String(s == null ? "" : s)
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+function isHidden(s, scenes){
+  if(!s) return true;
+  if(s.hidden) return true;
+  const sc = scenes && scenes[s.stage];
+  return !!(sc && sc.hidden);
+}
+function posterOf(s){
+  const media = (s && s.media) || [];
+  const img = media.find(m => m && m.kind !== "video" && m.src);
+  if(img) return img.src;
+  const vid = media.find(m => m && m.kind === "video" && (m.poster || m.src));
+  if(vid) return vid.poster || "";
+  if(s && s.file && /\.(png|jpe?g|gif|webp)$/i.test(s.file)) return s.file;
+  return "";
+}
+function videoOf(s){
+  const media = (s && s.media) || [];
+  const vid = media.find(m => m && m.kind === "video" && m.src);
+  if(vid) return vid.src;
+  if(s && s.file && /\.(mp4|webm|mov)(\?|$)/i.test(s.file)) return s.file;
+  return "";
+}
+function loadLocal(){
+  try{
+    const raw = localStorage.getItem(LS_KEY) || localStorage.getItem("wiganimation_storyboard_v1");
+    return raw ? JSON.parse(raw) : null;
+  }catch(e){ return null; }
+}
+async function loadAzure(){
+  try{
+    const r = await fetch("/api/state", { cache: "no-store" });
+    const data = await r.json();
+    if(data && data.ok && data.found && data.state && Array.isArray(data.state.shots)) return data.state;
+  }catch(e){}
+  return null;
+}
+function pickState(local, remote){
+  const localAt = local && local.savedAt ? String(local.savedAt) : "";
+  const remoteAt = remote && remote.savedAt ? String(remote.savedAt) : "";
+  const localN = local && local.shots ? local.shots.length : 0;
+  const remoteN = remote && remote.shots ? remote.shots.length : 0;
+  if(remoteN >= 2 && (!localN || (remoteAt && remoteAt > localAt))) return remote;
+  return local;
+}
+
+let shots = [];
+let scenes = {};
+let sceneOpen = {};
+let globalWpm = 150;
+let selectedId = null;
+let draggedId = null;
+let justDragged = false;
+let saveTimer = null;
+
+function visible(){
+  return shots.filter(s => !isHidden(s, scenes));
+}
+function render(){
+  const vis = visible();
+  const empty = document.getElementById("empty");
+  const board = document.getElementById("board");
+  const lane = document.getElementById("stageLane");
+  const ruler = document.getElementById("ruler");
+  
+  const hasHidden = shots.some(s => s.hidden) || Object.values(scenes || {}).some(sc => sc && sc.hidden);
+  const unhideBtn = document.getElementById("btnUnhideAll");
+  if(unhideBtn) {
+    unhideBtn.style.display = hasHidden ? "inline-block" : "none";
+  }
+
+  document.getElementById("statShots").textContent = String(vis.length);
+  document.getElementById("statScenes").textContent = String(new Set(vis.map(s => s.stage)).size);
+  if(!vis.length){
+    if(empty) empty.textContent = "No visible shots. Open the vertical shotlist and unhide some first.";
+    lane.innerHTML = "";
+    ruler.innerHTML = "";
+    return;
+  }
+  if(empty) empty.remove();
+  let t = 0;
+  const timed = vis.map(s => {
+    const dur = durationOf(s);
+    const item = { s, dur, inn: t, out: t + dur, w: Math.max(140, dur * PX) };
+    t += dur;
+    return item;
+  });
+  document.getElementById("statLen").textContent = formatTC(t);
+  const totalW = timed.reduce((n, x) => n + x.w + 8, 16);
+
+  const groups = [];
+  timed.forEach(item => {
+    const last = groups[groups.length - 1];
+    if(!last || last.stage !== item.s.stage) groups.push({ stage: item.s.stage, w: item.w + 8 });
+    else last.w += item.w + 8;
+  });
+  lane.style.minWidth = totalW + "px";
+  lane.innerHTML = groups.map(g => {
+    const name = STAGE_NAMES[g.stage] || g.stage;
+    return '<div class="stage-chip" style="width:' + g.w + 'px;background:' + (SCENE_COLORS[g.stage] || "#3498db") + '">'
+      + escapeHtml(g.stage + " · " + name) + "</div>";
+  }).join("");
+
+  ruler.style.minWidth = totalW + "px";
+  ruler.innerHTML = "";
+  for(let sec = 0; sec <= t; sec += 10){
+    const x = timed.reduce((acc, item) => {
+      if(sec >= item.out) return acc + item.w + 8;
+      if(sec <= item.inn) return acc;
+      return acc + ((sec - item.inn) / item.dur) * item.w;
+    }, 16);
+    const tick = document.createElement("div");
+    tick.className = "tick";
+    tick.style.left = x + "px";
+    tick.textContent = formatTC(sec);
+    ruler.appendChild(tick);
+  }
+
+  const row = document.createElement("div");
+  row.className = "row";
+  row.style.minWidth = totalW + "px";
+  timed.forEach(item => {
+    const s = item.s;
+    const poster = posterOf(s);
+    const card = document.createElement("article");
+    card.className = "card" + (s.bookmarked ? " is-mark" : "") + (selectedId === s.id ? " is-on" : "");
+    card.dataset.id = s.id;
+    card.style.width = item.w + "px";
+    card.draggable = true;
+    
+    const voText = s.vo || s.caption || "";
+
+    card.innerHTML = '<div class="card-header">'
+      + '<div class="handle" title="Drag to move">⋮⋮</div>'
+      + '<button type="button" class="hide-btn" title="Hide shot">Hide</button>'
+      + '</div>'
+      + '<div class="thumb">'
+      + (poster ? '<img src="' + escapeHtml(poster) + '" alt="" draggable="false">' : "")
+      + '<span class="badge">' + (videoOf(s) ? "▶ " : "") + item.dur + "s</span></div>"
+      + '<div class="body"><div class="tc">' + formatTC(item.inn) + " → " + formatTC(item.out) + "</div>"
+      + '<div class="file">' + escapeHtml((s.file || "Custom shot").split("/").pop()) + "</div>"
+      + '<div class="vo" title="Voice Over">' + escapeHtml(voText) + "</div>"
+      + '<div class="tags">' + (s.bookmarked ? "<span>🔖</span>" : "")
+      + (s.types || []).slice(0, 2).map(t => "<span>" + escapeHtml(t) + "</span>").join("")
+      + "</div></div>";
+
+    const hideBtn = card.querySelector(".hide-btn");
+    if(hideBtn){
+      hideBtn.addEventListener("click", e => {
+        e.stopPropagation();
+        hideShot(s.id);
+      });
+    }
+
+    card.addEventListener("dragstart", e => {
+      draggedId = s.id;
+      justDragged = false;
+      e.dataTransfer.setData("text/shot-id", s.id);
+      e.dataTransfer.effectAllowed = "move";
+      card.classList.add("dragging");
+    });
+    card.addEventListener("dragend", () => {
+      card.classList.remove("dragging");
+      document.querySelectorAll(".card.drag-over").forEach(el => el.classList.remove("drag-over"));
+      setTimeout(() => { justDragged = false; }, 40);
+    });
+    card.addEventListener("dragover", e => {
+      e.preventDefault();
+      card.classList.add("drag-over");
+    });
+    card.addEventListener("dragleave", () => card.classList.remove("drag-over"));
+    card.addEventListener("drop", e => {
+      e.preventDefault();
+      card.classList.remove("drag-over");
+      const fromId = e.dataTransfer.getData("text/shot-id") || draggedId;
+      if(!fromId || fromId === s.id) return;
+      justDragged = true;
+      moveShot(fromId, s.id);
+    });
+    card.addEventListener("click", () => {
+      if(justDragged) return;
+      openPlayer(s, item);
+    });
+    row.appendChild(card);
+  });
+  board.innerHTML = "";
+  board.appendChild(row);
+}
+function persist(note){
+  const payload = {
+    format: "wiganimation-shotlist-cookie",
+    version: 3,
+    shots,
+    scenes,
+    selectedShotId: selectedId,
+    sceneOpen,
+    globalWpm,
+    savedAt: new Date().toISOString()
+  };
+  try{ localStorage.setItem(LS_KEY, JSON.stringify(payload)); }catch(e){}
+  const el = document.getElementById("saveNote");
+  if(el) el.textContent = note || "Moved — saving…";
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(async () => {
+    try{
+      await fetch("/api/state", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ state: payload, backup: false })
+      });
+      if(el) el.textContent = "Saved to Azure · " + new Date().toLocaleTimeString();
+    }catch(e){
+      if(el) el.textContent = "Saved locally (Azure offline)";
+    }
+  }, 5000);
+}
+function moveShot(fromId, toId){
+  const from = shots.findIndex(s => s.id === fromId);
+  const to = shots.findIndex(s => s.id === toId);
+  if(from < 0 || to < 0 || from === to) return;
+  const [item] = shots.splice(from, 1);
+  shots.splice(to, 0, item);
+  selectedId = item.id;
+  persist("Moved shot — Azure save in 5s");
+  render();
+}
+function hideShot(id){
+  const s = shots.find(x => x.id === id);
+  if(!s) return;
+  s.hidden = true;
+  if(selectedId === id) selectedId = null;
+  persist("Shot hidden — Azure save in 5s");
+  render();
+}
+function unhideAll(){
+  shots.forEach(s => { s.hidden = false; });
+  for(let k in scenes){
+    if(scenes[k]) scenes[k].hidden = false;
+  }
+  persist("Unhide all shots — Azure save in 5s");
+  render();
+}
+function closePlayer(){
+  const player = document.getElementById("player");
+  const stage = document.getElementById("playerStage");
+  player.classList.remove("open");
+  stage.innerHTML = "";
+}
+function openPlayer(s, item){
+  selectedId = s.id;
+  document.querySelectorAll(".card").forEach(el => el.classList.toggle("is-on", el.dataset.id === s.id));
+  const drawer = document.getElementById("drawer");
+  drawer.classList.add("open");
+  drawer.innerHTML = "<h2>Stage " + escapeHtml(s.stage) + " · " + escapeHtml(STAGE_NAMES[s.stage] || "") + "</h2>"
+    + '<div class="tc">' + formatTC(item.inn) + " → " + formatTC(item.out) + " · " + item.dur + "s · "
+    + wordCount(s.vo) + " words</div>"
+    + (s.bookmarked ? "<p><b>Bookmark:</b> " + escapeHtml(s.bookmarkNote || "(no note)") + "</p>" : "")
+    + "<p>" + escapeHtml(s.vo || s.caption || "") + "</p>"
+    + '<p><a class="btn primary" href="research.html">Open in vertical shotlist</a></p>';
+
+  const src = videoOf(s);
+  const poster = posterOf(s);
+  const stage = document.getElementById("playerStage");
+  const cap = document.getElementById("playerCap");
+  stage.innerHTML = "";
+  if(src){
+    const v = document.createElement("video");
+    v.src = src;
+    if(poster) v.poster = poster;
+    v.controls = true;
+    v.autoplay = true;
+    v.playsInline = true;
+    stage.appendChild(v);
+  } else if(poster){
+    const img = document.createElement("img");
+    img.src = poster;
+    img.alt = s.file || "Still";
+    stage.appendChild(img);
+  } else {
+    stage.innerHTML = '<p class="cap">No playable media on this shot.</p>';
+  }
+  cap.textContent = (s.file || "Custom shot").split("/").pop() + " · " + formatTC(item.inn) + "–" + formatTC(item.out);
+  document.getElementById("player").classList.add("open");
+}
+
+document.getElementById("playerClose").addEventListener("click", closePlayer);
+document.getElementById("player").addEventListener("click", e => {
+  if(e.target.id === "player") closePlayer();
+});
+document.addEventListener("keydown", e => { if(e.key === "Escape") closePlayer(); });
+document.getElementById("btnUnhideAll").addEventListener("click", unhideAll);
+
+(async function boot(){
+  const local = loadLocal();
+  const remote = await loadAzure();
+  const state = pickState(local, remote) || {};
+  shots = Array.isArray(state.shots) ? state.shots : [];
+  scenes = state.scenes || {};
+  sceneOpen = state.sceneOpen || {};
+  if(state.globalWpm != null) globalWpm = Number(state.globalWpm) || 150;
+  render();
+})();
+</script>
+</body>
+</html>

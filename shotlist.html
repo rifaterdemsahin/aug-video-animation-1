@@ -1,0 +1,2586 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shotlist Table — WIG Animation</title>
+<script>
+(function(){
+  try{
+    var key = "aug-video-theme";
+    var theme = localStorage.getItem(key);
+    if(theme !== "light" && theme !== "dark"){
+      theme = window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+    }
+    document.documentElement.setAttribute("data-theme", theme);
+    document.documentElement.style.colorScheme = theme;
+  }catch(e){
+    document.documentElement.setAttribute("data-theme", "light");
+  }
+})();
+</script>
+<style>
+:root, html[data-theme="light"]{
+  --bg:#f4f3ef; --panel:#fff; --ink:#1a1a2e; --muted:#6b6f7a; --line:#e2e0d8;
+  --accent:#e74c3c; --accent2:#3498db; --accent3:#27ae60; --gold:#f39c12;
+  --chip:#eef0f4; --tc:#2c3e50; --shadow:0 1px 3px rgba(20,20,30,.08);
+}
+html[data-theme="dark"]{
+  --bg:#0f0f14; --panel:#181822; --ink:#ecf0f1; --muted:#9aa0ac; --line:#2a2a38;
+  --chip:#22222f; --tc:#bdc3c7; --shadow:0 1px 3px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;line-height:1.45;padding:0}
+a{color:var(--accent2)}
+header{position:sticky;top:0;z-index:50;background:var(--panel);border-bottom:1px solid var(--line);box-shadow:var(--shadow);padding:10px 16px}
+.bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;max-width:1400px;margin:0 auto}
+.title{font-weight:800;font-size:16px;letter-spacing:.02em}
+.theme-toggle{
+  font:inherit;font-size:12.5px;font-weight:650;cursor:pointer;
+  border:1px solid var(--line);background:var(--chip);color:var(--ink);
+  border-radius:999px;padding:6px 12px;margin-left:auto
+}
+.theme-toggle:hover{border-color:var(--gold);color:var(--gold)}
+.azure-pill{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:12px;font-weight:700;border-radius:999px;
+  padding:5px 10px;border:1px solid var(--line);background:var(--chip);color:var(--ink)
+}
+.azure-pill.is-saved{background:rgba(39,174,96,.16);border-color:rgba(39,174,96,.4);color:var(--accent3)}
+.azure-pill.is-sync{background:rgba(243,156,18,.14);border-color:rgba(243,156,18,.4);color:#b9770e}
+.azure-pill.is-error{background:rgba(231,76,60,.14);border-color:rgba(231,76,60,.4);color:var(--accent)}
+.azure-banner{
+  margin-top:14px;padding:8px 12px;
+  border:1px solid var(--line);border-radius:10px;background:var(--chip);
+  font-size:13px;color:var(--muted)
+}
+.azure-banner b{color:var(--ink)}
+.azure-banner.is-saved{border-color:rgba(39,174,96,.35);background:rgba(39,174,96,.08)}
+.azure-banner.is-sync{border-color:rgba(243,156,18,.35);background:rgba(243,156,18,.08)}
+.azure-banner.is-error{border-color:rgba(231,76,60,.35);background:rgba(231,76,60,.08)}
+#azureToast{
+  position:fixed;right:16px;bottom:16px;z-index:90;
+  min-width:240px;max-width:min(420px, calc(100vw - 32px));
+  padding:12px 14px;border-radius:12px;
+  background:var(--panel);color:var(--ink);
+  border:1px solid var(--line);box-shadow:0 8px 24px rgba(0,0,0,.18);
+  font-size:13px;line-height:1.4;display:none
+}
+#azureToast.show{display:block}
+#azureToast b{display:block;font-size:13.5px;margin-bottom:2px}
+#azureToast small{color:var(--muted)}
+#azureToast.is-saved{border-color:rgba(39,174,96,.45);background:rgba(39,174,96,.1)}
+#azureToast.is-sync{border-color:rgba(243,156,18,.45);background:rgba(243,156,18,.1)}
+#azureToast.is-error{border-color:rgba(231,76,60,.45);background:rgba(231,76,60,.08)}
+
+/* Shared Menu styling */
+.shared-nav {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+  margin-right: auto;
+  background: var(--chip, var(--bg));
+  padding: 4px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+}
+.shared-nav a {
+  color: var(--muted);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 13px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.shared-nav a:hover {
+  color: var(--accent2);
+  background: var(--panel);
+}
+.shared-nav a.active {
+  color: var(--ink);
+  background: var(--panel);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  border: 1px solid var(--line);
+}
+
+main{max-width:1400px;margin:0 auto;padding:16px 16px 80px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:18px;margin-bottom:18px}
+h1{font-size:22px;margin:0 0 16px;font-weight:800}
+
+/* Filter controls */
+.filter-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  align-items: flex-end;
+}
+.control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.control-group label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+.control-group input, .control-group select {
+  font: inherit;
+  font-size: 13px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  color: var(--ink);
+  border-radius: 8px;
+  width: 100%;
+}
+.control-group input:focus, .control-group select:focus {
+  outline: none;
+  border-color: var(--accent2);
+}
+.btn{
+  font:inherit;font-size:12.5px;font-weight:650;text-decoration:none;cursor:pointer;
+  border:1px solid var(--line);background:var(--chip);color:var(--ink);
+  border-radius:8px;padding:8px 14px;white-space:nowrap;
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+}
+.btn:hover{filter:brightness(1.05);border-color:var(--muted)}
+.btn.primary{background:var(--accent2);border-color:var(--accent2);color:#fff}
+.btn.danger{background:rgba(231,76,60,.15);border-color:rgba(231,76,60,.3);color:var(--accent)}
+.btn.sm{padding:4px 8px;font-size:11.5px}
+
+/* Stats row */
+.stats-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  font-size: 13px;
+  color: var(--muted);
+}
+.stats-bar b {
+  color: var(--ink);
+}
+
+/* Table styling */
+.table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: visible;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel);
+  margin-top: 14px;
+  padding: 28px 10px;
+}
+table.shotlist-table {
+  width: max-content;
+  min-width: 0;
+  table-layout: fixed;
+  border-collapse: collapse;
+  font-size: 13px;
+  text-align: left;
+}
+table.shotlist-table th, table.shotlist-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--line);
+  vertical-align: middle;
+  overflow: hidden;
+}
+table.shotlist-table td.edit-cell{overflow:visible}
+table.shotlist-table th {
+  position: relative;
+  background: var(--chip);
+  font-weight: 700;
+  color: var(--muted);
+  user-select: none;
+  cursor: pointer;
+  white-space: nowrap;
+}
+table.shotlist-table th:hover {
+  color: var(--ink);
+  background: var(--line);
+}
+table.shotlist-table th .th-label{
+  display:block;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.col-resizer{
+  position:absolute;top:0;right:0;width:8px;height:100%;
+  cursor:col-resize;user-select:none;z-index:3;
+}
+.col-resizer:hover, .col-resizer.is-dragging{
+  background: color-mix(in srgb, var(--accent2) 55%, transparent);
+}
+.col-hide-btn{
+  position:absolute;top:2px;right:8px;z-index:2;
+  width:16px;height:16px;padding:0;line-height:14px;
+  border:0;background:transparent;color:var(--muted);
+  font-size:13px;font-weight:800;cursor:pointer;border-radius:4px;
+  display:none;
+}
+table.shotlist-table th:hover .col-hide-btn{display:block}
+.col-hide-btn:hover{background:rgba(231,76,60,.18);color:var(--accent)}
+.col-picker{position:relative}
+.col-picker>summary{list-style:none}
+.col-picker>summary::-webkit-details-marker{display:none}
+.col-picker-menu{
+  position:absolute;z-index:60;top:calc(100% + 6px);left:0;
+  min-width:220px;max-height:min(70vh, 420px);overflow:auto;
+  background:var(--panel);border:1px solid var(--line);border-radius:12px;
+  box-shadow:var(--shadow);padding:8px;
+}
+.col-picker-item{
+  display:flex;align-items:center;gap:8px;
+  font-size:13px;padding:5px 6px;border-radius:8px;cursor:pointer;
+}
+.col-picker-item:hover{background:var(--chip)}
+.col-picker-item input{accent-color:var(--accent2)}
+.hidden-cols-bar{
+  display:none;flex-wrap:wrap;align-items:center;gap:6px;
+  margin-top:10px;font-size:12px;color:var(--muted)
+}
+.hidden-cols-bar.has-hidden{display:flex}
+.hidden-col-chip{
+  display:inline-flex;align-items:center;gap:4px;
+  font:inherit;font-size:11px;font-weight:650;cursor:pointer;
+  border:1px dashed var(--line);background:var(--chip);color:var(--ink);
+  border-radius:999px;padding:3px 8px;
+}
+.hidden-col-chip:hover{border-color:var(--accent2);color:var(--accent2)}
+.order-btns{display:grid;grid-template-columns:22px 22px;gap:2px;justify-content:center}
+.order-btn{
+  font:inherit;font-size:10px;font-weight:800;line-height:1;
+  width:22px;height:20px;padding:0;
+  border:1px solid var(--line);background:var(--chip);color:var(--ink);
+  border-radius:5px;cursor:pointer;
+}
+.order-btn:hover:not(:disabled){border-color:var(--accent2);color:var(--accent2)}
+.order-btn:disabled{opacity:.32;cursor:not-allowed}
+.order-btn.edge{font-size:9px;letter-spacing:-0.4px}
+.scene-select{
+  font:inherit;font-size:11px;font-weight:700;
+  border:1px solid var(--line);background:var(--bg);color:var(--ink);
+  border-radius:8px;padding:4px 6px;max-width:100%;
+  border-left-width:4px;
+}
+.scenes-panel{display:none;margin-top:14px}
+.scenes-panel.open{display:block}
+.scenes-head{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:12px}
+.scenes-head h2{font-size:18px;margin:0;font-weight:800}
+.scene-cards{display:flex;flex-direction:column;gap:12px}
+.scene-card{
+  border:1px solid var(--line);border-radius:12px;background:var(--bg);
+  padding:14px;border-left:5px solid var(--accent2);
+}
+.scene-card.is-hidden{opacity:.72}
+.scene-card-top{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin-bottom:10px}
+.scene-title-input,.scene-wpm-input,.scene-rationale{
+  font:inherit;font-size:13px;
+  border:1px solid var(--line);background:var(--panel);color:var(--ink);
+  border-radius:6px;padding:6px 8px;
+}
+.scene-title-input{width:min(260px,100%);font-weight:700}
+.scene-wpm-input{width:72px}
+.scene-rationale{width:100%;min-height:64px;resize:vertical;line-height:1.4}
+.scene-field label{
+  display:block;font-size:11px;font-weight:700;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.04em;margin:0 0 5px
+}
+.scene-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:800px){.scene-grid{grid-template-columns:1fr}}
+.scene-meta{font-size:12px;color:var(--muted)}
+.btn.is-on{border-color:var(--gold);color:var(--gold)}
+body.is-col-resizing{cursor:col-resize;user-select:none}
+body.is-col-resizing *{cursor:col-resize !important}
+.tag-editor{
+  display:flex;flex-direction:column;gap:6px;min-width:0;
+}
+.chip-row{
+  display:flex;flex-wrap:wrap;gap:4px;align-items:center;
+}
+.chip-x{
+  display:inline-flex;align-items:center;gap:3px;
+  font:inherit;font-size:10px;font-weight:600;
+  border:1px solid var(--line);background:var(--chip);color:var(--ink);
+  border-radius:999px;padding:2px 6px 2px 7px;cursor:pointer;max-width:100%;
+}
+.chip-x:hover{border-color:var(--accent);color:var(--accent)}
+.chip-x .x{opacity:.7;font-weight:800}
+.tag-badge{
+  display:inline-block;font-size:10px;font-weight:600;
+  background:rgba(243,156,18,.14);color:var(--gold);
+  border:1px solid rgba(243,156,18,.35);
+  padding:2px 6px;border-radius:4px;margin:1px;white-space:nowrap;
+}
+.add-row{display:flex;gap:4px;align-items:center;min-width:0}
+.add-select, .add-input{
+  font:inherit;font-size:11px;
+  border:1px solid var(--line);background:var(--bg);color:var(--ink);
+  border-radius:6px;padding:3px 6px;min-width:0;max-width:100%;
+}
+.add-select{width:100%}
+.add-input{flex:1;width:72px}
+.add-btn{
+  font:inherit;font-size:11px;font-weight:700;cursor:pointer;
+  border:1px solid var(--line);background:var(--chip);color:var(--ink);
+  border-radius:6px;padding:3px 7px;white-space:nowrap;
+}
+.add-btn:hover{border-color:var(--accent2);color:var(--accent2)}
+table.shotlist-table th.sorted-asc::after {
+  content: " ▲";
+}
+table.shotlist-table th.sorted-desc::after {
+  content: " ▼";
+}
+table.shotlist-table tbody tr:hover {
+  background: color-mix(in srgb, var(--bg) 40%, transparent);
+}
+table.shotlist-table tr.hidden-row {
+  opacity: 0.55;
+  background: color-mix(in srgb, var(--accent) 4%, transparent);
+}
+
+/* Badges */
+.stage-badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  padding: 3px 8px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.type-badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 600;
+  background: var(--chip);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin: 1px;
+  white-space: nowrap;
+}
+.label-badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin: 1px;
+  white-space: nowrap;
+}
+.label-badge.pain { background: rgba(231,76,60,.14); color: var(--accent); border: 1px solid rgba(231,76,60,.3); }
+.label-badge.gain { background: rgba(52,152,219,.14); color: var(--accent2); border: 1px solid rgba(52,152,219,.3); }
+.label-badge.solution { background: rgba(39,174,96,.14); color: var(--accent3); border: 1px solid rgba(39,174,96,.3); }
+
+/* Bookmark star */
+.star-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  color: var(--muted);
+  padding: 4px;
+  transition: transform 0.15s ease;
+}
+.star-btn:hover {
+  transform: scale(1.2);
+}
+.star-btn.bookmarked {
+  color: var(--gold);
+}
+
+/* Media thumbnail container */
+.thumb-cell {
+  position: relative;
+  width: 68px;
+  height: 44px;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  overflow: hidden;
+  background: #000;
+  cursor: pointer;
+  z-index: 1;
+}
+.thumb-cell img {
+  display: block;
+  width: 68px;
+  height: 44px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+.thumb-cell .play-icon {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,.35);
+  color: #fff;
+  font-size: 16px;
+  opacity: 0.8;
+  transition: opacity 0.2s;
+  pointer-events: none;
+  border-radius: 6px;
+}
+.thumb-cell:hover .play-icon {
+  opacity: 1;
+  background: rgba(0,0,0,.5);
+}
+#thumbHoverPreview{
+  position:fixed;
+  z-index:96;
+  pointer-events:none;
+  display:none;
+  width:340px;
+  height:220px;
+  border-radius:8px;
+  overflow:hidden;
+  border:1px solid var(--line);
+  box-shadow:0 14px 40px rgba(0,0,0,.5);
+  background:#000;
+}
+#thumbHoverPreview.show{display:block}
+#thumbHoverPreview img{
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+/* Editable voiceover cell */
+.vo-cell {
+  position: relative;
+}
+.vo-textarea {
+  width: 100%;
+  min-width: 0;
+  height: 54px;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 12.5px;
+  padding: 6px;
+  border-radius: 6px;
+  resize: vertical;
+}
+.vo-textarea:focus {
+  outline: none;
+  border-color: var(--accent2);
+  background: var(--panel);
+}
+
+/* Lightbox Modal */
+#mediaModal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.88);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 24px;
+  flex-direction: column;
+  gap: 12px;
+}
+#mediaModal.open {
+  display: flex;
+}
+#mediaModal .modal-content {
+  position: relative;
+  max-width: 90vw;
+  max-height: 80vh;
+  background: #000;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+}
+#mediaModal video, #mediaModal img {
+  display: block;
+  max-width: 90vw;
+  max-height: 80vh;
+  object-fit: contain;
+}
+#mediaModal .modal-cap {
+  color: #fff;
+  font-size: 14px;
+  text-align: center;
+  max-width: 600px;
+  line-height: 1.4;
+}
+#mediaModal .close-modal {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: rgba(0,0,0,.6);
+  border: 1px solid #fff;
+  color: #fff;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 800;
+  cursor: pointer;
+  z-index: 110;
+}
+#mediaModal .close-modal:hover {
+  background: #fff;
+  color: #000;
+}
+
+.hidden-shots-panel{display:none;margin-top:18px}
+.hidden-shots-panel.open{display:block}
+.hidden-shots-head{
+  display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;
+  margin-bottom:12px
+}
+.hidden-shots-head h2{font-size:18px;margin:0;font-weight:800}
+.hidden-shots-head .hint{font-size:13px;color:var(--muted)}
+.btn-hidden-count.is-on{border-color:var(--gold);color:var(--gold)}
+table.hidden-shots-table{width:100%;min-width:720px}
+table.hidden-shots-table th{cursor:default}
+table.hidden-shots-table th:hover{background:var(--chip);color:var(--muted)}
+
+</style>
+</head>
+<body>
+
+<header>
+  <div class="bar">
+    <div class="title"><a href="index.html" style="color:inherit;text-decoration:none">WIG Animation</a></div>
+    <nav class="shared-nav" aria-label="Main Navigation">
+      <a href="index.html" class="nav-item"><span>🏠</span> Overview</a>
+      <a href="research.html" class="nav-item"><span>🎬</span> Vertical Editor</a>
+      <a href="timeline.html" class="nav-item"><span>↔️</span> Horizontal Timeline</a>
+      <a href="shotlist.html" class="nav-item active" id="navFilter"><span>📊</span> Filter &amp; Sort Table</a>
+      <a href="scenes.html" class="nav-item" id="navScenes"><span>🗂️</span> Scenes</a>
+      <a href="voice_over.html" class="nav-item"><span>📜</span> VO Script</a>
+    </nav>
+    <div class="azure-pill" id="statAzure" title="Shotlist backup on Azure Blob">☁️ Azure…</div>
+    <button type="button" class="theme-toggle" id="themeToggle">Light</button>
+  </div>
+</header>
+
+<main>
+  <div class="panel">
+    <h1>Filter &amp; Sort Shotlist</h1>
+    <div class="filter-grid">
+      <div class="control-group">
+        <label for="filterSearch">Search keyword</label>
+        <input type="text" id="filterSearch" placeholder="Search caption, VO, file...">
+      </div>
+      <div class="control-group">
+        <label for="filterStage">Stage / Scene</label>
+        <select id="filterStage">
+          <option value="">All Stages</option>
+        </select>
+      </div>
+      <div class="control-group">
+        <label for="filterType">Shot Type</label>
+        <select id="filterType">
+          <option value="">All Types</option>
+        </select>
+      </div>
+      <div class="control-group">
+        <label for="filterTag">Tag</label>
+        <select id="filterTag">
+          <option value="">All Tags</option>
+        </select>
+      </div>
+      <div class="control-group">
+        <label for="filterLabel">Label</label>
+        <select id="filterLabel">
+          <option value="">All Labels</option>
+        </select>
+      </div>
+      <div class="control-group">
+        <label for="filterBookmark">Bookmark status</label>
+        <select id="filterBookmark">
+          <option value="">All Statuses</option>
+          <option value="bookmarked">Bookmarked only</option>
+          <option value="unbookmarked">Not bookmarked</option>
+        </select>
+      </div>
+      <div class="control-group">
+        <label for="filterVisibility">Visibility</label>
+        <select id="filterVisibility">
+          <option value="visible">Visible only</option>
+          <option value="hidden">Hidden only</option>
+          <option value="all">Show all (incl. hidden)</option>
+        </select>
+      </div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <button type="button" class="btn" id="btnResetFilters">Reset</button>
+        <details class="col-picker" id="colPicker">
+          <summary class="btn" id="btnColumns">Columns</summary>
+          <div class="col-picker-menu" id="colPickerMenu"></div>
+        </details>
+        <button type="button" class="btn" id="btnResetCols">Reset columns</button>
+        <button type="button" class="btn" id="btnScenes">Scenes</button>
+        <button type="button" class="btn primary" id="btnSaveAzure">Save to Azure</button>
+      </div>
+    </div>
+
+    <div class="stats-bar">
+      <span>Filtered: <b id="statFilteredCount">0</b> / <b id="statTotalCount">0</b> shots</span>
+      <span>•</span>
+      <span>Total Duration: <b id="statTotalDuration">00:00</b></span>
+      <span>•</span>
+      <span>Word Count: <b id="statTotalWords">0</b> words</span>
+      <span>•</span>
+      <span>Bookmarked: <b id="statBookmarkedCount">0</b></span>
+      <span>•</span>
+      <span>Hidden: <b id="statHiddenCount">0</b></span>
+      <button type="button" class="btn sm btn-hidden-count" id="btnShowHidden">Show hidden shots</button>
+    </div>
+    <div class="hidden-cols-bar" id="hiddenColsBar"></div>
+    <div class="azure-banner" id="azureBanner">☁️ Shotlist changes write to <b>Azure Blob</b> — <b id="azureBannerStatus">checking…</b></div>
+  </div>
+
+  <div class="panel scenes-panel" id="scenesPanel">
+    <div class="scenes-head">
+      <h2>Scene editor</h2>
+      <span class="hint" style="color:var(--muted);font-size:13px">Hide a scene, write why it exists, and assign types / labels. Shots stay linked by scene id.</span>
+      <button type="button" class="btn sm" id="btnAddScene" style="margin-left:auto">Add scene</button>
+      <button type="button" class="btn" id="btnCloseScenes">Close</button>
+    </div>
+    <div class="scene-cards" id="scenesBody"></div>
+  </div>
+
+  <div class="table-wrap">
+    <table class="shotlist-table" id="shotlistTable">
+      <colgroup id="shotlistCols"></colgroup>
+      <thead>
+        <tr id="shotlistHeadRow"></tr>
+      </thead>
+      <tbody id="shotlistBody">
+        <!-- Rendered dynamically -->
+      </tbody>
+    </table>
+  </div>
+
+  <div class="panel hidden-shots-panel" id="hiddenShotsPanel">
+    <div class="hidden-shots-head">
+      <h2>Hidden shots</h2>
+      <span class="hint" id="hiddenTableHint">Shots and scenes marked hidden.</span>
+      <button type="button" class="btn sm" id="btnShowAllHidden" style="margin-left:auto">Show all in this list</button>
+      <button type="button" class="btn" id="btnCloseHidden">Close</button>
+    </div>
+    <div class="table-wrap">
+      <table class="shotlist-table hidden-shots-table" id="hiddenShotsTable">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Media</th>
+            <th>Stage / Scene</th>
+            <th>File / ID</th>
+            <th>Caption</th>
+            <th>Voiceover</th>
+            <th>Why hidden</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="hiddenShotlistBody"></tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+<div id="azureToast" role="status" aria-live="polite"></div>
+<div id="thumbHoverPreview" aria-hidden="true"><img alt=""></div>
+
+<div id="mediaModal" role="dialog" aria-modal="true">
+  <button class="close-modal" id="modalClose">&times;</button>
+  <div class="modal-content" id="modalContent"></div>
+  <div class="modal-cap" id="modalCap"></div>
+</div>
+
+<script>
+/* ---------- Canonical Seed Data ---------- */
+const MANIFEST = [{"file": "stills/00_index/00_index.png", "stage": "00", "stageName": "Index", "caption": "Master 16-stage table of contents for the whole production framework.", "voiceoverDefault": true}, {"file": "stills/01_architecture/01_architecture.png", "stage": "01", "stageName": "Architecture", "caption": "DeliveryPilot Video Production Framework v1.0 — the full 14-stage flow diagram.", "voiceoverDefault": true}, {"file": "stills/02_plan/02_plan_00_cover-title.png", "stage": "02", "stageName": "Plan", "caption": "Title card: \"AI Second Brain Video Script — Complete Production Guide.\"", "voiceoverDefault": true}, {"file": "stills/02_plan/02_plan_01_contents.png", "stage": "02", "stageName": "Plan", "caption": "Table of contents for the flagship video's own script document.", "voiceoverDefault": false}, {"file": "stills/02_plan/02_plan_02_timing-table.png", "stage": "02", "stageName": "Plan", "caption": "Scene timing table — 6 scenes, 2:58 total, ~475 words at 140-160 wpm.", "voiceoverDefault": true}, {"file": "stills/02_plan/02_plan_03_voiceover-1.png", "stage": "02", "stageName": "Plan", "caption": "Flagship voiceover script pt.1 — Hook through Dual-Agent Engine.", "voiceoverDefault": true}, {"file": "stills/02_plan/02_plan_04_voiceover-2.png", "stage": "02", "stageName": "Plan", "caption": "Flagship voiceover script pt.2 — 4-Step Workflow through Call to Action.", "voiceoverDefault": true}, {"file": "stills/02_plan/02_plan_05_anim-prompts-1.png", "stage": "02", "stageName": "Plan", "caption": "Animation prompt — Scene 1 (chaos) and start of Scene 2 (organizing).", "voiceoverDefault": true}, {"file": "stills/02_plan/02_plan_06_anim-prompts-2.png", "stage": "02", "stageName": "Plan", "caption": "Animation prompt — Scene 2 conclusion and full Scene 3 (P.A.R.A. breakdown).", "voiceoverDefault": true}, {"file": "stills/02_plan/02_plan_07_anim-prompts-3.png", "stage": "02", "stageName": "Plan", "caption": "Animation prompt — Scene 4 (dual-agent engine) and start of Scene 5.", "voiceoverDefault": true}, {"file": "stills/02_plan/02_plan_08_anim-prompts-4.png", "stage": "02", "stageName": "Plan", "caption": "Animation prompt — Scene 5 conclusion (Apply step) and full Scene 6 (CTA).", "voiceoverDefault": true}, {"file": "stills/02_plan/02_plan_09_delivery-notes-1.png", "stage": "02", "stageName": "Plan", "caption": "Voiceover delivery notes — pacing/tone/energy per section, ElevenLabs config.", "voiceoverDefault": false}, {"file": "stills/02_plan/02_plan_10_pronunciation.png", "stage": "02", "stageName": "Plan", "caption": "Pronunciation guide: Obsidian, P.A.R.A., Gemini, Proxmox, CCAR-P.", "voiceoverDefault": false}, {"file": "stills/02_plan/02_plan_11_integration-1.png", "stage": "02", "stageName": "Plan", "caption": "Google Flow / Canva Bulk Create integration steps 1-2.", "voiceoverDefault": false}, {"file": "stills/02_plan/02_plan_12_integration-2.png", "stage": "02", "stageName": "Plan", "caption": "Integration steps continued + CSV template note.", "voiceoverDefault": false}, {"file": "stills/02_plan/02_plan_13_tech-specs.png", "stage": "02", "stageName": "Plan", "caption": "Technical specs: 1920x1080, 30fps, fonts, master color palette.", "voiceoverDefault": false}, {"file": "stills/02_plan/02_plan_14_workflow-phases-1.png", "stage": "02", "stageName": "Plan", "caption": "Production workflow — Phase 0-3 (plan, voiceover, assets, assembly).", "voiceoverDefault": false}, {"file": "stills/02_plan/02_plan_15_workflow-phases-2.png", "stage": "02", "stageName": "Plan", "caption": "Production workflow — Phase 4 (upload/distribution) + tools required.", "voiceoverDefault": false}, {"file": "stills/02_plan/02_plan_16_resources-final.png", "stage": "02", "stageName": "Plan", "caption": "Success factors + full YouTube description template.", "voiceoverDefault": true}, {"file": "stills/02_plan/02_plan_17_checklist.png", "stage": "02", "stageName": "Plan", "caption": "Pre-production / during-production / before-upload checklist.", "voiceoverDefault": false}, {"file": "stills/02_plan/02_plan_18_csv-master.png", "stage": "02", "stageName": "Plan", "caption": "Canonical CSV of all 6 scenes for Canva Bulk Create.", "voiceoverDefault": false}, {"file": "stills/02_plan/02_plan_19_music-audio.png", "stage": "02", "stageName": "Plan", "caption": "Music mood/tempo/sources, SFX cues, DaVinci mix levels.", "voiceoverDefault": false}, {"file": "stills/03_assets/03_assets_00_ref-google-flow.png", "stage": "03", "stageName": "Assets", "caption": "Reference: Google Flow AI creative studio tool card.", "voiceoverDefault": false}, {"file": "stills/03_assets/03_assets_01_para-vault-counts.png", "stage": "03", "stageName": "Assets", "caption": "Real generated infographic — P.A.R.A. Vault with live note counts.", "voiceoverDefault": true}, {"file": "stills/03_assets/03_assets_02_dashboard-screenshot.png", "stage": "03", "stageName": "Assets", "caption": "Real Second Brain dashboard screenshot (localhost:8899).", "voiceoverDefault": true}, {"file": "stills/03_assets/03_assets_03_4pillars-garbled.png", "stage": "03", "stageName": "Assets", "caption": "AI-generated 4-pillar infographic — text render is garbled, needs redo.", "voiceoverDefault": false}, {"file": "stills/03_assets/03_assets_unsorted-03.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "stills/03_assets/03_assets_unsorted-04.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "stills/03_assets/03_assets_unsorted-06.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "stills/03_assets/03_assets_unsorted-07.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "stills/03_assets/03_assets_unsorted-08.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "stills/03_assets/03_assets_unsorted-09.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "stills/03_assets/03_assets_unsorted-11.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "stills/03_assets/03_assets_unsorted-12.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "stills/03_assets/03_assets_unsorted-13.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "stills/03_assets/03_assets_unsorted-14.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "stills/03_assets/03_assets_unsorted-15.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "stills/03_assets/03_assets_unsorted-16.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "stills/03_assets/03_assets_unsorted-17.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "stills/03_assets/03_assets_unsorted-18.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "stills/03_assets/03_assets_unsorted-19.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "stills/03_assets/03_assets_unsorted-20.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "stills/03_assets/03_assets_unsorted-21.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "stills/03_assets/03_assets_unsorted-22.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "stills/03_assets/03_assets_unsorted-23.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "stills/03_assets/03_assets_unsorted-24.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "stills/03_assets/03_assets_unsorted-25.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "stills/03_assets/03_assets_unsorted-26.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "stills/03_assets/03_assets_unsorted-27.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "stills/03_assets/03_assets_unsorted-28.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "stills/03_assets/03_assets_unsorted-29.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "stills/03_assets/03_assets_unsorted-30.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "stills/03_assets/03_assets_unsorted-31.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "stills/03_assets/03_assets_unsorted-32.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "stills/03_assets/03_assets_unsorted-33.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "stills/03_assets/03_assets_unsorted-34.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "stills/03_assets/03_assets_unsorted-35.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "stills/03_assets/03_assets_unsorted-36.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "stills/03_assets/03_assets_unsorted-37.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "stills/03_assets/03_assets_unsorted-38.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "stills/03_assets/03_assets_unsorted-39.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "stills/03_assets/03_assets_unsorted-40.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "stills/03_assets/03_assets_unsorted-41.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "stills/03_assets/03_assets_unsorted-42.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "stills/03_assets/03_assets_unsorted-43.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "stills/03_assets/03_assets_unsorted-44.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "stills/03_assets/03_assets_unsorted-45.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "stills/03_assets/03_assets_unsorted-46.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "stills/03_assets/03_assets_unsorted-47.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "stills/03_assets/03_assets_unsorted-48.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "stills/03_assets/03_assets_unsorted-49.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "stills/03_assets/03_assets_unsorted-50.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "stills/03_assets/03_assets_unsorted-51.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "stills/03_assets/03_assets_unsorted-52.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "stills/03_assets/03_assets_unsorted-53.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "stills/03_assets/03_assets_unsorted-54.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "stills/03_assets/03_assets_unsorted-55.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "stills/03_assets/03_assets_unsorted-56.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "stills/03_assets/03_assets_unsorted-57.png", "stage": "03", "stageName": "Assets", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "stills/04_cohort/04_cohort_00_week7-notes.png", "stage": "04", "stageName": "Cohort", "caption": "Cohort workflow notes + real Week 7 cohort-call calendar entry.", "voiceoverDefault": true}, {"file": "stills/04_cohort/04_cohort_01_who-are-we.png", "stage": "04", "stageName": "Cohort", "caption": "\"WHO ARE WE\" personal brand banner — no-experience-to-certified value prop.", "voiceoverDefault": true}, {"file": "stills/04_cohort/04_cohort_02_schedule.png", "stage": "04", "stageName": "Cohort", "caption": "Cohort schedule — every Sunday, 9-11PM UK time, free.", "voiceoverDefault": true}, {"file": "stills/05_gaps/05_gaps_00_hallucination-vs-context.png", "stage": "05", "stageName": "Gaps", "caption": "Strong before/after: low-context hallucination vs. high-context accurate AI.", "voiceoverDefault": true}, {"file": "stills/05_gaps/05_gaps_unsorted-03.png", "stage": "05", "stageName": "Gaps", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "stills/05_gaps/05_gaps_unsorted-04.png", "stage": "05", "stageName": "Gaps", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "stills/05_gaps/05_gaps_unsorted-05.png", "stage": "05", "stageName": "Gaps", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "stills/05_gaps/05_gaps_unsorted-06.png", "stage": "05", "stageName": "Gaps", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "stills/05_gaps/05_gaps_unsorted-08.png", "stage": "05", "stageName": "Gaps", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "stills/05_gaps/05_gaps_unsorted-09.png", "stage": "05", "stageName": "Gaps", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "stills/05_gaps/05_gaps_unsorted-10.png", "stage": "05", "stageName": "Gaps", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "stills/05_gaps/05_gaps_unsorted-11.png", "stage": "05", "stageName": "Gaps", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "stills/06_assembly/06_assembly_00_scene1-2-stills.png", "stage": "06", "stageName": "Assembly", "caption": "Script recap + two real generated stills — candidate visuals for Scenes 1 & 2.", "voiceoverDefault": true}, {"file": "stills/06_assembly/06_assembly_01_divider-empty.png", "stage": "06", "stageName": "Assembly", "caption": "Empty \"Assembly\" section-divider ribbon.", "voiceoverDefault": false}, {"file": "stills/07_polish/07_polish_00_divider-empty.png", "stage": "07", "stageName": "Polish", "caption": "Empty section-divider ribbon (Polish stage).", "voiceoverDefault": false}, {"file": "stills/08_refinement/08_refinement_00_divider-empty.png", "stage": "08", "stageName": "Refinement", "caption": "Empty \"Refinement\" section-divider ribbon.", "voiceoverDefault": false}, {"file": "stills/09_audio/09_audio_00_divider-empty.png", "stage": "09", "stageName": "Audio", "caption": "Empty \"Audio\" section-divider ribbon.", "voiceoverDefault": false}, {"file": "stills/10_editcolor/10_editcolor_00_divider-empty.png", "stage": "10", "stageName": "Edit Color", "caption": "Empty \"Edit Color\" section-divider ribbon.", "voiceoverDefault": false}, {"file": "stills/11_thumbnail/11_thumbnail_00_divider-empty.png", "stage": "11", "stageName": "Thumbnail", "caption": "Empty \"Publish/Thumbnail\" section-divider ribbon.", "voiceoverDefault": false}, {"file": "stills/12_export/12_export_00_divider-empty.png", "stage": "12", "stageName": "Export", "caption": "Empty \"Publish/Export\" section-divider ribbon.", "voiceoverDefault": false}, {"file": "stills/13_metadata/13_metadata_00_template-empty.png", "stage": "13", "stageName": "Metadata", "caption": "Unfilled title/description template sticky note.", "voiceoverDefault": false}, {"file": "stills/13_metadata/13_metadata_01_followup-xpost.png", "stage": "13", "stageName": "Metadata", "caption": "Real embedded X post — a Canva feature request, tangential follow-up note.", "voiceoverDefault": false}, {"file": "stills/15_tactics/15_tactics_00_editor-screenshot-stub.png", "stage": "15", "stageName": "Tactics", "caption": "Screenshot of the Canva editor itself — unfinished \"Top Titles\" stub.", "voiceoverDefault": false}, {"file": "stills/15_tactics/15_tactics_unsorted-02.png", "stage": "15", "stageName": "Tactics", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "stills/15_tactics/15_tactics_unsorted-03.png", "stage": "15", "stageName": "Tactics", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}, {"file": "stills/15_tactics/15_tactics_unsorted-04.png", "stage": "15", "stageName": "Tactics", "caption": "Uncatalogued reference/visual asset — add a caption.", "voiceoverDefault": false}];
+
+const STAGE_ORDER = ["00","01","02","03","04","05","06","07","08","09","10","11","12","13","14","15","16"];
+const STAGE_NAMES = {
+  "00":"Index","01":"Architecture","02":"Plan","03":"Assets","04":"Cohort",
+  "05":"Gaps","06":"Assembly","07":"Polish","08":"Refinement","09":"Audio","10":"Edit Color",
+  "11":"Thumbnail","12":"Export","13":"Metadata","14":"WIG (My Story)","15":"Tactics",
+  "16":"Video Flow"
+};
+const SCENE_COLORS = {
+  "00":"#3498db","01":"#9b59b6","02":"#e67e22","03":"#1abc9c","04":"#e74c3c",
+  "05":"#2980b9","06":"#16a085","07":"#8e44ad","08":"#f39c12","09":"#27ae60",
+  "10":"#c0392b","11":"#2c3e50","12":"#d35400","13":"#7f8c8d","14":"#e91e63","15":"#00bcd4",
+  "16":"#6366f1"
+};
+
+const STAGE_VO = {
+  "00": "Every video I make now runs through the same sixteen-step pipeline. This is the map.",
+  "01": "Plan. Assets. Assembly. Polish. Publish. Each stage has one job, and one tool that does it.",
+  "02": "The plan isn't a vibe — it's a script, timed to the second, with the animation prompt for every scene written before I generate a single frame.",
+  "03": "46,000 notes, 210 live projects — the numbers on screen aren't mockups. That's my actual second brain, queried live.",
+  "04": "Every Sunday, 9 to 11PM UK time, free — I open my screen and we push AI to its limits together. No experience required.",
+  "05": "The gap is context. Low-context AI hallucinates. Feed it your history, your preferences, your own archive — and it stops guessing and starts knowing you.",
+  "06": "This is where the script and the first generated stills meet — chaos and clarity, side by side, before they ever hit a timeline.",
+  "07": "Every cut gets a pass in DaVinci before it's allowed to move on.",
+  "08": "Refinement is where I cut what doesn't earn its seconds.",
+  "09": "Voiceover at minus six, music bed at minus eighteen to minus twenty-four — score it so the words never fight the track.",
+  "10": "Color and graphics last, once the timing already works — never the other way round.",
+  "11": "The thumbnail gets the same AI pipeline as everything else: generated, not stock.",
+  "12": "1080p, H.264, 8 to 12 megabits. One export setting, every time, so nothing downstream breaks.",
+  "13": "Title, description, tags — written by the same system that wrote the script, then reviewed by me before it ships.",
+  "14": "For twenty years I was the SRE who fixed things by hand — critical national infrastructure, National Grid, Goldman Sachs, Microsoft. Then the game changed: agentic operational models that see drift and fix themselves. That's my Wildly Important Goal — and Delivery Pilot.",
+  "15": "Tactics are the small, unglamorous reps — the actual hands-on-keyboard work that makes the other fifteen steps real.",
+  "16": "These are the Google Flow animation clips — first frame still plus the playable loop."
+};
+
+const FILE_VO = {
+  "00_index.png": STAGE_VO["00"],
+  "01_architecture.png": STAGE_VO["01"],
+  "02_plan_00_cover-title.png": "AI Second Brain — complete production guide. Six scenes, two minutes fifty-eight.",
+  "02_plan_02_timing-table.png": "Six scenes, two fifty-eight total, about four hundred seventy-five words at one-forty to one-sixty words per minute.",
+  "02_plan_03_voiceover-1.png": "I was drowning in 46,000 notes across Obsidian. Every search felt like looking for a needle in a digital haystack. And then I realized—the problem wasn't the number of notes. It was that they weren't working for me. So I engineered something different: a machine-readable, AI-native knowledge engine.",
+  "02_plan_04_voiceover-2.png": "Raw knowledge isn't power—applied knowledge is. Tell. Show. Do. Apply. From chaos to execution in four steps. This isn't just about note-taking anymore. Links in the comments. Let's go.",
+  "02_plan_05_anim-prompts-1.png": "Scene 1 — Hook: chaotic dark workspace, 46,000 note-icons, red accent. Scene 2 begins: vault organizes.",
+  "02_plan_06_anim-prompts-2.png": "Scene 2 closes; Scene 3 — P.A.R.A. four zones AI understands instantly: Projects, Areas, Resources, Archive.",
+  "02_plan_07_anim-prompts-3.png": "Scene 4 — dual-agent engine, Gemini and Claude in tandem, syncing GitHub, Drive, Proxmox.",
+  "02_plan_08_anim-prompts-4.png": "Scene 5 — Apply step. Scene 6 — call to action: Build Your AI Second Brain. Join the hands-on cohort.",
+  "02_plan_16_resources-final.png": "Success factors locked. Full YouTube description ready to ship.",
+  "03_assets_01_para-vault-counts.png": STAGE_VO["03"],
+  "03_assets_02_dashboard-screenshot.png": "Then comes the engine: a local dual-agent rig running Gemini and Claude in tandem — live on the Second Brain dashboard.",
+  "04_cohort_00_week7-notes.png": STAGE_VO["04"],
+  "04_cohort_01_who-are-we.png": "No experience to certified — that's the personal brand promise of this cohort.",
+  "04_cohort_02_schedule.png": "Every Sunday, 9 to 11PM UK time, free. That's not a tagline — that's Week 7's calendar invite.",
+  "05_gaps_00_hallucination-vs-context.png": STAGE_VO["05"],
+  "06_assembly_00_scene1-2-stills.png": STAGE_VO["06"]
+};
+
+const VIDEO_FLOW = [
+  {file:"01_colorful-file-icons-background.mp4", slug:"colorful-file-icons-background"},
+  {file:"02_futuristic-network-grid.mp4", slug:"futuristic-network-grid"},
+  {file:"03_data-vault-galaxy.mp4", slug:"data-vault-galaxy"},
+  {file:"04_black-diamond-vortex.mp4", slug:"black-diamond-vortex"},
+  {file:"05_bright-light-in-darkness.mp4", slug:"bright-light-in-darkness"},
+  {file:"06_abstract-geometry-animation.mp4", slug:"abstract-geometry-animation"},
+  {file:"07_sparkling-light-explosion.mp4", slug:"sparkling-light-explosion"},
+  {file:"08_gray-diagonal-plane.mp4", slug:"gray-diagonal-plane"},
+  {file:"09_dark-screen-teal-bar.mp4", slug:"dark-screen-teal-bar"},
+  {file:"10_glowing-red-horizon.mp4", slug:"glowing-red-horizon"},
+  {file:"11_blue-title-card-garbled-text.mp4", slug:"blue-title-card-garbled-text"},
+  {file:"12_dark-grid-visualization.mp4", slug:"dark-grid-visualization"},
+  {file:"13_red-code-glitch.mp4", slug:"red-code-glitch"},
+  {file:"14_data-interface-dashboard.mp4", slug:"data-interface-dashboard"},
+  {file:"15_gold-blue-logos-sync.mp4", slug:"gold-blue-logos-sync"},
+  {file:"16_grid-interface-display.mp4", slug:"grid-interface-display"},
+  {file:"17_digital-asset-interface.mp4", slug:"digital-asset-interface"},
+  {file:"18_golden-brain-lightning.mp4", slug:"golden-brain-lightning"},
+  {file:"19_tell-show-animation.mp4", slug:"tell-show-animation"},
+  {file:"20_golden-brain-lightning-2.mp4", slug:"golden-brain-lightning-2"},
+  {file:"21_glowing-arrow-motion.mp4", slug:"glowing-arrow-motion"},
+  {file:"22_animated-arrow-grid.mp4", slug:"animated-arrow-grid"},
+  {file:"23_golden-brain-animation.mp4", slug:"golden-brain-animation"},
+  {file:"24_golden-brain-apps.mp4", slug:"golden-brain-apps"},
+  {file:"25_golden-brain-animation-2.mp4", slug:"golden-brain-animation-2"},
+  {file:"26_geometric-play-button-background.mp4", slug:"geometric-play-button-background"}
+].map(c => {
+  const stem = c.file.replace(/\.mp4$/i, "");
+  return {
+    file: c.file,
+    slug: c.slug,
+    src: "video_flow/" + c.file,
+    poster: "video_flow/_first_frames/" + stem + ".jpg",
+    frame: stem + ".jpg",
+    title: c.slug.replace(/-/g, " ").replace(/\b\w/g, ch => ch.toUpperCase())
+  };
+});
+
+const SHOT_TYPE_OPTIONS = [
+  "🎯 Hook",
+  "❄️ Intro / Cold Open",
+  "📣 Call to Action",
+  "⚡ Transition / Interrupt",
+  "🪝 Mid-roll / Cliffhanger",
+  "🎬 B-Roll / Cutaway",
+  "📌 Key Takeaways / Recap",
+  "💰 Sponsor / Integration",
+  "📺 Outro / End Screen",
+  "🏁 Closing"
+];
+const SCENE_TYPE_OPTIONS = ["1️⃣ Act I","2️⃣ Act II","3️⃣ Act III"].concat(SHOT_TYPE_OPTIONS);
+const LABEL_OPTIONS = ["😣 Pain","✨ Gain","✅ Solution"];
+const TYPE_HELP = {
+  "🎯 Hook": "Opening punch that names the problem and why the viewer should stay.",
+  "❄️ Intro / Cold Open": "A brief tease taken from later in the video before the hook.",
+  "📣 Call to Action": "Prompt to subscribe, comment, or follow a link.",
+  "⚡ Transition / Interrupt": "A planned visual or audio reset between sections.",
+  "🪝 Mid-roll / Cliffhanger": "A mini-hook so viewers stay through the middle.",
+  "🎬 B-Roll / Cutaway": "Visuals that illustrate the spoken point.",
+  "📌 Key Takeaways / Recap": "A short recap of the primary lessons.",
+  "💰 Sponsor / Integration": "Dedicated brand or sponsor beat.",
+  "📺 Outro / End Screen": "End cards, playlists, subscribe overlay.",
+  "🏁 Closing": "Final beat that lands the message.",
+  "1️⃣ Act I": "Setup — world, problem, and stakes.",
+  "2️⃣ Act II": "Confrontation — method or conflict plays out.",
+  "3️⃣ Act III": "Resolution — payoff, proof, and landing."
+};
+const LABEL_HELP = {
+  "😣 Pain": "The problem or frustration the viewer already feels.",
+  "✨ Gain": "The outcome or benefit they want.",
+  "✅ Solution": "The method or offer that closes the gap."
+};
+const SCENE_RATIONALE = {
+  "00": "Orients the viewer. This is the map of the 16-step pipeline before any scene starts.",
+  "01": "Shows the whole production machine — each stage has one job and one tool.",
+  "02": "The plan is a timed script, not a vibe. Animation prompts are written before a frame is generated.",
+  "03": "Proof, not mockups. Live vault numbers and the dashboard so the claim is real.",
+  "04": "The human offer: a free Sunday cohort. Turns the system into a community you can join.",
+  "05": "Names the gap: low-context AI hallucinates; your archive is what makes it accurate.",
+  "06": "Where script meets first stills — chaos and clarity side by side before the timeline.",
+  "07": "Every cut gets a DaVinci pass before it is allowed to move on.",
+  "08": "Cut what does not earn its seconds.",
+  "09": "Voiceover and music mix so words never fight the track.",
+  "10": "Color and graphics last, once timing already works.",
+  "11": "The thumbnail uses the same AI pipeline as the film — generated, not stock.",
+  "12": "One export setting every time so nothing downstream breaks.",
+  "13": "Title, description, tags written by the same system that wrote the script.",
+  "14": "My story and Wildly Important Goal — why this pipeline exists.",
+  "15": "The unglamorous reps that make the other fifteen steps real.",
+  "16": "Playable Google Flow loops — motion that the stills only imply."
+};
+const COL_DEFS = [
+  { key:"index", label:"#", sort:"index", width:52, min:40 },
+  { key:"order", label:"Order", width:56, min:52 },
+  { key:"media", label:"Media", width:88, min:68 },
+  { key:"stage", label:"Stage / Scene", sort:"stage", width:168, min:130 },
+  { key:"file", label:"File / ID", sort:"file", width:150, min:90 },
+  { key:"caption", label:"Caption", sort:"caption", width:170, min:90 },
+  { key:"vo", label:"Voiceover Script (Editable)", sort:"vo", width:220, min:140 },
+  { key:"words", label:"Words", sort:"words", width:64, min:48, align:"right" },
+  { key:"duration", label:"Duration", sort:"duration", width:80, min:56, align:"right" },
+  { key:"wpm", label:"WPM", sort:"wpm", width:56, min:44, align:"right" },
+  { key:"types", label:"Types", width:180, min:120 },
+  { key:"tags", label:"Tags", width:160, min:110 },
+  { key:"labels", label:"Labels", width:150, min:110 },
+  { key:"star", label:"Star", width:56, min:44 },
+  { key:"action", label:"Action", width:76, min:60 }
+];
+const COL_WIDTHS_KEY = "wiganimation_shotlist_colwidths";
+const COL_HIDDEN_KEY = "wiganimation_shotlist_colhidden";
+const API_BASE_KEY = "wiganimation_api_base";
+
+const LS_KEY = "wiganimation_shotlist_v2";
+
+/* ---------- State Logic ---------- */
+let globalWpm = 150;
+const DEFAULT_WPM = 150;
+let shots = [];
+let scenes = {};
+let selectedShotId = null;
+let selectedSceneStage = null;
+let sceneOpen = {};
+let sceneOrder = STAGE_ORDER.slice();
+let scenesPanelOpen = false;
+
+function uid(){ return "s_" + Math.random().toString(36).slice(2, 10) + Date.now().toString(36); }
+function wordCount(text){
+  const t = (text || "").trim();
+  return t ? t.split(/\s+/).length : 0;
+}
+function formatTC(totalSec){
+  totalSec = Math.max(0, Math.round(totalSec || 0));
+  const h = Math.floor(totalSec / 3600);
+  const m = Math.floor((totalSec % 3600) / 60);
+  const s = totalSec % 60;
+  const pad = n => String(n).padStart(2, "0");
+  return h > 0 ? `${pad(h)}:${pad(m)}:${pad(s)}` : `${pad(m)}:${pad(s)}`;
+}
+function durationFromVo(text, overrideSec, wpm){
+  if(overrideSec != null && overrideSec !== "" && !isNaN(Number(overrideSec))){
+    return Math.max(1, Number(overrideSec));
+  }
+  const w = wordCount(text);
+  if(!w) return 2;
+  const rate = Math.max(80, Number(wpm) || globalWpm || DEFAULT_WPM);
+  return Math.max(2, Math.round((w / rate) * 60));
+}
+function shotWpm(s){
+  if(s && s.wpm != null && s.wpm !== "" && !isNaN(Number(s.wpm))) return Number(s.wpm);
+  const sc = s && scenes[s.stage];
+  if(sc && sc.wpm != null && sc.wpm !== "" && !isNaN(Number(sc.wpm))) return Number(sc.wpm);
+  return globalWpm || DEFAULT_WPM;
+}
+function fileBasename(path){
+  return String(path || "").split("/").pop();
+}
+function voForFile(file){
+  if(!file) return "";
+  return FILE_VO[file] || FILE_VO[fileBasename(file)] || "";
+}
+
+function videoFlowShotId(clip){
+  return "vf_" + String(clip.file || "").replace(/[^a-zA-Z0-9]/g, "_").slice(0, 50);
+}
+function videoFlowMedia(clip){
+  return [
+    { kind: "image", src: clip.poster, name: clip.frame, source: "video_flow_frame" },
+    { kind: "video", src: clip.src, poster: clip.poster, name: clip.file, source: "video_flow" }
+  ];
+}
+function buildVideoFlowShot(clip){
+  return {
+    id: videoFlowShotId(clip),
+    file: clip.src,
+    stage: "16",
+    caption: "Google Flow clip — " + clip.title + " (first frame + playable).",
+    vo: "(B-roll · Video Flow) " + clip.title + ".",
+    types: ["🎬 B-Roll / Cutaway"],
+    labels: [],
+    tags: [],
+    hidden: false,
+    minimized: false,
+    bookmarked: false,
+    bookmarkNote: "",
+    bookmarkedAt: "",
+    durationSec: 4,
+    media: videoFlowMedia(clip),
+    obsidianPath: "1_Projects_Deadline/WIGAnimation/" + clip.src,
+    kind: "shot"
+  };
+}
+function buildVideoFlowShots(){
+  return VIDEO_FLOW.map(buildVideoFlowShot);
+}
+
+function buildDefaultShots(){
+  const stills = MANIFEST.map((m, idx) => {
+    const voText = m.voiceoverDefault ? (FILE_VO[fileBasename(m.file)] || STAGE_VO[m.stage] || "") : "";
+    return {
+      id: "s_" + String(idx).padStart(3, "0"),
+      file: m.file,
+      stage: m.stage,
+      caption: m.caption || "",
+      vo: voText,
+      types: m.voiceoverDefault ? ["🎬 B-Roll / Cutaway"] : [],
+      labels: [],
+      tags: [],
+      hidden: false,
+      minimized: false,
+      bookmarked: false,
+      bookmarkNote: "",
+      bookmarkedAt: "",
+      durationSec: null, // auto from VO
+      media: m.file ? [{ kind: "image", src: m.file, name: m.file, source: "local" }] : [],
+      obsidianPath: "",
+      kind: "shot"
+    };
+  });
+  return stills.concat(buildVideoFlowShots());
+}
+
+function loadState(){
+  try{
+    const raw = localStorage.getItem(LS_KEY);
+    if(raw) return JSON.parse(raw);
+  }catch(e){}
+  return null;
+}
+
+function escapeHtml(s){
+  return String(s == null ? "" : s)
+    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+}
+function normalizeToken(val){
+  return String(val || "").replace(/\s+/g, " ").trim().slice(0, 48);
+}
+function uniqueList(list){
+  const out = [];
+  (list || []).forEach(v => {
+    const n = normalizeToken(v);
+    if(n && !out.includes(n)) out.push(n);
+  });
+  return out;
+}
+/* Scene ↔ shot relation
+   scenes[id] = { id, title, types, labels, hidden, minimized, wpm, shotIds[] }
+   shot.stage / shot.sceneId = scene id
+   sceneGraph is the portable view written into Azure/localStorage. */
+function allSceneIds(){
+  const ids = [];
+  (sceneOrder && sceneOrder.length ? sceneOrder : STAGE_ORDER).forEach(id => {
+    if(id != null && String(id) !== "" && !ids.includes(String(id))) ids.push(String(id));
+  });
+  Object.keys(scenes || {}).forEach(id => {
+    if(id && !ids.includes(id)) ids.push(id);
+  });
+  shots.forEach(s => {
+    const id = s && (s.sceneId || s.stage);
+    if(id != null && String(id) !== "" && !ids.includes(String(id))) ids.push(String(id));
+  });
+  return ids;
+}
+function sceneColor(id){
+  if(SCENE_COLORS[id]) return SCENE_COLORS[id];
+  const extras = ["#0ea5e9","#84cc16","#f43f5e","#a855f7","#14b8a6","#eab308"];
+  const n = parseInt(id, 10);
+  return extras[Math.abs((isNaN(n) ? String(id).length : n)) % extras.length];
+}
+function sceneTitle(stage){
+  const sc = scenes[stage] || {};
+  const custom = (sc.title || "").trim();
+  if(custom) return custom;
+  return STAGE_NAMES[stage] || ("Scene " + stage);
+}
+function ensureScene(stage){
+  const id = String(stage);
+  if(!scenes[id]){
+    scenes[id] = { minimized: false, hidden: false, title: "", rationale: "", types: [], labels: [], wpm: null, shotIds: [] };
+  }
+  const sc = scenes[id];
+  sc.id = id;
+  if(sc.hidden == null) sc.hidden = false;
+  if(sc.title == null) sc.title = "";
+  if(sc.rationale == null) sc.rationale = "";
+  if(sc.wpm === undefined) sc.wpm = null;
+  if(sc.minimized == null) sc.minimized = false;
+  if(!Array.isArray(sc.types)) sc.types = [];
+  if(!Array.isArray(sc.labels)) sc.labels = [];
+  if(!Array.isArray(sc.shotIds)) sc.shotIds = [];
+  return sc;
+}
+function shotsInScene(stage){
+  return shots.filter(s => String(s.sceneId || s.stage) === String(stage));
+}
+function syncSceneGraph(){
+  const ids = allSceneIds();
+  ids.forEach(ensureScene);
+  ids.forEach(id => { scenes[id].shotIds = []; });
+  shots.forEach(s => {
+    if(!s) return;
+    const id = String(s.sceneId || s.stage || "");
+    if(!id) return;
+    s.stage = id;
+    s.sceneId = id;
+    ensureScene(id).shotIds.push(s.id);
+  });
+  sceneOrder = ids;
+}
+function buildSceneGraph(){
+  syncSceneGraph();
+  return {
+    version: 1,
+    scenes: allSceneIds().map((id, order) => {
+      const sc = ensureScene(id);
+      return {
+        id,
+        name: STAGE_NAMES[id] || ("Scene " + id),
+        title: sc.title || "",
+        displayName: sceneTitle(id),
+        order,
+        hidden: !!sc.hidden,
+        minimized: !!sc.minimized,
+        wpm: sc.wpm,
+        rationale: sc.rationale || "",
+        types: (sc.types || []).slice(),
+        labels: (sc.labels || []).slice(),
+        shotIds: (sc.shotIds || []).slice(),
+        shotCount: (sc.shotIds || []).length
+      };
+    }),
+    links: shots.map(s => ({ shotId: s.id, sceneId: String(s.sceneId || s.stage || "") }))
+  };
+}
+function sceneOptionHTML(selected){
+  return allSceneIds().map(id => {
+    const sel = String(id) === String(selected) ? " selected" : "";
+    return `<option value="${escapeHtml(id)}"${sel}>${escapeHtml(id)} · ${escapeHtml(sceneTitle(id))}</option>`;
+  }).join("");
+}
+function nextSceneId(){
+  const used = new Set(allSceneIds());
+  let n = 17;
+  while(used.has(String(n).padStart(2, "0"))) n++;
+  return String(n).padStart(2, "0");
+}
+function assignShotToScene(shotId, newStage){
+  const shot = shots.find(s => s.id === shotId);
+  if(!shot) return false;
+  const from = String(shot.sceneId || shot.stage || "");
+  const to = String(newStage || "");
+  if(!to || from === to) return false;
+  ensureScene(to);
+  shot.stage = to;
+  shot.sceneId = to;
+  const fromIdx = shots.indexOf(shot);
+  if(fromIdx >= 0) shots.splice(fromIdx, 1);
+  let insertAt = shots.length;
+  for(let i = shots.length - 1; i >= 0; i--){
+    if(String(shots[i].sceneId || shots[i].stage) === to){
+      insertAt = i + 1;
+      break;
+    }
+  }
+  shots.splice(insertAt, 0, shot);
+  syncSceneGraph();
+  persist("Moved " + shotLabel(shot) + " from scene " + from + " to " + to + " (“" + sceneTitle(to) + "”)");
+  refreshStageFilter();
+  renderScenesPanel();
+  renderTable();
+  return true;
+}
+
+function allCustomTags(){
+  const set = new Set();
+  shots.forEach(s => (s.tags || []).forEach(t => { if(t) set.add(t); }));
+  return Array.from(set).sort((a,b) => a.localeCompare(b));
+}
+function currentStatePayload(){
+  syncSceneGraph();
+  return {
+    format: "wiganimation-shotlist-cookie",
+    version: 4,
+    shots,
+    scenes,
+    sceneOrder: allSceneIds(),
+    sceneGraph: buildSceneGraph(),
+    selectedShotId,
+    selectedSceneStage,
+    sceneOpen,
+    globalWpm,
+    columnWidths,
+    hiddenColumns,
+    savedAt: new Date().toISOString()
+  };
+}
+function saveState(){
+  try{
+    localStorage.setItem(LS_KEY, JSON.stringify(currentStatePayload()));
+  }catch(e){
+    console.error("Failed to save state to localStorage", e);
+  }
+}
+
+let apiBase = "";
+let azurePushTimer = null;
+let voAzureTimer = null;
+let lastChangeNote = "";
+let columnWidths = {};
+let hiddenColumns = [];
+
+function setAzureStat(text, detail){
+  const when = new Date().toLocaleTimeString();
+  const map = {
+    "saved": "☁️ Saved to Azure · " + when,
+    "saving…": "☁️ Saving to Azure…",
+    "sync…": "☁️ Saving to Azure…",
+    "load…": "☁️ Loading from Azure…",
+    "loaded": "☁️ Loaded from Azure · " + when,
+    "seeding…": "☁️ First save to Azure…",
+    "seeded": "☁️ Saved to Azure · " + when,
+    "cloud": "☁️ On Azure",
+    "empty": "☁️ Not saved to Azure yet",
+    "offline": "☁️ Azure offline",
+    "error": "☁️ Azure save failed",
+    "pending": "☁️ Unsaved changes"
+  };
+  const label = map[text] || ("☁️ " + text);
+  const kind = /error|fail/i.test(text) ? "error"
+    : /pending|unsaved/i.test(text) ? "sync"
+    : /save|saved|seeded|loaded|cloud/i.test(text) ? "saved"
+    : /sync|saving|load|seed/i.test(text) ? "sync" : "";
+  const el = document.getElementById("statAzure");
+  if(el){
+    el.textContent = label;
+    el.className = "azure-pill" + (kind ? " is-" + kind : "");
+  }
+  const banner = document.getElementById("azureBanner");
+  const status = document.getElementById("azureBannerStatus");
+  if(status) status.textContent = (detail || label.replace(/^☁️\s*/, ""));
+  if(banner) banner.className = "azure-banner" + (kind ? " is-" + kind : "");
+  const toast = document.getElementById("azureToast");
+  if(toast && (detail || text === "saved" || text === "error" || text === "pending")){
+    toast.className = "show" + (kind ? " is-" + kind : "");
+    toast.innerHTML = "<b>" + escapeHtml(label) + "</b><small>" + escapeHtml(detail || lastChangeNote || "Shotlist state") + "</small>";
+    clearTimeout(setAzureStat._hide);
+    setAzureStat._hide = setTimeout(() => { toast.className = toast.className.replace(/\bshow\b/g, "").trim(); }, 4200);
+  }
+}
+async function originHasShotlistApi(origin){
+  try{
+    const r = await fetch(origin + "/api/health", { cache: "no-store" });
+    if(!r.ok) return false;
+    const j = await r.json();
+    return !!(j && j.ok);
+  }catch(e){
+    return false;
+  }
+}
+async function resolveApiBase(){
+  if(await originHasShotlistApi(location.origin)){
+    apiBase = "";
+    try{ localStorage.removeItem(API_BASE_KEY); }catch(e){}
+    return "";
+  }
+  const candidates = [];
+  try{
+    const cached = localStorage.getItem(API_BASE_KEY);
+    if(cached) candidates.push(cached);
+  }catch(e){}
+  for(let p = 8765; p <= 8775; p++) candidates.push("http://127.0.0.1:" + p);
+  candidates.push("http://127.0.0.1:54965");
+  const seen = new Set();
+  for(const origin of candidates){
+    if(!origin || seen.has(origin) || origin === location.origin) continue;
+    seen.add(origin);
+    if(await originHasShotlistApi(origin)){
+      apiBase = origin;
+      try{ localStorage.setItem(API_BASE_KEY, origin); }catch(e){}
+      return origin;
+    }
+  }
+  apiBase = "";
+  return "";
+}
+function apiUrl(path){ return (apiBase || "") + path; }
+function pushAzureState(payload, opts){
+  opts = opts || {};
+  const run = async () => {
+    try{
+      await resolveApiBase();
+      const res = await fetch(apiUrl("/api/state"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ state: payload, backup: opts.backup !== false })
+      });
+      const data = await res.json().catch(() => null);
+      if(!res.ok || !data || !data.ok){
+        throw new Error((data && data.error) || ("HTTP " + res.status));
+      }
+      const blob = data.latest || "aug-video-animation-1/shotlist/latest.json";
+      const mention = (opts.note || lastChangeNote || "Shotlist updated")
+        + " · blob " + blob
+        + (data.bytes != null ? " · " + data.bytes + " bytes" : "");
+      setAzureStat("saved", mention);
+    }catch(e){
+      setAzureStat("error", (e && e.message) ? e.message : String(e));
+    }
+  };
+  setAzureStat(opts.silent ? "sync…" : "saving…", opts.note || lastChangeNote);
+  return run();
+}
+function persist(note, opts){
+  opts = opts || {};
+  if(note) lastChangeNote = note;
+  saveState();
+  if(opts.skipAzure) return;
+  setAzureStat("pending", lastChangeNote || "Change detected — Azure save shortly.");
+  clearTimeout(azurePushTimer);
+  azurePushTimer = setTimeout(() => {
+    pushAzureState(currentStatePayload(), { backup: true, silent: true, note: lastChangeNote });
+  }, opts.delay != null ? opts.delay : 1600);
+}
+function applyRemoteState(remote){
+  const incoming = remote && remote.shots ? remote : (remote && remote.state) || remote;
+  if(!incoming || !Array.isArray(incoming.shots) || incoming.shots.length < 2) return false;
+  if(!incoming.shots.some(s => s && (s.file || s.vo || s.stage))) return false;
+  shots = incoming.shots;
+  scenes = incoming.scenes || {};
+  sceneOrder = Array.isArray(incoming.sceneOrder) && incoming.sceneOrder.length
+    ? incoming.sceneOrder.map(String)
+    : STAGE_ORDER.slice();
+  allSceneIds().forEach(ensureScene);
+  if(incoming.globalWpm != null && !isNaN(Number(incoming.globalWpm))) globalWpm = Number(incoming.globalWpm);
+  selectedShotId = incoming.selectedShotId || null;
+  selectedSceneStage = incoming.selectedSceneStage || null;
+  sceneOpen = incoming.sceneOpen ? Object.assign({}, incoming.sceneOpen) : sceneOpen;
+  if(incoming.columnWidths && typeof incoming.columnWidths === "object"){
+    columnWidths = Object.assign({}, defaultColWidths(), incoming.columnWidths);
+    applyColWidths();
+  }
+  if(Array.isArray(incoming.hiddenColumns)){
+    hiddenColumns = incoming.hiddenColumns.filter(k => COL_DEFS.some(c => c.key === k));
+    persistHiddenColumns();
+    applyColVisibility();
+    renderColPicker();
+  }
+  shots.forEach(ensureShotMeta);
+  syncSceneGraph();
+  saveState();
+  return true;
+}
+async function hydrateAzureState(){
+  setAzureStat("load…");
+  try{
+    await resolveApiBase();
+    const res = await fetch(apiUrl("/api/state"), { cache: "no-store" });
+    const data = await res.json().catch(() => null);
+    if(!res.ok || !data || !data.ok){
+      throw new Error((data && data.error) || ("HTTP " + res.status));
+    }
+    if(!data.found){
+      if(shots && shots.length){
+        setAzureStat("seeding…", "No Azure copy yet — writing this shotlist now.");
+        await pushAzureState(currentStatePayload(), { backup: true, silent: true, note: "Seeded filter table shotlist" });
+      } else {
+        setAzureStat("empty");
+      }
+      return;
+    }
+    const remote = data.state || {};
+    const remoteAt = String(remote.savedAt || data.lastModified || "");
+    const local = loadState() || {};
+    const localAt = String(local.savedAt || "");
+    const localCount = (local.shots && local.shots.length) || 0;
+    if(!localCount || (remoteAt && (!localAt || remoteAt > localAt))){
+      if(applyRemoteState(remote)){
+        refreshStageFilter();
+        renderScenesPanel();
+        renderTable();
+        setAzureStat("loaded", "Loaded shotlist from Azure · " + (remoteAt || data.lastModified || ""));
+      } else {
+        setAzureStat("cloud");
+      }
+    } else {
+      setAzureStat("cloud", "Local shotlist is current. Azure has " + (data.blob || "latest.json") + ".");
+    }
+  }catch(e){
+    setAzureStat("offline", (e && e.message) ? e.message : String(e));
+    console.warn("Azure hydrate failed", e);
+  }
+}
+
+function initData(){
+  const state = loadState();
+  shots = Array.isArray(state && state.shots) && state.shots.length
+    ? state.shots
+    : buildDefaultShots();
+
+  scenes = (state && state.scenes) ? state.scenes : {};
+  STAGE_ORDER.forEach(st => {
+    if(!scenes[st]) scenes[st] = { minimized: false, hidden: false, title: "", types: [], labels: [], wpm: null };
+    if(scenes[st].hidden == null) scenes[st].hidden = false;
+    if(scenes[st].title == null) scenes[st].title = "";
+    if(scenes[st].wpm === undefined) scenes[st].wpm = null;
+    if(scenes[st].minimized == null) scenes[st].minimized = false;
+    if(!Array.isArray(scenes[st].types)) scenes[st].types = [];
+    if(!Array.isArray(scenes[st].labels)) scenes[st].labels = [];
+  });
+
+  if(state && state.globalWpm != null && !isNaN(Number(state.globalWpm))) globalWpm = Number(state.globalWpm);
+  selectedShotId = (state && state.selectedShotId) || null;
+  selectedSceneStage = (state && state.selectedSceneStage) || null;
+  sceneOpen = (state && state.sceneOpen) ? Object.assign({}, state.sceneOpen) : {};
+  
+  STAGE_ORDER.forEach(st => {
+    if(sceneOpen[st] === undefined){
+      sceneOpen[st] = !(scenes[st] && scenes[st].minimized);
+    }
+    scenes[st].minimized = !sceneOpen[st];
+  });
+  shots.forEach(ensureShotMeta);
+  sceneOrder = Array.isArray(state && state.sceneOrder) && state.sceneOrder.length
+    ? state.sceneOrder.map(String)
+    : STAGE_ORDER.slice();
+  allSceneIds().forEach(ensureScene);
+  syncSceneGraph();
+  columnWidths = loadColWidths(state && state.columnWidths);
+  hiddenColumns = loadHiddenColumns(state && state.hiddenColumns);
+}
+
+function ensureShotMeta(s){
+  if(!s) return s;
+  if(!Array.isArray(s.types)) s.types = [];
+  if(!Array.isArray(s.labels)) s.labels = [];
+  if(!Array.isArray(s.tags)) s.tags = [];
+  s.types = uniqueList(s.types);
+  s.labels = uniqueList(s.labels);
+  s.tags = uniqueList(s.tags);
+  const sceneId = String(s.sceneId || s.stage || "");
+  if(sceneId){
+    s.stage = sceneId;
+    s.sceneId = sceneId;
+  }
+  return s;
+}
+function defaultColWidths(){
+  const out = {};
+  COL_DEFS.forEach(c => { out[c.key] = c.width; });
+  return out;
+}
+function loadColWidths(fromState){
+  let stored = null;
+  try{ stored = JSON.parse(localStorage.getItem(COL_WIDTHS_KEY) || "null"); }catch(e){}
+  const out = Object.assign({}, defaultColWidths(), stored || {}, fromState || {});
+  COL_DEFS.forEach(c => {
+    if(out[c.key] != null && c.min && out[c.key] < c.min) out[c.key] = c.width;
+  });
+  return out;
+}
+function persistColWidths(){
+  try{ localStorage.setItem(COL_WIDTHS_KEY, JSON.stringify(columnWidths)); }catch(e){}
+}
+function loadHiddenColumns(fromState){
+  let stored = null;
+  try{ stored = JSON.parse(localStorage.getItem(COL_HIDDEN_KEY) || "null"); }catch(e){}
+  const src = Array.isArray(fromState) ? fromState : (Array.isArray(stored) ? stored : []);
+  return src.filter(k => COL_DEFS.some(c => c.key === k));
+}
+function persistHiddenColumns(){
+  try{ localStorage.setItem(COL_HIDDEN_KEY, JSON.stringify(hiddenColumns)); }catch(e){}
+}
+function isColHidden(key){
+  return hiddenColumns.indexOf(key) !== -1;
+}
+function visibleColCount(){
+  return COL_DEFS.filter(c => !isColHidden(c.key)).length;
+}
+function applyColVisibility(){
+  COL_DEFS.forEach(c => {
+    const hide = isColHidden(c.key);
+    document.querySelectorAll('[data-col="' + c.key + '"]').forEach(el => {
+      el.style.display = hide ? "none" : "";
+    });
+  });
+  renderHiddenColsBar();
+  renderColPicker();
+  const btn = document.getElementById("btnColumns");
+  if(btn){
+    const n = hiddenColumns.length;
+    btn.textContent = n ? ("Columns (" + n + " hidden)") : "Columns";
+  }
+}
+function hideColumn(key){
+  if(!COL_DEFS.some(c => c.key === key)) return;
+  if(isColHidden(key)) return;
+  if(visibleColCount() <= 1) return;
+  hiddenColumns = hiddenColumns.concat([key]);
+  persistHiddenColumns();
+  applyColVisibility();
+}
+function showColumn(key){
+  hiddenColumns = hiddenColumns.filter(k => k !== key);
+  persistHiddenColumns();
+  applyColVisibility();
+}
+function toggleColumn(key, show){
+  if(show) showColumn(key);
+  else hideColumn(key);
+}
+function resetColumns(){
+  columnWidths = defaultColWidths();
+  hiddenColumns = [];
+  applyColWidths();
+  persistColWidths();
+  persistHiddenColumns();
+  applyColVisibility();
+}
+function renderColPicker(){
+  const menu = document.getElementById("colPickerMenu");
+  if(!menu) return;
+  menu.innerHTML = COL_DEFS.map(c => {
+    const checked = !isColHidden(c.key);
+    return '<label class="col-picker-item">'
+      + '<input type="checkbox" data-col-toggle="' + c.key + '"' + (checked ? " checked" : "") + '>'
+      + escapeHtml(c.label)
+      + "</label>";
+  }).join("")
+    + '<button type="button" class="btn sm" id="btnShowAllCols" style="width:100%;margin-top:6px">Show all columns</button>';
+}
+function renderHiddenColsBar(){
+  const bar = document.getElementById("hiddenColsBar");
+  if(!bar) return;
+  if(!hiddenColumns.length){
+    bar.className = "hidden-cols-bar";
+    bar.innerHTML = "";
+    return;
+  }
+  bar.className = "hidden-cols-bar has-hidden";
+  bar.innerHTML = "<span>Hidden columns:</span>" + hiddenColumns.map(key => {
+    const def = COL_DEFS.find(c => c.key === key);
+    const label = def ? def.label : key;
+    return '<button type="button" class="hidden-col-chip" data-show-col="' + key + '" title="Show ' + escapeHtml(label) + '">'
+      + escapeHtml(label) + " +</button>";
+  }).join("");
+}
+function applyColWidths(){
+  const group = document.getElementById("shotlistCols");
+  if(!group) return;
+  COL_DEFS.forEach(c => {
+    const col = group.querySelector('col[data-col="' + c.key + '"]');
+    if(col) col.style.width = (columnWidths[c.key] || c.width) + "px";
+  });
+}
+function renderHead(){
+  const group = document.getElementById("shotlistCols");
+  const row = document.getElementById("shotlistHeadRow");
+  group.innerHTML = "";
+  row.innerHTML = "";
+  COL_DEFS.forEach(c => {
+    const col = document.createElement("col");
+    col.dataset.col = c.key;
+    col.style.width = (columnWidths[c.key] || c.width) + "px";
+    group.appendChild(col);
+    const th = document.createElement("th");
+    th.dataset.col = c.key;
+    if(c.sort) th.dataset.sort = c.sort;
+    if(c.align === "right") th.style.textAlign = "right";
+    th.innerHTML = '<span class="th-label">' + escapeHtml(c.label) + '</span>'
+      + '<button type="button" class="col-hide-btn" data-hide-col="' + c.key + '" title="Hide ' + escapeHtml(c.label) + ' column">×</button>'
+      + '<span class="col-resizer" data-col="' + c.key + '" title="Drag to resize column"></span>';
+    row.appendChild(th);
+  });
+  applyColWidths();
+  applyColVisibility();
+}
+function initColResize(){
+  const table = document.getElementById("shotlistTable");
+  let drag = null;
+  document.getElementById("shotlistHeadRow").addEventListener("mousedown", (e) => {
+    const handle = e.target.closest(".col-resizer");
+    if(!handle) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const key = handle.dataset.col;
+    const def = COL_DEFS.find(c => c.key === key);
+    drag = {
+      key,
+      startX: e.clientX,
+      startW: columnWidths[key] || (def && def.width) || 80,
+      min: (def && def.min) || 40,
+      handle
+    };
+    handle.classList.add("is-dragging");
+    document.body.classList.add("is-col-resizing");
+  });
+  window.addEventListener("mousemove", (e) => {
+    if(!drag) return;
+    const next = Math.max(drag.min, Math.round(drag.startW + (e.clientX - drag.startX)));
+    columnWidths[drag.key] = next;
+    applyColWidths();
+  });
+  window.addEventListener("mouseup", () => {
+    if(!drag) return;
+    drag.handle.classList.remove("is-dragging");
+    document.body.classList.remove("is-col-resizing");
+    persistColWidths();
+    drag = null;
+  });
+  document.getElementById("shotlistHeadRow").addEventListener("dblclick", (e) => {
+    const handle = e.target.closest(".col-resizer");
+    if(!handle) return;
+    const def = COL_DEFS.find(c => c.key === handle.dataset.col);
+    if(!def) return;
+    columnWidths[def.key] = def.width;
+    applyColWidths();
+    persistColWidths();
+  });
+  table.addEventListener("click", (e) => {
+    if(e.target.closest(".col-resizer")) e.stopPropagation();
+  }, true);
+}
+
+/* ---------- Setup UI and Interaction ---------- */
+let sortField = "index";
+let sortAscending = true;
+
+function populateFilters(){
+  refreshStageFilter();
+
+  const typeSelect = document.getElementById("filterType");
+  SCENE_TYPE_OPTIONS.forEach(optVal => {
+    const opt = document.createElement("option");
+    opt.value = optVal;
+    opt.textContent = optVal;
+    typeSelect.appendChild(opt);
+  });
+
+  const labelSelect = document.getElementById("filterLabel");
+  LABEL_OPTIONS.forEach(optVal => {
+    const opt = document.createElement("option");
+    opt.value = optVal;
+    opt.textContent = optVal;
+    labelSelect.appendChild(opt);
+  });
+  refreshTagFilter();
+}
+function refreshStageFilter(){
+  const stageSelect = document.getElementById("filterStage");
+  if(!stageSelect) return;
+  const current = stageSelect.value;
+  stageSelect.innerHTML = '<option value="">All Stages</option>';
+  allSceneIds().forEach(st => {
+    const opt = document.createElement("option");
+    opt.value = st;
+    opt.textContent = st + " - " + sceneTitle(st);
+    stageSelect.appendChild(opt);
+  });
+  if(current && [...stageSelect.options].some(o => o.value === current)) stageSelect.value = current;
+}
+function refreshTagFilter(){
+  const tagSelect = document.getElementById("filterTag");
+  if(!tagSelect) return;
+  const current = tagSelect.value;
+  tagSelect.innerHTML = '<option value="">All Tags</option>';
+  allCustomTags().forEach(optVal => {
+    const opt = document.createElement("option");
+    opt.value = optVal;
+    opt.textContent = optVal;
+    tagSelect.appendChild(opt);
+  });
+  if(current && [...tagSelect.options].some(o => o.value === current)) tagSelect.value = current;
+}
+
+function getPoster(shot){
+  const media = shot.media || [];
+  const img = media.find(m => m && m.kind !== "video" && m.src);
+  if(img) return img.src;
+  const vid = media.find(m => m && m.kind === "video" && (m.poster || m.src));
+  if(vid) return vid.poster || "";
+  if(shot.file && /\.(png|jpe?g|gif|webp)$/i.test(shot.file)) return shot.file;
+  return "";
+}
+
+function getVideoSrc(shot){
+  const media = shot.media || [];
+  const vid = media.find(m => m && m.kind === "video" && m.src);
+  return vid ? vid.src : "";
+}
+
+function chipRemoveBtn(kind, shotId, value, extraClass){
+  return `<button type="button" class="chip-x ${extraClass || ""}" data-remove="${kind}" data-id="${escapeHtml(shotId)}" data-val="${escapeHtml(value)}" title="Remove ${escapeHtml(value)}">`
+    + `<span>${escapeHtml(value)}</span><span class="x" aria-hidden="true">×</span></button>`;
+}
+function typeEditorHTML(shot){
+  const chips = (shot.types || []).map(t => chipRemoveBtn("types", shot.id, t, "type-badge")).join("");
+  const unused = SHOT_TYPE_OPTIONS.filter(t => !(shot.types || []).includes(t));
+  const opts = unused.map(t => `<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join("");
+  return `<div class="tag-editor" data-kind="types" data-id="${escapeHtml(shot.id)}">
+    <div class="chip-row">${chips || '<span style="color:var(--muted);font-size:11px;">No type</span>'}</div>
+    <div class="add-row">
+      <select class="add-select" data-add="types" data-id="${escapeHtml(shot.id)}" ${unused.length ? "" : "disabled"}>
+        <option value="">+ Type</option>${opts}
+      </select>
+    </div>
+  </div>`;
+}
+function tagEditorHTML(shot){
+  const chips = (shot.tags || []).map(t => chipRemoveBtn("tags", shot.id, t, "tag-badge")).join("");
+  const suggestions = allCustomTags().filter(t => !(shot.tags || []).includes(t)).slice(0, 8);
+  const listId = "tag-sugg-" + shot.id;
+  return `<div class="tag-editor" data-kind="tags" data-id="${escapeHtml(shot.id)}">
+    <div class="chip-row">${chips || '<span style="color:var(--muted);font-size:11px;">No tags</span>'}</div>
+    <div class="add-row">
+      <input class="add-input" list="${listId}" data-add-input="tags" data-id="${escapeHtml(shot.id)}" placeholder="+ Tag" maxlength="48">
+      <datalist id="${listId}">${suggestions.map(t => `<option value="${escapeHtml(t)}"></option>`).join("")}</datalist>
+      <button type="button" class="add-btn" data-add-btn="tags" data-id="${escapeHtml(shot.id)}">Add</button>
+    </div>
+  </div>`;
+}
+function labelClass(label){
+  if(String(label).includes("Gain")) return "gain";
+  if(String(label).includes("Solution")) return "solution";
+  return "pain";
+}
+function labelEditorHTML(shot){
+  const chips = (shot.labels || []).map(l => chipRemoveBtn("labels", shot.id, l, "label-badge " + labelClass(l))).join("");
+  const unused = LABEL_OPTIONS.filter(t => !(shot.labels || []).includes(t));
+  const opts = unused.map(t => `<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join("");
+  return `<div class="tag-editor" data-kind="labels" data-id="${escapeHtml(shot.id)}">
+    <div class="chip-row">${chips || '<span style="color:var(--muted);font-size:11px;">No label</span>'}</div>
+    <div class="add-row">
+      <select class="add-select" data-add="labels" data-id="${escapeHtml(shot.id)}" ${unused.length ? "" : "disabled"}>
+        <option value="">+ Label</option>${opts}
+      </select>
+    </div>
+  </div>`;
+}
+function shotLabel(shot){
+  return fileBasename(shot.file) || shot.id;
+}
+function addShotValue(shotId, kind, raw){
+  const shot = shots.find(s => s.id === shotId);
+  if(!shot) return false;
+  ensureShotMeta(shot);
+  const val = normalizeToken(raw);
+  if(!val) return false;
+  if(shot[kind].includes(val)) return false;
+  shot[kind] = shot[kind].concat([val]);
+  const noun = kind === "types" ? "Type" : kind === "labels" ? "Label" : "Tag";
+  persist(noun + " “" + val + "” added on " + shotLabel(shot));
+  refreshTagFilter();
+  renderTable();
+  return true;
+}
+function removeShotValue(shotId, kind, raw){
+  const shot = shots.find(s => s.id === shotId);
+  if(!shot) return false;
+  ensureShotMeta(shot);
+  const val = normalizeToken(raw);
+  const before = shot[kind].length;
+  shot[kind] = shot[kind].filter(v => v !== val);
+  if(shot[kind].length === before) return false;
+  const noun = kind === "types" ? "Type" : kind === "labels" ? "Label" : "Tag";
+  persist(noun + " “" + val + "” removed from " + shotLabel(shot));
+  refreshTagFilter();
+  renderTable();
+  return true;
+}
+
+function getVisibleShots(){
+  const searchVal = document.getElementById("filterSearch").value.toLowerCase();
+  const stageVal = document.getElementById("filterStage").value;
+  const typeVal = document.getElementById("filterType").value;
+  const labelVal = document.getElementById("filterLabel").value;
+  const tagVal = document.getElementById("filterTag").value;
+  const bookmarkVal = document.getElementById("filterBookmark").value;
+  const visibilityVal = document.getElementById("filterVisibility").value;
+
+  let filtered = shots.filter((shot) => {
+    // 1. Text search
+    if(searchVal) {
+      const matchText = (
+        String(shot.id || "") + " " +
+        String(shot.file || "") + " " +
+        String(shot.caption || "") + " " +
+        String(shot.vo || "") + " " +
+        (STAGE_NAMES[shot.stage] || "") + " " +
+        (shot.types || []).join(" ") + " " +
+        (shot.tags || []).join(" ") + " " +
+        (shot.labels || []).join(" ")
+      ).toLowerCase();
+      if(!matchText.includes(searchVal)) return false;
+    }
+
+    // 2. Stage
+    if(stageVal && String(shot.stage) !== String(stageVal)) return false;
+
+    // 3. Shot Type
+    if(typeVal && !(shot.types || []).includes(typeVal)) return false;
+
+    // 4. Label
+    if(labelVal && !(shot.labels || []).includes(labelVal)) return false;
+
+    // 4b. Custom tag
+    if(tagVal && !(shot.tags || []).includes(tagVal)) return false;
+
+    // 5. Bookmark status
+    if(bookmarkVal === "bookmarked" && !shot.bookmarked) return false;
+    if(bookmarkVal === "unbookmarked" && shot.bookmarked) return false;
+
+    // 6. Visibility
+    const isSecHidden = scenes[shot.stage] && scenes[shot.stage].hidden;
+    const isHidden = shot.hidden || isSecHidden;
+    if(visibilityVal === "visible" && isHidden) return false;
+    if(visibilityVal === "hidden" && !isHidden) return false;
+
+    return true;
+  });
+
+  // Sort shots
+  filtered.sort((a, b) => {
+    let valA, valB;
+    if(sortField === "index") {
+      valA = shots.indexOf(a);
+      valB = shots.indexOf(b);
+    } else if(sortField === "stage") {
+      valA = a.stage;
+      valB = b.stage;
+    } else if(sortField === "file") {
+      valA = a.file || "";
+      valB = b.file || "";
+    } else if(sortField === "caption") {
+      valA = a.caption || "";
+      valB = b.caption || "";
+    } else if(sortField === "vo") {
+      valA = a.vo || "";
+      valB = b.vo || "";
+    } else if(sortField === "words") {
+      valA = wordCount(a.vo);
+      valB = wordCount(b.vo);
+    } else if(sortField === "duration") {
+      valA = durationFromVo(a.vo, a.durationSec, shotWpm(a));
+      valB = durationFromVo(b.vo, b.durationSec, shotWpm(b));
+    } else if(sortField === "wpm") {
+      valA = shotWpm(a);
+      valB = shotWpm(b);
+    } else {
+      valA = shots.indexOf(a);
+      valB = shots.indexOf(b);
+    }
+
+    if(valA < valB) return sortAscending ? -1 : 1;
+    if(valA > valB) return sortAscending ? 1 : -1;
+    return 0;
+  });
+  return filtered;
+}
+
+function afterShotMove(item, note){
+  sortField = "index";
+  sortAscending = true;
+  document.querySelectorAll("table.shotlist-table th").forEach(h => {
+    h.classList.remove("sorted-asc", "sorted-desc");
+  });
+  const indexTh = document.querySelector('th[data-sort="index"]');
+  if(indexTh) indexTh.classList.add("sorted-asc");
+  persist(note);
+  renderTable();
+}
+function moveShot(shotId, dir){
+  const list = getVisibleShots();
+  const visIdx = list.findIndex(s => s.id === shotId);
+  if(visIdx < 0) return false;
+  const neighbor = list[visIdx + dir];
+  if(!neighbor) return false;
+  const from = shots.indexOf(list[visIdx]);
+  const to = shots.indexOf(neighbor);
+  if(from < 0 || to < 0 || from === to) return false;
+  const [item] = shots.splice(from, 1);
+  shots.splice(to, 0, item);
+  afterShotMove(item, "Moved " + shotLabel(item) + (dir < 0 ? " up" : " down"));
+  return true;
+}
+function moveShotToEdge(shotId, edge){
+  const list = getVisibleShots();
+  const visIdx = list.findIndex(s => s.id === shotId);
+  if(visIdx < 0) return false;
+  if(edge === "top" && visIdx === 0) return false;
+  if(edge === "bottom" && visIdx === list.length - 1) return false;
+  const item = list[visIdx];
+  const from = shots.indexOf(item);
+  if(from < 0) return false;
+  shots.splice(from, 1);
+  if(edge === "top"){
+    const to = shots.indexOf(list[0]);
+    shots.splice(Math.max(0, to), 0, item);
+  } else {
+    const last = list[list.length - 1];
+    const to = shots.indexOf(last);
+    shots.splice(to + 1, 0, item);
+  }
+  afterShotMove(item, "Moved " + shotLabel(item) + (edge === "top" ? " to top" : " to bottom"));
+  return true;
+}
+
+function renderTable(){
+  const filtered = getVisibleShots();
+
+  // Render stats
+  let totalDur = 0;
+  let totalWords = 0;
+  let bookmarkedCount = 0;
+  let hiddenCount = 0;
+
+  shots.forEach(s => {
+    const isHidden = s.hidden || (scenes[s.stage] && scenes[s.stage].hidden);
+    if(!isHidden) {
+      totalDur += durationFromVo(s.vo, s.durationSec, shotWpm(s));
+      totalWords += wordCount(s.vo);
+    }
+    if(s.bookmarked) bookmarkedCount++;
+    if(s.hidden) hiddenCount++;
+  });
+
+  document.getElementById("statFilteredCount").textContent = String(filtered.length);
+  document.getElementById("statTotalCount").textContent = String(shots.length);
+  document.getElementById("statTotalDuration").textContent = formatTC(totalDur);
+  document.getElementById("statTotalWords").textContent = String(totalWords);
+  document.getElementById("statBookmarkedCount").textContent = String(bookmarkedCount);
+  document.getElementById("statHiddenCount").textContent = String(hiddenCount);
+  updateHiddenButton();
+  if(hiddenTableOpen) renderHiddenTable();
+
+  // Render rows
+  const tbody = document.getElementById("shotlistBody");
+  tbody.innerHTML = "";
+
+  if(filtered.length === 0){
+    tbody.innerHTML = `<tr><td colspan="${COL_DEFS.length}" style="text-align:center; padding: 24px; color: var(--muted);">No matching shots found. Try adjusting your filters.</td></tr>`;
+    applyColVisibility();
+    return;
+  }
+
+  filtered.forEach((shot, visIdx) => {
+    const isSecHidden = scenes[shot.stage] && scenes[shot.stage].hidden;
+    const isHidden = shot.hidden || isSecHidden;
+    const row = document.createElement("tr");
+    if(isHidden) row.className = "hidden-row";
+    const canUp = visIdx > 0;
+    const canDown = visIdx < filtered.length - 1;
+
+    const poster = getPoster(shot);
+    const videoSrc = getVideoSrc(shot);
+    const originalIndex = shots.indexOf(shot) + 1;
+    const duration = durationFromVo(shot.vo, shot.durationSec, shotWpm(shot));
+    const words = wordCount(shot.vo);
+    const stageColor = sceneColor(shot.sceneId || shot.stage);
+
+    // Media cell
+    let mediaHtml = "";
+    if(poster){
+      mediaHtml = `
+        <div class="thumb-cell" onclick="openMediaPreview('${shot.id}')">
+          <img src="${poster}" alt="Preview">
+          ${videoSrc ? '<div class="play-icon">▶</div>' : ''}
+        </div>
+      `;
+    } else {
+      mediaHtml = `<div style="font-size:10px; color:var(--muted); text-align:center;">No still</div>`;
+    }
+
+    row.innerHTML = `
+      <td data-col="index"><b>${originalIndex}</b></td>
+      <td data-col="order">
+        <div class="order-btns">
+          <button type="button" class="order-btn" ${canUp ? "" : "disabled"} onclick="moveShot('${shot.id}', -1)" title="Move up">▲</button>
+          <button type="button" class="order-btn edge" ${canUp ? "" : "disabled"} onclick="moveShotToEdge('${shot.id}', 'top')" title="Send to top">⇈</button>
+          <button type="button" class="order-btn" ${canDown ? "" : "disabled"} onclick="moveShot('${shot.id}', 1)" title="Move down">▼</button>
+          <button type="button" class="order-btn edge" ${canDown ? "" : "disabled"} onclick="moveShotToEdge('${shot.id}', 'bottom')" title="Send to bottom">⇊</button>
+        </div>
+      </td>
+      <td data-col="media">${mediaHtml}</td>
+      <td data-col="stage">
+        <select class="scene-select" data-scene="${escapeHtml(shot.id)}" title="Move this shot to another scene" style="border-left-color:${stageColor}">
+          ${sceneOptionHTML(shot.sceneId || shot.stage)}
+        </select>
+      </td>
+      <td data-col="file">
+        <code style="word-break:break-all; font-size:11px;">${escapeHtml(fileBasename(shot.file))}</code>
+        <div style="font-size: 10px; color: var(--muted); margin-top:2px;">ID: ${escapeHtml(shot.id)}</div>
+      </td>
+      <td data-col="caption"><span style="color:var(--muted);">${escapeHtml(shot.caption || "(No caption)")}</span></td>
+      <td class="vo-cell" data-col="vo">
+        <textarea class="vo-textarea" data-id="${escapeHtml(shot.id)}">${escapeHtml(shot.vo || "")}</textarea>
+      </td>
+      <td data-col="words" style="text-align:right;"><b>${words}</b></td>
+      <td data-col="duration" style="text-align:right;">
+        <b>${duration}s</b>
+        <div style="font-size:10px; color:var(--muted);">${formatTC(duration)}</div>
+      </td>
+      <td data-col="wpm" style="text-align:right;">${shotWpm(shot)}</td>
+      <td class="edit-cell" data-col="types">${typeEditorHTML(shot)}</td>
+      <td class="edit-cell" data-col="tags">${tagEditorHTML(shot)}</td>
+      <td class="edit-cell" data-col="labels">${labelEditorHTML(shot)}</td>
+      <td data-col="star" style="text-align:center;">
+        <button class="star-btn ${shot.bookmarked ? 'bookmarked' : ''}" onclick="toggleBookmark('${shot.id}')" title="Toggle Bookmark">
+          ${shot.bookmarked ? '★' : '☆'}
+        </button>
+      </td>
+      <td data-col="action">
+        <button class="btn sm" onclick="toggleHide('${shot.id}')">
+          ${shot.hidden ? 'Show' : 'Hide'}
+        </button>
+      </td>
+    `;
+
+    // Bind event listeners for textareas to autosave
+    const textarea = row.querySelector(".vo-textarea");
+    textarea.addEventListener("input", (e) => {
+      const targetShot = shots.find(s => s.id === shot.id);
+      if(targetShot) {
+        targetShot.vo = e.target.value;
+        persist("Voiceover edited on " + fileBasename(targetShot.file), { delay: 2500 });
+        // Update words and duration in the row without full re-render to keep cursor focus
+        const wCount = wordCount(targetShot.vo);
+        const dur = durationFromVo(targetShot.vo, targetShot.durationSec, shotWpm(targetShot));
+        const wordsCell = row.querySelector('[data-col="words"] b');
+        const durCell = row.querySelector('[data-col="duration"]');
+        if(wordsCell) wordsCell.textContent = String(wCount);
+        if(durCell){
+          const b = durCell.querySelector("b");
+          const d = durCell.querySelector("div");
+          if(b) b.textContent = dur + "s";
+          if(d) d.textContent = formatTC(dur);
+        }
+        updateLiveStats();
+      }
+    });
+
+    tbody.appendChild(row);
+  });
+  applyColVisibility();
+}
+
+let hiddenTableOpen = false;
+function isShotHidden(s){
+  return !!(s && (s.hidden || (scenes[s.stage] && scenes[s.stage].hidden)));
+}
+function hiddenShotsList(){
+  return shots.filter(isShotHidden);
+}
+function updateHiddenButton(count){
+  if(count == null){
+    count = hiddenShotsList().length;
+  }
+  const btn = document.getElementById("btnShowHidden");
+  if(!btn) return;
+  const n = Number(count) || 0;
+  btn.textContent = hiddenTableOpen
+    ? ("Hide hidden table (" + n + ")")
+    : ("Show hidden shots (" + n + ")");
+  btn.classList.toggle("is-on", hiddenTableOpen);
+  btn.disabled = false;
+}
+function setHiddenTableOpen(open){
+  hiddenTableOpen = !!open;
+  const panel = document.getElementById("hiddenShotsPanel");
+  if(panel) panel.classList.toggle("open", hiddenTableOpen);
+  updateHiddenButton();
+  if(hiddenTableOpen){
+    renderHiddenTable();
+    panel.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+}
+function renderHiddenTable(){
+  const tbody = document.getElementById("hiddenShotlistBody");
+  const hint = document.getElementById("hiddenTableHint");
+  if(!tbody) return;
+  const list = hiddenShotsList();
+  if(hint){
+    const shotOnly = list.filter(s => s.hidden).length;
+    const sceneOnly = list.length - shotOnly;
+    hint.textContent = list.length
+      ? (list.length + " hidden · " + shotOnly + " shot hide · " + sceneOnly + " from a hidden scene")
+      : "No hidden shots right now.";
+  }
+  tbody.innerHTML = "";
+  if(!list.length){
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--muted);">No hidden shots. Hide a row with the Hide button to see it here.</td></tr>';
+    return;
+  }
+  list.forEach(shot => {
+    const poster = getPoster(shot);
+    const videoSrc = getVideoSrc(shot);
+    const originalIndex = shots.indexOf(shot) + 1;
+    const stageName = STAGE_NAMES[shot.stage] || shot.stage;
+    const stageColor = SCENE_COLORS[shot.stage] || "#3498db";
+    const sceneHidden = !!(scenes[shot.stage] && scenes[shot.stage].hidden);
+    const reasons = [];
+    if(shot.hidden) reasons.push("Shot hidden");
+    if(sceneHidden) reasons.push("Scene " + shot.stage + " hidden");
+    let mediaHtml = "";
+    if(poster){
+      mediaHtml = `<div class="thumb-cell" onclick="openMediaPreview('${shot.id}')">
+        <img src="${poster}" alt="Preview">
+        ${videoSrc ? '<div class="play-icon">▶</div>' : ""}
+      </div>`;
+    } else {
+      mediaHtml = '<div style="font-size:10px;color:var(--muted);text-align:center;">No still</div>';
+    }
+    const vo = String(shot.vo || "").trim();
+    const voShort = vo.length > 140 ? vo.slice(0, 140) + "…" : vo;
+    const row = document.createElement("tr");
+    row.className = "hidden-row";
+    row.innerHTML = `
+      <td><b>${originalIndex}</b></td>
+      <td>${mediaHtml}</td>
+      <td><span class="stage-badge" style="background:${stageColor}">${escapeHtml(shot.stage)} · ${escapeHtml(stageName)}</span></td>
+      <td>
+        <code style="word-break:break-all;font-size:11px;">${escapeHtml(fileBasename(shot.file))}</code>
+        <div style="font-size:10px;color:var(--muted);margin-top:2px;">ID: ${escapeHtml(shot.id)}</div>
+      </td>
+      <td><span style="color:var(--muted);">${escapeHtml(shot.caption || "(No caption)")}</span></td>
+      <td><span style="color:var(--muted);font-size:12px;">${escapeHtml(voShort || "—")}</span></td>
+      <td>${reasons.map(r => '<span class="type-badge">' + escapeHtml(r) + "</span>").join(" ")}</td>
+      <td>
+        ${shot.hidden ? `<button class="btn sm primary" onclick="toggleHide('${shot.id}')">Show shot</button>` : ""}
+        ${sceneHidden ? `<button class="btn sm" onclick="unhideScene('${shot.stage}')">Show scene ${escapeHtml(shot.stage)}</button>` : ""}
+      </td>
+    `;
+    tbody.appendChild(row);
+  });
+}
+function unhideScene(stage){
+  const sc = ensureScene(stage);
+  sc.hidden = false;
+  persist("Showed scene " + stage + " (“" + sceneTitle(stage) + "”)");
+  renderScenesPanel();
+  renderTable();
+}
+function hideScene(stage){
+  const sc = ensureScene(stage);
+  sc.hidden = true;
+  persist("Hid scene " + stage + " (“" + sceneTitle(stage) + "”)");
+  renderScenesPanel();
+  renderTable();
+}
+function setScenesPanelOpen(open){
+  scenesPanelOpen = !!open;
+  const panel = document.getElementById("scenesPanel");
+  const btn = document.getElementById("btnScenes");
+  if(panel) panel.classList.toggle("open", scenesPanelOpen);
+  if(btn) btn.classList.toggle("is-on", scenesPanelOpen);
+  const navScenes = document.getElementById("navScenes");
+  const navFilter = document.getElementById("navFilter");
+  if(navScenes) navScenes.classList.toggle("active", scenesPanelOpen);
+  if(navFilter) navFilter.classList.toggle("active", !scenesPanelOpen);
+  if(scenesPanelOpen){
+    renderScenesPanel();
+    if(location.hash !== "#scenes") history.replaceState(null, "", "#scenes");
+    panel.scrollIntoView({ behavior: "smooth", block: "start" });
+  } else if(location.hash === "#scenes"){
+    history.replaceState(null, "", location.pathname + location.search);
+  }
+}
+function sceneTypeChips(id, selected){
+  const chips = (selected || []).map(t =>
+    `<button type="button" class="chip-x type-badge" data-scene-tog="types" data-scene-id="${escapeHtml(id)}" data-val="${escapeHtml(t)}" title="${escapeHtml(TYPE_HELP[t] || t)}">${escapeHtml(t)}<span class="x">×</span></button>`
+  ).join("");
+  const unused = SCENE_TYPE_OPTIONS.filter(t => !(selected || []).includes(t));
+  const opts = unused.map(t => `<option value="${escapeHtml(t)}" title="${escapeHtml(TYPE_HELP[t] || t)}">${escapeHtml(t)}</option>`).join("");
+  return `<div class="chip-row">${chips || '<span class="scene-meta">No type yet</span>'}</div>
+    <div class="add-row" style="margin-top:6px">
+      <select class="add-select" data-scene-add="types" data-scene-id="${escapeHtml(id)}" ${unused.length ? "" : "disabled"}>
+        <option value="">+ Type</option>${opts}
+      </select>
+    </div>`;
+}
+function sceneLabelChips(id, selected){
+  const chips = (selected || []).map(l =>
+    `<button type="button" class="chip-x label-badge ${labelClass(l)}" data-scene-tog="labels" data-scene-id="${escapeHtml(id)}" data-val="${escapeHtml(l)}" title="${escapeHtml(LABEL_HELP[l] || l)}">${escapeHtml(l)}<span class="x">×</span></button>`
+  ).join("");
+  const unused = LABEL_OPTIONS.filter(t => !(selected || []).includes(t));
+  const opts = unused.map(t => `<option value="${escapeHtml(t)}" title="${escapeHtml(LABEL_HELP[t] || t)}">${escapeHtml(t)}</option>`).join("");
+  return `<div class="chip-row">${chips || '<span class="scene-meta">No label yet</span>'}</div>
+    <div class="add-row" style="margin-top:6px">
+      <select class="add-select" data-scene-add="labels" data-scene-id="${escapeHtml(id)}" ${unused.length ? "" : "disabled"}>
+        <option value="">+ Label</option>${opts}
+      </select>
+    </div>`;
+}
+function renderScenesPanel(){
+  const root = document.getElementById("scenesBody");
+  if(!root) return;
+  syncSceneGraph();
+  root.innerHTML = allSceneIds().map(id => {
+    const sc = ensureScene(id);
+    const count = shotsInScene(id).length;
+    const canDelete = count === 0 && STAGE_ORDER.indexOf(id) === -1;
+    const placeholder = SCENE_RATIONALE[id] || "Why does this scene exist in the film? What job does it do for the viewer?";
+    return `<article class="scene-card${sc.hidden ? " is-hidden" : ""}" data-scene-id="${escapeHtml(id)}" style="border-left-color:${sceneColor(id)}">
+      <div class="scene-card-top">
+        <span class="stage-badge" style="background:${sceneColor(id)}">${escapeHtml(id)}</span>
+        <input class="scene-title-input" data-scene-title="${escapeHtml(id)}" value="${escapeHtml(sc.title || STAGE_NAMES[id] || "")}" placeholder="${escapeHtml(STAGE_NAMES[id] || ("Scene " + id))}">
+        <span class="scene-meta"><b>${count}</b> shot${count === 1 ? "" : "s"}</span>
+        <label class="scene-meta" style="display:inline-flex;align-items:center;gap:6px">WPM
+          <input class="scene-wpm-input" type="number" min="80" max="220" data-scene-wpm="${escapeHtml(id)}" value="${sc.wpm != null ? escapeHtml(sc.wpm) : ""}" placeholder="${globalWpm}">
+        </label>
+        <label class="scene-meta" style="display:inline-flex;align-items:center;gap:6px;margin-left:auto">
+          <input type="checkbox" data-scene-hidden="${escapeHtml(id)}" ${sc.hidden ? "checked" : ""}>
+          Hide scene
+        </label>
+        ${sc.hidden
+          ? `<button type="button" class="btn sm" data-scene-show="${escapeHtml(id)}">Show</button>`
+          : `<button type="button" class="btn sm" data-scene-hide="${escapeHtml(id)}">Hide</button>`}
+        <button type="button" class="btn sm" data-filter-scene="${escapeHtml(id)}">View shots</button>
+        ${canDelete ? `<button type="button" class="btn sm danger" data-scene-del="${escapeHtml(id)}">Delete</button>` : ""}
+      </div>
+      <div class="scene-field" style="margin-bottom:10px">
+        <label for="rationale-${escapeHtml(id)}">Rationale — why this scene exists</label>
+        <textarea class="scene-rationale" id="rationale-${escapeHtml(id)}" data-scene-rationale="${escapeHtml(id)}" placeholder="${escapeHtml(placeholder)}">${escapeHtml(sc.rationale || "")}</textarea>
+      </div>
+      <div class="scene-grid">
+        <div class="scene-field">
+          <label>Types</label>
+          ${sceneTypeChips(id, sc.types)}
+        </div>
+        <div class="scene-field">
+          <label>Labels</label>
+          ${sceneLabelChips(id, sc.labels)}
+        </div>
+      </div>
+    </article>`;
+  }).join("");
+}
+function updateSceneTitle(id, raw){
+  const sc = ensureScene(id);
+  const next = String(raw || "").trim();
+  const def = STAGE_NAMES[id] || ("Scene " + id);
+  sc.title = (next && next !== def) ? next : "";
+  persist("Renamed scene " + id + " to “" + sceneTitle(id) + "”");
+  refreshStageFilter();
+  renderScenesPanel();
+  renderTable();
+}
+function updateSceneWpm(id, raw){
+  const sc = ensureScene(id);
+  if(raw === "" || raw == null) sc.wpm = null;
+  else {
+    const n = Number(raw);
+    sc.wpm = isNaN(n) ? null : Math.max(80, Math.min(220, n));
+  }
+  persist("Set scene " + id + " WPM to " + (sc.wpm == null ? "default" : sc.wpm));
+  renderTable();
+}
+function addScene(){
+  const id = nextSceneId();
+  const name = window.prompt("New scene name", "Scene " + id);
+  if(name == null) return;
+  ensureScene(id);
+  scenes[id].title = String(name).trim();
+  if(!sceneOrder.includes(id)) sceneOrder.push(id);
+  persist("Added scene " + id + " “" + sceneTitle(id) + "”");
+  refreshStageFilter();
+  renderScenesPanel();
+  renderTable();
+}
+function updateSceneRationale(id, raw){
+  const sc = ensureScene(id);
+  sc.rationale = String(raw || "");
+  persist("Updated rationale for scene " + id + " (“" + sceneTitle(id) + "”)");
+}
+function toggleSceneTag(id, kind, val){
+  const sc = ensureScene(id);
+  const list = Array.isArray(sc[kind]) ? sc[kind].slice() : [];
+  const token = normalizeToken(val);
+  if(!token) return;
+  if(list.includes(token)) sc[kind] = list.filter(v => v !== token);
+  else sc[kind] = uniqueList(list.concat([token]));
+  const noun = kind === "types" ? "type" : "label";
+  persist((list.includes(token) ? "Removed " : "Added ") + noun + " “" + token + "” on scene " + id);
+  renderScenesPanel();
+}
+function deleteScene(id){
+  if(STAGE_ORDER.indexOf(id) !== -1) return;
+  if(shotsInScene(id).length) return;
+  delete scenes[id];
+  sceneOrder = sceneOrder.filter(x => x !== id);
+  persist("Deleted empty scene " + id);
+  refreshStageFilter();
+  renderScenesPanel();
+  renderTable();
+}
+
+function updateLiveStats(){
+  let totalDur = 0;
+  let totalWords = 0;
+  shots.forEach(s => {
+    const isHidden = s.hidden || (scenes[s.stage] && scenes[s.stage].hidden);
+    if(!isHidden) {
+      totalDur += durationFromVo(s.vo, s.durationSec, shotWpm(s));
+      totalWords += wordCount(s.vo);
+    }
+  });
+  document.getElementById("statTotalDuration").textContent = formatTC(totalDur);
+  document.getElementById("statTotalWords").textContent = String(totalWords);
+}
+
+function toggleBookmark(shotId){
+  const shot = shots.find(s => s.id === shotId);
+  if(shot){
+    shot.bookmarked = !shot.bookmarked;
+    shot.bookmarkedAt = shot.bookmarked ? new Date().toISOString() : "";
+    persist((shot.bookmarked ? "Bookmarked " : "Unbookmarked ") + shotLabel(shot));
+    renderTable();
+  }
+}
+
+function toggleHide(shotId){
+  const shot = shots.find(s => s.id === shotId);
+  if(shot){
+    shot.hidden = !shot.hidden;
+    persist((shot.hidden ? "Hid " : "Showed ") + shotLabel(shot));
+    renderTable();
+  }
+}
+
+/* ---------- Preview Modal ---------- */
+function openMediaPreview(shotId){
+  if(typeof hideThumbPreview === "function") hideThumbPreview();
+  const shot = shots.find(s => s.id === shotId);
+  if(!shot) return;
+
+  const modal = document.getElementById("mediaModal");
+  const content = document.getElementById("modalContent");
+  const cap = document.getElementById("modalCap");
+
+  content.innerHTML = "";
+  const videoSrc = getVideoSrc(shot);
+  const poster = getPoster(shot);
+
+  if(videoSrc){
+    const video = document.createElement("video");
+    video.src = videoSrc;
+    video.poster = poster;
+    video.controls = true;
+    video.autoplay = true;
+    video.loop = true;
+    video.playsInline = true;
+    content.appendChild(video);
+  } else if(poster){
+    const img = document.createElement("img");
+    img.src = poster;
+    img.alt = "Still frame preview";
+    content.appendChild(img);
+  } else {
+    content.innerHTML = `<div style="color:#fff; padding:40px;">No preview media available</div>`;
+  }
+
+  cap.textContent = shot.caption || shot.file || "";
+  modal.classList.add("open");
+}
+
+function closeMediaPreview(){
+  const modal = document.getElementById("mediaModal");
+  const content = document.getElementById("modalContent");
+  content.innerHTML = ""; // Stop playing video if active
+  modal.classList.remove("open");
+}
+
+/* ---------- Column Sorting Setup ---------- */
+document.getElementById("shotlistHeadRow").addEventListener("click", (e) => {
+  if(e.target.closest(".col-resizer")) return;
+  const hideBtn = e.target.closest("[data-hide-col]");
+  if(hideBtn){
+    e.preventDefault();
+    e.stopPropagation();
+    hideColumn(hideBtn.dataset.hideCol);
+    return;
+  }
+  const th = e.target.closest("th[data-sort]");
+  if(!th) return;
+  const field = th.dataset.sort;
+  if(sortField === field) {
+    sortAscending = !sortAscending;
+  } else {
+    sortField = field;
+    sortAscending = true;
+  }
+  document.querySelectorAll("table.shotlist-table th").forEach(h => {
+    h.classList.remove("sorted-asc", "sorted-desc");
+  });
+  th.classList.add(sortAscending ? "sorted-asc" : "sorted-desc");
+  renderTable();
+});
+
+/* ---------- Event Listeners Setup ---------- */
+document.getElementById("filterSearch").addEventListener("input", renderTable);
+document.getElementById("filterStage").addEventListener("change", renderTable);
+document.getElementById("filterType").addEventListener("change", renderTable);
+document.getElementById("filterTag").addEventListener("change", renderTable);
+document.getElementById("filterLabel").addEventListener("change", renderTable);
+document.getElementById("filterBookmark").addEventListener("change", renderTable);
+document.getElementById("filterVisibility").addEventListener("change", renderTable);
+
+document.getElementById("btnResetFilters").addEventListener("click", () => {
+  document.getElementById("filterSearch").value = "";
+  document.getElementById("filterStage").value = "";
+  document.getElementById("filterType").value = "";
+  document.getElementById("filterTag").value = "";
+  document.getElementById("filterLabel").value = "";
+  document.getElementById("filterBookmark").value = "";
+  document.getElementById("filterVisibility").value = "visible";
+  renderTable();
+});
+document.getElementById("btnResetCols").addEventListener("click", () => {
+  resetColumns();
+});
+document.getElementById("btnScenes").addEventListener("click", () => {
+  setScenesPanelOpen(!scenesPanelOpen);
+});
+document.getElementById("btnCloseScenes").addEventListener("click", () => {
+  setScenesPanelOpen(false);
+});
+document.getElementById("btnAddScene").addEventListener("click", addScene);
+document.getElementById("scenesBody").addEventListener("input", (e) => {
+  const ta = e.target.closest("[data-scene-rationale]");
+  if(!ta) return;
+  const id = ta.dataset.sceneRationale;
+  ensureScene(id).rationale = ta.value;
+  persist("Updated rationale for scene " + id + " (“" + sceneTitle(id) + "”)", { delay: 2500 });
+});
+document.getElementById("scenesBody").addEventListener("change", (e) => {
+  const title = e.target.closest("[data-scene-title]");
+  if(title){ updateSceneTitle(title.dataset.sceneTitle, title.value); return; }
+  const wpm = e.target.closest("[data-scene-wpm]");
+  if(wpm){ updateSceneWpm(wpm.dataset.sceneWpm, wpm.value); return; }
+  const hid = e.target.closest("[data-scene-hidden]");
+  if(hid){
+    if(hid.checked) hideScene(hid.dataset.sceneHidden);
+    else unhideScene(hid.dataset.sceneHidden);
+    return;
+  }
+  const add = e.target.closest("[data-scene-add]");
+  if(add && add.value){
+    toggleSceneTag(add.dataset.sceneId, add.dataset.sceneAdd, add.value);
+  }
+});
+document.getElementById("scenesBody").addEventListener("click", (e) => {
+  const tog = e.target.closest("[data-scene-tog]");
+  if(tog){
+    toggleSceneTag(tog.dataset.sceneId, tog.dataset.sceneTog, tog.dataset.val);
+    return;
+  }
+  const view = e.target.closest("[data-filter-scene]");
+  if(view){
+    document.getElementById("filterStage").value = view.dataset.filterScene;
+    setScenesPanelOpen(false);
+    renderTable();
+    document.querySelector(".table-wrap")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    return;
+  }
+  const show = e.target.closest("[data-scene-show]");
+  if(show){ unhideScene(show.dataset.sceneShow); return; }
+  const hide = e.target.closest("[data-scene-hide]");
+  if(hide){ hideScene(hide.dataset.sceneHide); return; }
+  const del = e.target.closest("[data-scene-del]");
+  if(del) deleteScene(del.dataset.sceneDel);
+});
+document.getElementById("colPickerMenu").addEventListener("change", (e) => {
+  const box = e.target.closest("[data-col-toggle]");
+  if(!box) return;
+  toggleColumn(box.dataset.colToggle, box.checked);
+  if(!box.checked && !isColHidden(box.dataset.colToggle)) box.checked = true;
+});
+document.getElementById("colPickerMenu").addEventListener("click", (e) => {
+  if(e.target.id === "btnShowAllCols" || e.target.closest("#btnShowAllCols")){
+    hiddenColumns = [];
+    persistHiddenColumns();
+    applyColVisibility();
+  }
+});
+document.getElementById("hiddenColsBar").addEventListener("click", (e) => {
+  const btn = e.target.closest("[data-show-col]");
+  if(btn) showColumn(btn.dataset.showCol);
+});
+document.getElementById("btnShowHidden").addEventListener("click", () => {
+  setHiddenTableOpen(!hiddenTableOpen);
+});
+document.getElementById("btnCloseHidden").addEventListener("click", () => {
+  setHiddenTableOpen(false);
+});
+document.getElementById("btnShowAllHidden").addEventListener("click", () => {
+  const list = hiddenShotsList();
+  if(!list.length) return;
+  list.forEach(s => { s.hidden = false; });
+  Object.keys(scenes).forEach(st => {
+    if(scenes[st] && scenes[st].hidden) scenes[st].hidden = false;
+  });
+  persist("Showed all hidden shots");
+  renderTable();
+});
+
+document.getElementById("btnSaveAzure").addEventListener("click", () => {
+  lastChangeNote = lastChangeNote || "Manual save from filter table";
+  clearTimeout(azurePushTimer);
+  pushAzureState(currentStatePayload(), { backup: true, note: lastChangeNote });
+});
+
+document.getElementById("shotlistBody").addEventListener("change", (e) => {
+  const sceneSel = e.target.closest("select[data-scene]");
+  if(sceneSel){
+    assignShotToScene(sceneSel.dataset.scene, sceneSel.value);
+    return;
+  }
+  const sel = e.target.closest("select[data-add]");
+  if(!sel || !sel.value) return;
+  addShotValue(sel.dataset.id, sel.dataset.add, sel.value);
+});
+document.getElementById("shotlistBody").addEventListener("click", (e) => {
+  const rm = e.target.closest("[data-remove]");
+  if(rm){
+    e.preventDefault();
+    removeShotValue(rm.dataset.id, rm.dataset.remove, rm.dataset.val);
+    return;
+  }
+  const addBtn = e.target.closest("[data-add-btn]");
+  if(addBtn){
+    const input = addBtn.parentElement.querySelector("[data-add-input]");
+    addShotValue(addBtn.dataset.id, addBtn.dataset.addBtn, input ? input.value : "");
+  }
+});
+document.getElementById("shotlistBody").addEventListener("keydown", (e) => {
+  if(e.key !== "Enter") return;
+  const input = e.target.closest("[data-add-input]");
+  if(!input) return;
+  e.preventDefault();
+  addShotValue(input.dataset.id, input.dataset.addInput, input.value);
+});
+
+const THUMB_HOVER_SCALE = 5;
+const thumbHoverPreview = document.getElementById("thumbHoverPreview");
+const thumbHoverImg = thumbHoverPreview.querySelector("img");
+function hideThumbPreview(){
+  thumbHoverPreview.classList.remove("show");
+}
+function showThumbPreview(cell){
+  const img = cell.querySelector("img");
+  if(!img || !img.src) return;
+  const r = cell.getBoundingClientRect();
+  const w = Math.round(r.width * THUMB_HOVER_SCALE);
+  const h = Math.round(r.height * THUMB_HOVER_SCALE);
+  thumbHoverImg.src = img.currentSrc || img.src;
+  thumbHoverPreview.style.width = w + "px";
+  thumbHoverPreview.style.height = h + "px";
+  let left = r.left;
+  let top = r.top + (r.height / 2) - (h / 2);
+  const pad = 8;
+  if(left + w > window.innerWidth - pad) left = window.innerWidth - w - pad;
+  if(left < pad) left = pad;
+  if(top + h > window.innerHeight - pad) top = window.innerHeight - h - pad;
+  if(top < pad) top = pad;
+  thumbHoverPreview.style.left = left + "px";
+  thumbHoverPreview.style.top = top + "px";
+  thumbHoverPreview.classList.add("show");
+}
+document.querySelector("main").addEventListener("mouseover", (e) => {
+  const cell = e.target.closest(".thumb-cell");
+  if(!cell) return;
+  if(e.relatedTarget && cell.contains(e.relatedTarget)) return;
+  showThumbPreview(cell);
+});
+document.querySelector("main").addEventListener("mouseout", (e) => {
+  const cell = e.target.closest(".thumb-cell");
+  if(!cell) return;
+  if(e.relatedTarget && cell.contains(e.relatedTarget)) return;
+  hideThumbPreview();
+});
+document.querySelector(".table-wrap").addEventListener("scroll", hideThumbPreview);
+window.addEventListener("scroll", hideThumbPreview, true);
+
+document.getElementById("modalClose").addEventListener("click", closeMediaPreview);
+document.getElementById("mediaModal").addEventListener("click", (e) => {
+  if(e.target === document.getElementById("mediaModal")){
+    closeMediaPreview();
+  }
+});
+
+// Theme toggle
+const themeToggle = document.getElementById("themeToggle");
+themeToggle.addEventListener("click", () => {
+  const cur = document.documentElement.getAttribute("data-theme");
+  const next = cur === "dark" ? "light" : "dark";
+  document.documentElement.setAttribute("data-theme", next);
+  document.documentElement.style.colorScheme = next;
+  localStorage.setItem("aug-video-theme", next);
+  themeToggle.textContent = next === "dark" ? "Light" : "Dark";
+});
+themeToggle.textContent = document.documentElement.getAttribute("data-theme") === "dark" ? "Light" : "Dark";
+
+// Initialization
+initData();
+renderHead();
+initColResize();
+populateFilters();
+renderTable();
+hydrateAzureState();
+
+</script>
+</body>
+</html>

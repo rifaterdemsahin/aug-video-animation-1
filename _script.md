@@ -7,7 +7,7 @@ status: draft
 
 # WIG Animation — Voiceover Script
 
-Editable from the storyboard page (`storyboard.html` at the repo root) — that page loads this
+Editable from the storyboard page (`research.html` at the repo root) — that page loads this
 structure into a textarea, shows live word count / marked-slide count, and saves your latest
 edits to browser storage. This file is the seed copy; after editing in the browser, use its
 "Download .md" button and overwrite this file to keep it in sync.
@@ -105,7 +105,7 @@ UI #1a1a2e, red #e74c3c, blue #3498db, green #27ae60, gray #95a5a6, gold #f39c12
 
 Short narration beats, one per production stage, for a behind-the-scenes cut that tours the
 whole `WIGAnimation` framework itself. Mark the ones you actually want voiced in
-`storyboard.html`; the rest can stay silent B-roll with on-screen text only.
+`research.html`; the rest can stay silent B-roll with on-screen text only.
 
 ### 00 — Index
 > "Every video I make now runs through the same sixteen-step pipeline. This is the map."

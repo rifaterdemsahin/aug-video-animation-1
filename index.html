@@ -37,7 +37,39 @@
     html,body{margin:0;background:var(--bg);color:var(--ink);font-family:Georgia,"Times New Roman",serif}
     a{color:var(--cyan)}
     a:hover{color:var(--gold)}
-    .topbar{display:flex;justify-content:flex-end;margin:0 0 8px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    .topbar{display:flex;align-items:center;margin:0 0 24px;padding-bottom:12px;border-bottom:1px solid var(--line);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;flex-wrap:wrap;gap:12px}
+    .shared-nav {
+      display: inline-flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      align-items: center;
+      background: var(--chip, var(--bg));
+      padding: 4px;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+    }
+    .shared-nav a {
+      color: var(--muted);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 13px;
+      padding: 6px 12px;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .shared-nav a:hover {
+      color: var(--cyan);
+      background: var(--panel);
+    }
+    .shared-nav a.active {
+      color: var(--ink);
+      background: var(--panel);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      border: 1px solid var(--line);
+    }
     .theme-toggle{
       font:inherit;font-size:13px;font-weight:650;cursor:pointer;
       border:1px solid var(--line);background:var(--panel);color:var(--ink);
@@ -89,12 +121,29 @@
     .stages a{border:1px solid var(--line);border-radius:999px;padding:4px 9px;font-size:11.5px;color:var(--muted);text-decoration:none}
     .stages a:hover{color:var(--gold);border-color:var(--gold)}
     footer{margin-top:56px;padding-top:20px;border-top:1px solid var(--line);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:13px;color:var(--muted)}
+    #mediaHover{
+      position:fixed;inset:0;z-index:80;display:none;
+      align-items:center;justify-content:center;
+      background:rgba(0,0,0,.82);padding:28px;pointer-events:none
+    }
+    #mediaHover.open{display:flex}
+    #mediaHover img{max-width:92vw;max-height:86vh;object-fit:contain;border-radius:10px;box-shadow:0 12px 40px rgba(0,0,0,.45)}
+    #mediaHover .cap{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);color:#fff;font-size:12px;text-align:center;max-width:80vw}
   </style>
 </head>
 <body>
   <div class="wrap">
     <div class="topbar">
-      <button type="button" class="theme-toggle" id="themeToggle" aria-label="Switch color theme">Light</button>
+      <div class="title" style="font-weight: 800; font-size: 16px; margin-right: 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;"><a href="index.html" style="color:inherit;text-decoration:none">WIG Animation</a></div>
+      <nav class="shared-nav" aria-label="Main Navigation">
+        <a href="index.html" class="nav-item active"><span>🏠</span> Overview</a>
+        <a href="research.html" class="nav-item"><span>🎬</span> Vertical Editor</a>
+        <a href="timeline.html" class="nav-item"><span>↔️</span> Horizontal Timeline</a>
+        <a href="shotlist.html" class="nav-item"><span>📊</span> Filter &amp; Sort Table</a>
+        <a href="scenes.html" class="nav-item"><span>🗂️</span> Scenes</a>
+        <a href="voice_over.html" class="nav-item"><span>📜</span> VO Script</a>
+      </nav>
+      <button type="button" class="theme-toggle" id="themeToggle" aria-label="Switch color theme" style="margin-left: auto;">Light</button>
     </div>
     <header class="hero">
       <p class="kicker">August 2026 · DeliveryPilot · public WIP</p>
@@ -105,8 +154,9 @@
         I am publishing the production itself.
       </p>
       <div class="actions">
-        <a class="btn primary" href="storyboard.html">Open the shotlist</a>
-        <a class="btn ghost" href="_script.md">Read the voiceover script</a>
+        <a class="btn primary" href="research.html">Open the shotlist</a>
+        <a class="btn ghost" href="timeline.html">Horizontal timeline</a>
+        <a class="btn ghost" href="voice_over.html">Read the voiceover script</a>
         <a class="btn ghost" href="https://github.com/rifaterdemsahin/aug-video-animation-1">GitHub source</a>
       </div>
       <figure class="hero-art">
@@ -140,7 +190,7 @@
         </article>
         <article class="card">
           <h3>02 · The shotlist</h3>
-          <p><a href="storyboard.html">storyboard.html</a> is the editor: scenes, VO, types, hide/undo, playable Flow clips with first-frame posters.</p>
+          <p><a href="research.html">research.html</a> is the editor: scenes, VO, types, hide/undo, playable Flow clips with first-frame posters.</p>
         </article>
         <article class="card">
           <h3>03 · The stills</h3>
@@ -166,7 +216,7 @@
         <a href="stills/11_thumbnail/11_thumbnail_00_divider-empty.png">11 Thumbnail</a>
         <a href="stills/12_export/12_export_00_divider-empty.png">12 Export</a>
         <a href="stills/13_metadata/13_metadata_00_template-empty.png">13 Metadata</a>
-        <a href="_script.md">14 WIG</a>
+        <a href="voice_over.html">14 WIG</a>
         <a href="stills/15_tactics/15_tactics_00_editor-screenshot-stub.png">15 Tactics</a>
         <a href="#clips">16 Video Flow</a>
       </div>
@@ -181,7 +231,10 @@
         </thead>
         <tbody>
           <tr><td><a href="index.html"><code>index.html</code></a></td><td>This page</td></tr>
-          <tr><td><a href="storyboard.html"><code>storyboard.html</code></a></td><td>Shotlist editor</td></tr>
+          <tr><td><a href="research.html"><code>research.html</code></a></td><td>Shotlist editor</td></tr>
+          <tr><td><a href="timeline.html"><code>timeline.html</code></a></td><td>Horizontal timeline of the same shots</td></tr>
+          <tr><td><a href="shotlist.html"><code>shotlist.html</code></a></td><td>Filter &amp; Sort Table</td></tr>
+          <tr><td><a href="scenes.html"><code>scenes.html</code></a></td><td>Scene Editor</td></tr>
           <tr><td><a href="_script.md"><code>_script.md</code></a></td><td>Flagship VO + stage walkthrough</td></tr>
           <tr><td><a href="README.md"><code>README.md</code></a></td><td>Repo map and local run notes</td></tr>
           <tr><td><a href="stills/images_manifest.json"><code>stills/</code></a></td><td>105 Canva stills, one folder per stage</td></tr>
@@ -203,7 +256,7 @@
         <a class="still-card" href="stills/11_thumbnail/11_thumbnail_00_divider-empty.png"><img src="stills/11_thumbnail/11_thumbnail_00_divider-empty.png" alt="Stage 11 thumbnail divider"><span class="meta"><b>11</b><span>Thumbnail · 1</span></span></a>
         <a class="still-card" href="stills/12_export/12_export_00_divider-empty.png"><img src="stills/12_export/12_export_00_divider-empty.png" alt="Stage 12 export divider"><span class="meta"><b>12</b><span>Export · 1</span></span></a>
         <a class="still-card" href="stills/13_metadata/13_metadata_00_template-empty.png"><img src="stills/13_metadata/13_metadata_00_template-empty.png" alt="Stage 13 metadata template"><span class="meta"><b>13</b><span>Metadata · 2</span></span></a>
-        <a class="still-card empty" href="_script.md"><span class="meta"><b>14</b><span>WIG — no still yet; VO in the script</span></span></a>
+        <a class="still-card empty" href="voice_over.html"><span class="meta"><b>14</b><span>WIG — no still yet; VO in the script</span></span></a>
         <a class="still-card" href="stills/15_tactics/15_tactics_00_editor-screenshot-stub.png"><img src="stills/15_tactics/15_tactics_00_editor-screenshot-stub.png" alt="Stage 15 tactics editor stub"><span class="meta"><b>15</b><span>Tactics · 4</span></span></a>
       </div>
     </section>
@@ -229,8 +282,8 @@
     <section>
       <h2>How to look around</h2>
       <ul>
-        <li><a href="storyboard.html">Shotlist</a> — the live editor. Grammar/rewrite and vault search need the local <code>server.py</code>; everything else is static.</li>
-        <li><a href="_script.md">_script.md</a> — Part A (flagship VO) and Part B (stage walkthrough + Stage 14 WIG).</li>
+        <li><a href="research.html">Shotlist</a> — the live editor. Grammar/rewrite and vault search need the local <code>server.py</code>; everything else is static. <a href="timeline.html">Horizontal timeline</a> shows the same deck as a filmstrip.</li>
+        <li><a href="voice_over.html">VO Script</a> — Part A (flagship VO) and Part B (stage walkthrough + Stage 14 WIG).</li>
         <li><a href="stills/02_plan/02_plan_00_cover-title.png"><code>stills/02_plan/</code></a> — Canva deck the flagship script was transcribed from. Full catalog: <a href="stills/images_manifest.json">images_manifest.json</a>.</li>
         <li><a href="video_flow/18_golden-brain-lightning.mp4"><code>video_flow/</code></a> — 26 clips + <code>_first_frames/</code>. Catalog: <a href="video_flow/video_flow_manifest.json">video_flow_manifest.json</a>.</li>
         <li><a href="README.md">README.md</a> — folder map and how to run locally.</li>
@@ -241,6 +294,10 @@
       Rifat Erdem Sahin · DeliveryPilot · published from the Second Brain WIGAnimation project ·
       <a href="https://github.com/rifaterdemsahin/aug-video-animation-1">rifaterdemsahin/aug-video-animation-1</a>
     </footer>
+  </div>
+  <div id="mediaHover" aria-hidden="true">
+    <img alt="">
+    <div class="cap"></div>
   </div>
   <script>
     (function(){
@@ -261,6 +318,33 @@
       }
       apply(theme());
       if(btn) btn.addEventListener("click", function(){ apply(theme() === "dark" ? "light" : "dark"); });
+    })();
+    (function(){
+      var hover = document.getElementById("mediaHover");
+      if(!hover) return;
+      var img = hover.querySelector("img");
+      var cap = hover.querySelector(".cap");
+      function show(src, name){
+        if(!src) return;
+        img.src = src;
+        img.alt = name || "";
+        cap.textContent = name || "";
+        hover.classList.add("open");
+        hover.setAttribute("aria-hidden", "false");
+      }
+      function hide(){
+        hover.classList.remove("open");
+        hover.setAttribute("aria-hidden", "true");
+        img.removeAttribute("src");
+      }
+      document.querySelectorAll(".still-card img, .clip-grid img, .hero-art img").forEach(function(el){
+        el.addEventListener("mouseenter", function(){
+          var name = (el.closest("a") && el.closest("a").querySelector(".meta span")) ? el.closest("a").querySelector(".meta span").textContent : (el.alt || "");
+          show(el.currentSrc || el.src, name);
+        });
+        el.addEventListener("mouseleave", hide);
+      });
+      document.addEventListener("keydown", function(e){ if(e.key === "Escape") hide(); });
     })();
   </script>
 </body>

@@ -11,21 +11,29 @@ I am turning a Canva production plan into a YouTube/LinkedIn video — shotlist,
 | Path | What |
 |------|------|
 | [index.html](index.html) | Public landing — what I am doing, one playable clip |
-| [storyboard.html](storyboard.html) | Browser shotlist (scenes, VO, tags, Flow players) |
+| [research.html](research.html) | Browser shotlist (scenes, VO, tags, Flow players) |
+| [timeline.html](timeline.html) | Same shotlist as a horizontal timeline |
+| [shotlist.html](shotlist.html) | Filter & Sort Table of all shots |
+| [scenes.html](scenes.html) | Scene Editor for scene-only details |
+| [voice_over.html](voice_over.html) | Voiceover script text and checklist |
 | [_script.md](_script.md) | Flagship VO (Part A) + stage walkthrough (Part B) |
 | [stills/images_manifest.json](stills/images_manifest.json) | Catalog of every still (paths, stage, caption) |
 | [video_flow/video_flow_manifest.json](video_flow/video_flow_manifest.json) | Catalog of the 26 Flow clips |
 
 Landing page and shotlist share a **dark / light** toggle (saved in this browser). Default follows the OS.
 
-Local extras: `python3 server.py` on port 8765 for OpenRouter grammar/rewrite and vault path search. Then open [http://127.0.0.1:8765/storyboard.html](http://127.0.0.1:8765/storyboard.html). Static GitHub Pages does not run that API.
+Local extras: `python3 server.py` on port 8765 for OpenRouter grammar/rewrite and vault path search. Then open [http://127.0.0.1:8765/research.html](http://127.0.0.1:8765/research.html). Static GitHub Pages does not run that API.
 
 ## Layout
 
 ```
 .
 ├── index.html              public landing (GitHub Pages)
-├── storyboard.html         shotlist editor
+├── research.html           shotlist editor (vertical editor)
+├── timeline.html           horizontal timeline of the shots
+├── shotlist.html           filter & sort table of shots
+├── scenes.html             scene editor (scenes information)
+├── voice_over.html         voiceover script
 ├── _script.md              voiceover seed
 ├── server.py               local shotlist server + /api/*
 ├── stills/                 Canva / production stills, by stage
@@ -55,7 +63,7 @@ Stage 14 (WIG / my story) has no still yet — the VO lives in `_script.md` Part
 
 ## Stills
 
-Each still lives at `stills/{stage}_{name}/{filename}.png`. The shotlist loads those paths from `stills/images_manifest.json` (also inlined in `storyboard.html`). Saved browser state that still points at the old root filenames is remapped on load.
+Each still lives at `stills/{stage}_{name}/{filename}.png`. The shotlist loads those paths from `stills/images_manifest.json` (also inlined in `research.html`). Saved browser state that still points at the old root filenames is remapped on load.
 
 | Folder | Stage | Files |
 |--------|-------|------:|
@@ -86,9 +94,9 @@ Example: [video_flow/18_golden-brain-lightning.mp4](video_flow/18_golden-brain-l
 ```bash
 python3 server.py
 # open http://127.0.0.1:8765/          → index.html
-#      http://127.0.0.1:8765/storyboard.html
+#      http://127.0.0.1:8765/research.html
 ```
 
-Grammar / rewrite on a shot's VO and `[[` vault path search need this server. Everything else is static and works on GitHub Pages.
+Grammar / rewrite, vault search, and **Azure shotlist backup** need this server. The Save button writes the cookie/shotlist state to Azure Blob (`projects/aug-video-animation-1/shotlist/`) using Key Vault secret `AZURE-STORAGE-CONN-STR`. Tools → Load from Azure restores it. Everything else is static and works on GitHub Pages.
 
 By [Rifat Erdem Sahin](https://github.com/rifaterdemsahin) / DeliveryPilot.

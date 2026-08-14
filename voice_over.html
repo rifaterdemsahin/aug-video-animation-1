@@ -1,0 +1,870 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Voiceover Script — WIG Animation</title>
+<script>
+(function(){
+  try{
+    var key = "aug-video-theme";
+    var theme = localStorage.getItem(key);
+    if(theme !== "light" && theme !== "dark"){
+      theme = window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+    }
+    document.documentElement.setAttribute("data-theme", theme);
+    document.documentElement.style.colorScheme = theme;
+  }catch(e){
+    document.documentElement.setAttribute("data-theme", "light");
+  }
+})();
+</script>
+<style>
+:root, html[data-theme="light"]{
+  --bg:#fbfbfa; --panel:#fff; --ink:#1c1c1e; --muted:#86868b; --line:#e5e5ea;
+  --accent:#e74c3c; --accent2:#0071e3; --accent3:#34c759; --gold:#ff9500;
+  --chip:#f2f2f7; --shadow:0 1px 2px rgba(0,0,0,0.05);
+}
+html[data-theme="dark"]{
+  --bg:#1c1c1e; --panel:#2c2c2e; --ink:#f5f5f7; --muted:#8e8e93; --line:#3a3a3c;
+  --chip:#3a3a3c; --shadow:0 1px 3px rgba(0,0,0,0.3);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;line-height:1.5;padding:0}
+a{color:var(--accent2);text-decoration:none}
+header{position:sticky;top:0;z-index:50;background:var(--panel);border-bottom:1px solid var(--line);box-shadow:var(--shadow);padding:10px 16px}
+.bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;max-width:850px;margin:0 auto}
+.title{font-weight:800;font-size:16px;letter-spacing:.02em}
+.theme-toggle{
+  font:inherit;font-size:12.5px;font-weight:650;cursor:pointer;
+  border:1px solid var(--line);background:var(--chip);color:var(--ink);
+  border-radius:999px;padding:6px 12px;margin-left:auto
+}
+.theme-toggle:hover{border-color:var(--gold);color:var(--gold)}
+
+/* Shared Menu navigation */
+.shared-nav {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+  margin-right: auto;
+  background: var(--chip, var(--bg));
+  padding: 4px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+}
+.shared-nav a {
+  color: var(--muted);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 13px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.shared-nav a:hover {
+  color: var(--accent2);
+  background: var(--panel);
+}
+.shared-nav a.active {
+  color: var(--ink);
+  background: var(--panel);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  border: 1px solid var(--line);
+}
+
+main {
+  max-width: 850px;
+  margin: 0 auto;
+  padding: 28px 16px 120px;
+}
+
+/* Script container style */
+.script-container {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: var(--shadow);
+  padding: 40px 50px;
+}
+@media (max-width: 600px) {
+  .script-container {
+    padding: 20px;
+  }
+}
+
+.script-header-block {
+  border-bottom: 2px solid var(--line);
+  padding-bottom: 20px;
+  margin-bottom: 30px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+}
+.script-title {
+  font-size: 28px;
+  font-weight: 800;
+  margin: 0 0 8px;
+}
+.script-stats {
+  font-size: 13px;
+  color: var(--muted);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  font-weight: 600;
+}
+
+.stage-section {
+  margin-top: 36px;
+}
+.stage-heading {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 6px;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.script-block {
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px dashed var(--line);
+}
+.script-block:last-child {
+  border-bottom: none;
+}
+.vo-paragraph {
+  font-family: Georgia, serif;
+  font-size: 17.5px;
+  line-height: 1.6;
+  color: var(--ink);
+  margin: 0 0 10px;
+}
+.visual-only {
+  font-family: -apple-system, sans-serif;
+  font-style: italic;
+  color: var(--muted);
+  font-size: 14px;
+  margin: 0 0 10px;
+}
+.meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+.meta-badges {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.badge {
+  background: var(--chip);
+  border: 1px solid var(--line);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+/* Inline notes style */
+.note-container {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin-top: 8px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.note-container:focus-within {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(255, 149, 0, 0.12);
+}
+.note-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+.note-textarea {
+  border: none;
+  background: transparent;
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 13.5px;
+  width: 100%;
+  padding: 0;
+  resize: vertical;
+  min-height: 32px;
+  line-height: 1.4;
+}
+.note-textarea:focus {
+  outline: none;
+}
+.note-textarea::placeholder {
+  color: var(--muted);
+  opacity: 0.6;
+}
+
+/* Azure pill style */
+.azure-pill {
+  display: inline-flex;
+  align-items: center;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: var(--chip);
+  border: 1px solid var(--line);
+  color: var(--muted);
+  transition: all 0.2s ease;
+}
+.azure-pill.is-saved {
+  background: rgba(52, 199, 89, 0.15);
+  color: var(--accent3);
+  border-color: var(--accent3);
+}
+.azure-pill.is-sync {
+  background: rgba(0, 113, 227, 0.15);
+  color: var(--accent2);
+  border-color: var(--accent2);
+}
+.azure-pill.is-error {
+  background: rgba(255, 59, 48, 0.15);
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+/* Floating Actions */
+.floating-actions {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  display: flex;
+  gap: 12px;
+  z-index: 100;
+}
+.btn-float {
+  background: var(--accent2);
+  color: #fff;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 13px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: transform 0.2s, background 0.2s;
+}
+.btn-float:hover {
+  transform: scale(1.05);
+  background: #0077ed;
+}
+.btn-float-save {
+  background: var(--accent3);
+}
+.btn-float-save:hover {
+  background: #28a745;
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="bar">
+    <div class="title"><a href="index.html" style="color:inherit;text-decoration:none">WIG Animation</a></div>
+    <nav class="shared-nav" aria-label="Main Navigation">
+      <a href="index.html" class="nav-item"><span>🏠</span> Overview</a>
+      <a href="research.html" class="nav-item"><span>🎬</span> Vertical Editor</a>
+      <a href="timeline.html" class="nav-item"><span>↔️</span> Horizontal Timeline</a>
+      <a href="shotlist.html" class="nav-item"><span>📊</span> Filter &amp; Sort Table</a>
+      <a href="scenes.html" class="nav-item"><span>🗂️</span> Scenes</a>
+      <a href="voice_over.html" class="nav-item active"><span>📜</span> VO Script</a>
+    </nav>
+    <div style="display:flex; align-items:center; gap:12px;">
+      <span class="azure-pill" id="statAzure">☁️ Loading...</span>
+      <button type="button" class="theme-toggle" id="themeToggle">Light</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="script-container">
+    <div class="script-header-block">
+      <div>
+        <h1 class="script-title">Voiceover Script</h1>
+        <div class="script-stats">
+          <span id="statScenes">— Scenes</span>
+          <span id="statShots">— Shots</span>
+          <span id="statWords">— Words</span>
+          <span id="statDuration">— Duration</span>
+        </div>
+      </div>
+      <div style="display:flex; gap: 8px; align-items: center;">
+        <label class="filter-checkbox-label" title="Show only bookmarked text segments">
+          <input type="checkbox" id="bookmarkedOnly"> ⭐ Bookmarks
+        </label>
+        <label class="filter-checkbox-label" title="Show B-rolls/visual shots without voiceover">
+          <input type="checkbox" id="showBroll" checked> 📹 Include Visual-Only
+        </label>
+      </div>
+    </div>
+
+    <!-- Script Stream -->
+    <div id="scriptStream">
+      <p style="color:var(--muted); font-style:italic;">Loading script data from Azure...</p>
+    </div>
+  </div>
+</main>
+
+<div class="floating-actions">
+  <button type="button" class="btn-float btn-float-save" id="btnSaveAzure">☁️ Save to Azure</button>
+  <button type="button" class="btn-float" id="btnDownloadMd">⬇️ Download .md</button>
+</div>
+
+<script>
+// State management
+let apiBase = "";
+const API_BASE_KEY = "wiganimation_api_base";
+const DEFAULT_WPM = 150;
+
+let fullState = {};
+let shots = [];
+let scenes = {};
+let selectedShotId = null;
+let selectedSceneStage = null;
+let sceneOpen = {};
+let globalWpm = DEFAULT_WPM;
+
+let azurePushTimer = null;
+let isDirty = false;
+
+const STAGE_ORDER = ["00","01","02","03","04","05","06","07","08","09","10","11","12","13","14","15","16"];
+const STAGE_NAMES = {
+  "00":"Index","01":"Architecture","02":"Plan","03":"Assets","04":"Cohort",
+  "05":"Gaps","06":"Assembly","07":"Polish","08":"Refinement","09":"Audio","10":"Edit Color",
+  "11":"Thumbnail","12":"Export","13":"Metadata","14":"WIG (My Story)","15":"Tactics",
+  "16":"Video Flow"
+};
+
+// API base resolution
+async function originHasShotlistApi(origin){
+  try{
+    const r = await fetch(origin + "/api/health", { cache: "no-store" });
+    if(!r.ok) return false;
+    const j = await r.json();
+    return !!(j && j.ok);
+  }catch(e){
+    return false;
+  }
+}
+
+async function resolveApiBase(){
+  if(await originHasShotlistApi(location.origin)){
+    apiBase = "";
+    try{ localStorage.removeItem(API_BASE_KEY); }catch(e){}
+    return "";
+  }
+  const candidates = [];
+  try{
+    const cached = localStorage.getItem(API_BASE_KEY);
+    if(cached) candidates.push(cached);
+  }catch(e){}
+  for(let p = 8765; p <= 8775; p++) candidates.push("http://127.0.0.1:" + p);
+  candidates.push("http://127.0.0.1:54965");
+  const seen = new Set();
+  for(const origin of candidates){
+    if(!origin || seen.has(origin) || origin === location.origin) continue;
+    seen.add(origin);
+    if(await originHasShotlistApi(origin)){
+      apiBase = origin;
+      try{ localStorage.setItem(API_BASE_KEY, origin); }catch(e){}
+      return origin;
+    }
+  }
+  apiBase = "";
+  return "";
+}
+
+function apiUrl(path){
+  return (apiBase || "") + path;
+}
+
+// Helpers
+function wordCount(text){
+  const t = (text || "").trim();
+  return t ? t.split(/\s+/).length : 0;
+}
+
+function escapeHtml(s){
+  return String(s == null ? "" : s)
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;");
+}
+
+function fileBasename(path){
+  return String(path || "").split("/").pop();
+}
+
+function isSceneHidden(stage){
+  const st = stage == null ? "" : String(stage);
+  return !!(scenes[st] && scenes[st].hidden);
+}
+
+function isShotHidden(s){
+  return !!(s && (s.hidden || isSceneHidden(s.stage)));
+}
+
+// Filters hidden scenes/shots
+function visibleShots() {
+  return shots.filter(s => !isShotHidden(s));
+}
+
+function totalWords() {
+  return visibleShots().reduce((n, s) => n + wordCount(s.vo), 0);
+}
+
+function durationFromVo(text, overrideSec, wpm){
+  if(overrideSec != null && overrideSec !== "" && !isNaN(Number(overrideSec))){
+    return Math.max(1, Number(overrideSec));
+  }
+  const w = wordCount(text);
+  if(!w) return 2; // still holds a beat
+  const rate = Math.max(80, Number(wpm) || globalWpm || DEFAULT_WPM);
+  return Math.max(2, Math.round((w / rate) * 60));
+}
+
+function shotWpm(s){
+  if(s && s.wpm != null && s.wpm !== "" && !isNaN(Number(s.wpm))) return Number(s.wpm);
+  const sc = s && scenes[s.stage];
+  if(sc && sc.wpm != null && sc.wpm !== "" && !isNaN(Number(sc.wpm))) return Number(sc.wpm);
+  return globalWpm || DEFAULT_WPM;
+}
+
+function shotDuration(s){
+  return durationFromVo(s.vo, s.durationSec, shotWpm(s));
+}
+
+function computeTimeline(){
+  let t = 0;
+  const map = {}; // id -> {in, out, dur}
+  visibleShots().forEach(s => {
+    const dur = shotDuration(s);
+    map[s.id] = { in: t, out: t + dur, dur };
+    t += dur;
+  });
+  return { map, total: t };
+}
+
+function formatTC(totalSec){
+  totalSec = Math.max(0, Math.round(totalSec || 0));
+  const h = Math.floor(totalSec / 3600);
+  const m = Math.floor((totalSec % 3600) / 60);
+  const s = totalSec % 60;
+  const pad = n => String(n).padStart(2, "0");
+  return h > 0 ? `${pad(h)}:${pad(m)}:${pad(s)}` : `${pad(m)}:${pad(s)}`;
+}
+
+// UI State Updates
+function setAzureStat(text){
+  const when = new Date().toLocaleTimeString();
+  const map = {
+    "saved": "☁️ Saved to Azure · " + when,
+    "saving…": "☁️ Saving to Azure…",
+    "sync…": "☁️ Saving to Azure…",
+    "load…": "☁️ Loading from Azure…",
+    "loaded": "☁️ Loaded from Azure · " + when,
+    "seeding…": "☁️ First save to Azure…",
+    "seeded": "☁️ Saved to Azure · " + when,
+    "cloud": "☁️ On Azure",
+    "empty": "☁️ Not saved to Azure yet",
+    "offline": "☁️ Azure offline",
+    "error": "☁️ Azure save failed",
+    "pending": "☁️ Unsaved changes"
+  };
+  const label = map[text] || ("☁️ " + text);
+  const kind = /error|fail/i.test(text) ? "error" : /pending|unsaved/i.test(text) ? "sync" : /save|saved|seeded|loaded|cloud/i.test(text) ? "saved" : /sync|saving|load|seed/i.test(text) ? "sync" : "";
+  const el = document.getElementById("statAzure");
+  if(el){
+    el.textContent = label;
+    el.className = "azure-pill" + (kind ? " is-" + kind : "");
+  }
+}
+
+function updateStats() {
+  const tl = computeTimeline();
+  const activeShots = visibleShots();
+  const stagesPresent = new Set(activeShots.map(s => s.stage));
+  
+  document.getElementById("statScenes").textContent = `${stagesPresent.size} Scenes`;
+  document.getElementById("statShots").textContent = `${activeShots.length} Shots`;
+  document.getElementById("statWords").textContent = `${totalWords()} Words`;
+  document.getElementById("statDuration").textContent = `${formatTC(tl.total)}`;
+}
+
+// Render dynamic script view - excludes hidden shots/scenes
+function renderScript() {
+  const container = document.getElementById("scriptStream");
+  if (!container) return;
+  
+  const showBookmarked = document.getElementById("bookmarkedOnly").checked;
+  const showBroll = document.getElementById("showBroll").checked;
+  
+  container.innerHTML = "";
+  
+  const tl = computeTimeline();
+  
+  const grouped = {};
+  STAGE_ORDER.forEach(st => {
+    grouped[st] = [];
+  });
+  
+  // Collect shots that are not marked as hidden
+  shots.forEach(s => {
+    if (isShotHidden(s)) return; // Filters out hidden ones!
+    if (showBookmarked && !s.bookmarked) return;
+    
+    const hasVo = wordCount(s.vo) > 0;
+    if (!hasVo && !showBroll) return;
+    
+    grouped[s.stage].push(s);
+  });
+  
+  let totalRendered = 0;
+  
+  STAGE_ORDER.forEach(stage => {
+    const list = grouped[stage] || [];
+    if (!list.length) return;
+    
+    totalRendered += list.length;
+    
+    // Create stage section header
+    const stageHeader = document.createElement("div");
+    stageHeader.className = "stage-section";
+    stageHeader.innerHTML = `
+      <div class="stage-heading">
+        <span>Stage ${stage} — ${STAGE_NAMES[stage] || stage}</span>
+      </div>
+    `;
+    container.appendChild(stageHeader);
+    
+    list.forEach(s => {
+      const tc = tl.map[s.id] || { in: 0, out: 0, dur: 0 };
+      const block = document.createElement("div");
+      block.className = "script-block";
+      
+      let bodyHtml = "";
+      if (s.vo) {
+        bodyHtml = `<p class="vo-paragraph">${escapeHtml(s.vo)}</p>`;
+      } else {
+        bodyHtml = `<p class="visual-only">📹 [Visual: ${escapeHtml(s.caption || fileBasename(s.file) || "B-roll")}]</p>`;
+      }
+      
+      block.innerHTML = `
+        ${bodyHtml}
+        <div class="meta-row">
+          <div class="meta-badges">
+            <span class="badge">${formatTC(tc.in)}–${formatTC(tc.out)} (${tc.dur}s)</span>
+            ${s.vo ? `<span class="badge">${wordCount(s.vo)} words</span>` : ''}
+            <span style="font-family:monospace; margin-left:6px;">${fileBasename(s.file) || "Text Card"}</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span class="bookmark-star" onclick="toggleBookmark('${s.id}')" title="Toggle Bookmark">
+              ${s.bookmarked ? '⭐' : '☆'}
+            </span>
+          </div>
+        </div>
+        <div class="note-container">
+          <span class="note-label">📝 Segment Note</span>
+          <textarea class="note-textarea" 
+                    placeholder="Add an inline production note or feedback..."
+                    oninput="handleNoteChange('${s.id}', this.value)">${escapeHtml(s.bookmarkNote || "")}</textarea>
+        </div>
+      `;
+      container.appendChild(block);
+    });
+  });
+  
+  if (totalRendered === 0) {
+    container.innerHTML = `
+      <div style="text-align:center; padding:40px; color:var(--muted); border:1px dashed var(--line); border-radius:12px; background:var(--panel);">
+        No matching active script elements. Make sure scenes and shots are not hidden in the Vertical Editor.
+      </div>
+    `;
+  }
+}
+
+// Save & Auto-save logic
+function currentStatePayload() {
+  return {
+    format: "wiganimation-shotlist-cookie",
+    version: 3,
+    shots,
+    scenes,
+    selectedShotId,
+    selectedSceneStage,
+    sceneOpen,
+    globalWpm,
+    savedAt: new Date().toISOString()
+  };
+}
+
+function markDirty() {
+  isDirty = true;
+  setAzureStat("pending");
+}
+
+function handleNoteChange(shotId, value) {
+  const s = shots.find(x => x.id === shotId);
+  if (s) {
+    s.bookmarkNote = value;
+    s.bookmarked = !!value.trim();
+    if (s.bookmarked && !s.bookmarkedAt) {
+      s.bookmarkedAt = new Date().toISOString();
+    } else if (!s.bookmarked) {
+      s.bookmarkedAt = "";
+    }
+    markDirty();
+    
+    // Auto-save
+    clearTimeout(azurePushTimer);
+    azurePushTimer = setTimeout(() => {
+      saveAll({ silent: true });
+    }, 5000);
+    
+    updateStats();
+  }
+}
+
+window.toggleBookmark = function(shotId) {
+  const s = shots.find(x => x.id === shotId);
+  if (s) {
+    s.bookmarked = !s.bookmarked;
+    if (s.bookmarked && !s.bookmarkedAt) {
+      s.bookmarkedAt = new Date().toISOString();
+    } else if (!s.bookmarked) {
+      s.bookmarkedAt = "";
+    }
+    
+    if (!s.bookmarked) {
+      s.bookmarkNote = "";
+    }
+    
+    markDirty();
+    renderScript();
+    updateStats();
+    
+    clearTimeout(azurePushTimer);
+    azurePushTimer = setTimeout(() => {
+      saveAll({ silent: true });
+    }, 5000);
+  }
+};
+
+function saveAll(opts){
+  opts = opts || {};
+  STAGE_ORDER.forEach(st => {
+    if(!scenes[st]) scenes[st] = { minimized: false, hidden: false, title: "", types: [], labels: [], wpm: null };
+    scenes[st].minimized = sceneOpen[st] === false;
+  });
+  
+  const payload = currentStatePayload();
+  try {
+    localStorage.setItem("wiganimation_state_v3", JSON.stringify(payload));
+  } catch(e) {}
+  
+  if(!opts.keepDirty){
+    isDirty = false;
+  }
+  
+  if(!opts.skipAzure){
+    pushAzureState(payload, { backup: !opts.keepDirty, silent: !!opts.silent });
+  }
+}
+
+async function pushAzureState(payload, opts){
+  opts = opts || {};
+  setAzureStat("saving…");
+  try{
+    const url = apiUrl("/api/state");
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ state: payload, backup: opts.backup !== false })
+    });
+    const data = await res.json().catch(() => null);
+    if(!res.ok || !data || !data.ok){
+      throw new Error((data && data.error) || ("HTTP " + res.status + " " + res.statusText));
+    }
+    setAzureStat("saved");
+    if(!opts.silent) flash("Saved to Azure");
+  }catch(e){
+    setAzureStat("error");
+    console.error("Azure save failed", e);
+    flash("Azure save failed: " + e.message);
+  }
+}
+
+// Download markdown script helper
+function compileMarkdown() {
+  let body = "# Shotlist — Voiceover & Production Notes\n\n";
+  body += `*Generated dynamically* · Total words: ${totalWords()} · Duration: ${formatTC(computeTimeline().total)} @ ${globalWpm} wpm\n\n`;
+  
+  visibleShots().forEach((s, i) => {
+    if (wordCount(s.vo) === 0 && (!s.bookmarkNote || !s.bookmarkNote.trim())) return;
+    
+    const tc = computeTimeline().map[s.id] || { in: 0, out: 0, dur: 0 };
+    body += `### ${i+1}. Stage ${s.stage}${s.file ? " — " + fileBasename(s.file) : ""}\n`;
+    body += `**Timecode:** ${formatTC(tc.in)}–${formatTC(tc.out)} (${tc.dur}s)`;
+    
+    if (s.vo) {
+      body += `\n\n> ${s.vo}\n`;
+    }
+    if(s.bookmarkNote && s.bookmarkNote.trim()) {
+      body += `\n**Notes/Bookmark:** ${s.bookmarkNote}\n`;
+    }
+    body += `\n\n---\n\n`;
+  });
+  return body;
+}
+
+function flash(msg) {
+  const el = document.createElement("div");
+  el.style.position = "fixed";
+  el.style.bottom = "20px";
+  el.style.right = "20px";
+  el.style.background = "var(--tc, #333)";
+  el.style.color = "#fff";
+  el.style.padding = "10px 20px";
+  el.style.borderRadius = "8px";
+  el.style.boxShadow = "0 4px 12px rgba(0,0,0,0.15)";
+  el.style.zIndex = "9999";
+  el.style.fontFamily = "sans-serif";
+  el.style.fontSize = "13px";
+  el.style.fontWeight = "bold";
+  el.style.transition = "opacity 0.3s ease";
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(() => {
+    el.style.opacity = "0";
+    setTimeout(() => el.remove(), 300);
+  }, 3000);
+}
+
+// Initial state fetch
+async function loadAndRender() {
+  setAzureStat("load…");
+  try {
+    await resolveApiBase();
+    const url = apiUrl("/api/state");
+    const res = await fetch(url, { cache: "no-store" });
+    const data = await res.json().catch(() => null);
+    
+    if (res.ok && data && data.ok) {
+      if (data.found) {
+        fullState = data.state || {};
+        shots = fullState.shots || [];
+        scenes = fullState.scenes || {};
+        selectedShotId = fullState.selectedShotId;
+        selectedSceneStage = fullState.selectedSceneStage;
+        sceneOpen = fullState.sceneOpen || {};
+        globalWpm = fullState.globalWpm || DEFAULT_WPM;
+        setAzureStat("loaded");
+      } else {
+        setAzureStat("empty");
+        const local = localStorage.getItem("wiganimation_state_v3");
+        if (local) {
+          fullState = JSON.parse(local);
+          shots = fullState.shots || [];
+          scenes = fullState.scenes || {};
+          selectedShotId = fullState.selectedShotId;
+          selectedSceneStage = fullState.selectedSceneStage;
+          sceneOpen = fullState.sceneOpen || {};
+          globalWpm = fullState.globalWpm || DEFAULT_WPM;
+        }
+      }
+    } else {
+      throw new Error((data && data.error) || "HTTP " + res.status);
+    }
+  } catch (err) {
+    console.warn("API load failed, trying local storage fallback", err);
+    setAzureStat("offline");
+    
+    const local = localStorage.getItem("wiganimation_state_v3");
+    if (local) {
+      try {
+        fullState = JSON.parse(local);
+        shots = fullState.shots || [];
+        scenes = fullState.scenes || {};
+        selectedShotId = fullState.selectedShotId;
+        selectedSceneStage = fullState.selectedSceneStage;
+        sceneOpen = fullState.sceneOpen || {};
+        globalWpm = fullState.globalWpm || DEFAULT_WPM;
+      } catch (e) {
+        console.error("Local storage parse failed", e);
+      }
+    }
+  }
+  
+  // Render
+  updateStats();
+  renderScript();
+}
+
+// Event Listeners
+document.getElementById("bookmarkedOnly").addEventListener("change", renderScript);
+document.getElementById("showBroll").addEventListener("change", renderScript);
+
+document.getElementById("btnSaveAzure").addEventListener("click", () => {
+  saveAll({ silent: false });
+});
+
+document.getElementById("btnDownloadMd").addEventListener("click", () => {
+  const body = compileMarkdown();
+  const blob = new Blob([body], { type: "text/markdown" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "_script.md";
+  a.click();
+  URL.revokeObjectURL(a.href);
+});
+
+// Theme Toggle
+const themeToggle = document.getElementById("themeToggle");
+themeToggle.addEventListener("click", () => {
+  const cur = document.documentElement.getAttribute("data-theme");
+  const next = cur === "dark" ? "light" : "dark";
+  document.documentElement.setAttribute("data-theme", next);
+  document.documentElement.style.colorScheme = next;
+  localStorage.setItem("aug-video-theme", next);
+  themeToggle.textContent = next === "dark" ? "Light" : "Dark";
+});
+themeToggle.textContent = document.documentElement.getAttribute("data-theme") === "dark" ? "Light" : "Dark";
+
+// Load content on start
+loadAndRender();
+</script>
+</body>
+</html>
