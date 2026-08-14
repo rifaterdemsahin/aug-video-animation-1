@@ -567,11 +567,11 @@ table.hidden-shots-table th:hover{background:var(--chip);color:var(--muted)}
     <div class="title"><a href="index.html" style="color:inherit;text-decoration:none">WIG Animation</a></div>
     <nav class="shared-nav" aria-label="Main Navigation">
       <a href="index.html" class="nav-item"><span>🏠</span> Overview</a>
-      <a href="research.html" class="nav-item"><span>🎬</span> Vertical Editor</a>
-      <a href="timeline.html" class="nav-item"><span>↔️</span> Horizontal Timeline</a>
-      <a href="shotlist.html" class="nav-item active" id="navFilter"><span>📊</span> Filter &amp; Sort Table</a>
+      <a href="research.html" class="nav-item"><span>🎬</span> Research</a>
       <a href="scenes.html" class="nav-item" id="navScenes"><span>🗂️</span> Scenes</a>
-      <a href="voice_over.html" class="nav-item"><span>📜</span> VO Script</a>
+      <a href="timeline.html" class="nav-item"><span>↔️</span> Timeline</a>
+      <a href="shotlist.html" class="nav-item active" id="navFilter"><span>📊</span> Shot List</a>
+      <a href="voice_over.html" class="nav-item"><span>📜</span> VoiceOver</a>
     </nav>
     <div class="azure-pill" id="statAzure" title="Shotlist backup on Azure Blob">☁️ Azure…</div>
     <button type="button" class="theme-toggle" id="themeToggle">Light</button>
@@ -2164,49 +2164,66 @@ function sceneLabelChips(id, selected){
       </select>
     </div>`;
 }
+function renderSceneCard(id){
+  const sc = ensureScene(id);
+  const count = shotsInScene(id).length;
+  const canDelete = count === 0 && STAGE_ORDER.indexOf(id) === -1;
+  const placeholder = SCENE_RATIONALE[id] || "Why does this scene exist in the film? What job does it do for the viewer?";
+  return `<article class="scene-card${sc.hidden ? " is-hidden" : ""}" data-scene-id="${escapeHtml(id)}" style="border-left-color:${sceneColor(id)}">
+    <div class="scene-card-top">
+      <span class="stage-badge" style="background:${sceneColor(id)}">${escapeHtml(id)}</span>
+      <input class="scene-title-input" data-scene-title="${escapeHtml(id)}" value="${escapeHtml(sc.title || STAGE_NAMES[id] || "")}" placeholder="${escapeHtml(STAGE_NAMES[id] || ("Scene " + id))}">
+      <span class="scene-meta"><b>${count}</b> shot${count === 1 ? "" : "s"}</span>
+      <label class="scene-meta" style="display:inline-flex;align-items:center;gap:6px">WPM
+        <input class="scene-wpm-input" type="number" min="80" max="220" data-scene-wpm="${escapeHtml(id)}" value="${sc.wpm != null ? escapeHtml(sc.wpm) : ""}" placeholder="${globalWpm}">
+      </label>
+      <label class="scene-meta" style="display:inline-flex;align-items:center;gap:6px;margin-left:auto">
+        <input type="checkbox" data-scene-hidden="${escapeHtml(id)}" ${sc.hidden ? "checked" : ""}>
+        Hide scene
+      </label>
+      ${sc.hidden
+        ? `<button type="button" class="btn sm" data-scene-show="${escapeHtml(id)}">Show</button>`
+        : `<button type="button" class="btn sm" data-scene-hide="${escapeHtml(id)}">Hide</button>`}
+      <button type="button" class="btn sm" data-filter-scene="${escapeHtml(id)}">View shots</button>
+      ${canDelete ? `<button type="button" class="btn sm danger" data-scene-del="${escapeHtml(id)}">Delete</button>` : ""}
+    </div>
+    <div class="scene-field" style="margin-bottom:10px">
+      <label for="rationale-${escapeHtml(id)}">Rationale — why this scene exists</label>
+      <textarea class="scene-rationale" id="rationale-${escapeHtml(id)}" data-scene-rationale="${escapeHtml(id)}" placeholder="${escapeHtml(placeholder)}">${escapeHtml(sc.rationale || "")}</textarea>
+    </div>
+    <div class="scene-grid">
+      <div class="scene-field">
+        <label>Types</label>
+        ${sceneTypeChips(id, sc.types)}
+      </div>
+      <div class="scene-field">
+        <label>Labels</label>
+        ${sceneLabelChips(id, sc.labels)}
+      </div>
+    </div>
+  </article>`;
+}
+
 function renderScenesPanel(){
   const root = document.getElementById("scenesBody");
   if(!root) return;
   syncSceneGraph();
-  root.innerHTML = allSceneIds().map(id => {
-    const sc = ensureScene(id);
-    const count = shotsInScene(id).length;
-    const canDelete = count === 0 && STAGE_ORDER.indexOf(id) === -1;
-    const placeholder = SCENE_RATIONALE[id] || "Why does this scene exist in the film? What job does it do for the viewer?";
-    return `<article class="scene-card${sc.hidden ? " is-hidden" : ""}" data-scene-id="${escapeHtml(id)}" style="border-left-color:${sceneColor(id)}">
-      <div class="scene-card-top">
-        <span class="stage-badge" style="background:${sceneColor(id)}">${escapeHtml(id)}</span>
-        <input class="scene-title-input" data-scene-title="${escapeHtml(id)}" value="${escapeHtml(sc.title || STAGE_NAMES[id] || "")}" placeholder="${escapeHtml(STAGE_NAMES[id] || ("Scene " + id))}">
-        <span class="scene-meta"><b>${count}</b> shot${count === 1 ? "" : "s"}</span>
-        <label class="scene-meta" style="display:inline-flex;align-items:center;gap:6px">WPM
-          <input class="scene-wpm-input" type="number" min="80" max="220" data-scene-wpm="${escapeHtml(id)}" value="${sc.wpm != null ? escapeHtml(sc.wpm) : ""}" placeholder="${globalWpm}">
-        </label>
-        <label class="scene-meta" style="display:inline-flex;align-items:center;gap:6px;margin-left:auto">
-          <input type="checkbox" data-scene-hidden="${escapeHtml(id)}" ${sc.hidden ? "checked" : ""}>
-          Hide scene
-        </label>
-        ${sc.hidden
-          ? `<button type="button" class="btn sm" data-scene-show="${escapeHtml(id)}">Show</button>`
-          : `<button type="button" class="btn sm" data-scene-hide="${escapeHtml(id)}">Hide</button>`}
-        <button type="button" class="btn sm" data-filter-scene="${escapeHtml(id)}">View shots</button>
-        ${canDelete ? `<button type="button" class="btn sm danger" data-scene-del="${escapeHtml(id)}">Delete</button>` : ""}
-      </div>
-      <div class="scene-field" style="margin-bottom:10px">
-        <label for="rationale-${escapeHtml(id)}">Rationale — why this scene exists</label>
-        <textarea class="scene-rationale" id="rationale-${escapeHtml(id)}" data-scene-rationale="${escapeHtml(id)}" placeholder="${escapeHtml(placeholder)}">${escapeHtml(sc.rationale || "")}</textarea>
-      </div>
-      <div class="scene-grid">
-        <div class="scene-field">
-          <label>Types</label>
-          ${sceneTypeChips(id, sc.types)}
-        </div>
-        <div class="scene-field">
-          <label>Labels</label>
-          ${sceneLabelChips(id, sc.labels)}
-        </div>
-      </div>
-    </article>`;
-  }).join("");
+  const all = allSceneIds();
+  const visibleIds = all.filter(id => !ensureScene(id).hidden);
+  const hiddenIds = all.filter(id => ensureScene(id).hidden);
+
+  let html = visibleIds.map(renderSceneCard).join("");
+  if(hiddenIds.length > 0){
+    html += `<div class="hidden-scenes-divider" style="margin: 24px 0 12px; padding-top: 16px; border-top: 2px dashed var(--line); display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px;">
+      <h3 style="margin: 0; font-size: 15px; font-weight: 700; color: var(--muted); display: inline-flex; align-items: center; gap: 8px;">
+        <span>🙈 Hidden Scenes</span>
+        <span class="pill sm" style="background: var(--chip); color: var(--muted); font-size: 12px; padding: 2px 8px; border-radius: 999px;">${hiddenIds.length}</span>
+      </h3>
+      <span style="font-size: 12px; color: var(--muted);">Hidden scenes are pushed to the bottom and excluded from active timing.</span>
+    </div>`;
+    html += hiddenIds.map(renderSceneCard).join("");
+  }
+  root.innerHTML = html;
 }
 function updateSceneTitle(id, raw){
   const sc = ensureScene(id);
