@@ -8095,7 +8095,7 @@ async function saveToAzure(manual = false){
       finalVoiceoverScript: document.getElementById('finalVoiceoverOutput')?.value || "",
       savedAt: new Date().toISOString()
     },
-    backup: false
+    backup: true
   };
   
   try {
@@ -8105,9 +8105,11 @@ async function saveToAzure(manual = false){
       body: JSON.stringify(payload)
     });
     if(res.ok){
+      const d = await res.json();
       const timeStr = new Date().toLocaleTimeString();
-      if(stat) stat.textContent = '☁️ Saved to Azure · ' + timeStr;
-      if(manual) showToast('☁️ Voiceover saved to Azure at ' + timeStr);
+      const tag = d.versionTag ? ` (${d.versionTag})` : '';
+      if(stat) stat.textContent = '☁️ Saved to Azure · ' + timeStr + tag;
+      if(manual) showToast('☁️ Saved to Azure · ' + timeStr + tag);
     } else {
       if(stat) stat.textContent = "☁️ Local (Offline)";
     }

@@ -899,17 +899,22 @@ async function applyAIGeneratedScript(){
   if(!gen) return;
   document.getElementById("guruScriptArea").value = gen;
   
-  // Save to Azure state
+  // Save to Azure state with versioning
+  let verStr = "";
   try {
-    await fetch("/api/state", {
+    const res = await fetch("/api/state", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ finalVoiceoverScript: gen, backup: true }),
     });
+    if(res.ok){
+      const d = await res.json();
+      if(d.versionTag) verStr = ` · ${d.versionTag}`;
+    }
   } catch(e){}
 
   closeAIVoiceoverModal();
-  alert("🎉 Gemini AI Voiceover applied to Master Review and saved to Azure Blob!");
+  alert(`🎉 Emotional Voiceover applied to Master Review and saved to Azure Blob${verStr}!`);
 }
 
 // Initialize on page load

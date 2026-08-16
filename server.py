@@ -208,14 +208,31 @@ def blob_request(method: str, blob_path: str, body: bytes | None = None, query: 
 
 
 def save_shotlist_state(payload: dict[str, Any], backup: bool = True) -> dict[str, Any]:
+    cur_version = 0
+    try:
+        cur_state = load_shotlist_state(STORAGE_LATEST)
+        if cur_state.get("ok") and isinstance(cur_state.get("state"), dict):
+            cur_version = int(cur_state["state"].get("version") or 0)
+    except Exception:
+        cur_version = 0
+
+    new_version = cur_version + 1
+    stamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%SZ")
+    version_tag = f"v{new_version}_{stamp}"
+    
+    # Inject version metadata
+    payload["version"] = new_version
+    payload["versionTag"] = version_tag
+    if not payload.get("savedAt"):
+        payload["savedAt"] = datetime.now(timezone.utc).isoformat()
+
     raw = json.dumps(payload, ensure_ascii=False).encode("utf-8")
     status, _, body = blob_request("PUT", STORAGE_LATEST, raw)
     if status not in (200, 201):
         raise RuntimeError(f"Azure blob save failed HTTP {status}: {body[:400].decode('utf-8', 'replace')}")
     backup_name = ""
     if backup:
-        stamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H%M%SZ")
-        backup_name = f"{STORAGE_PREFIX}/backups/{stamp}.json"
+        backup_name = f"{STORAGE_PREFIX}/backups/{version_tag}.json"
         b_status, _, b_body = blob_request("PUT", backup_name, raw)
         if b_status not in (200, 201):
             raise RuntimeError(f"Azure blob backup failed HTTP {b_status}: {b_body[:400].decode('utf-8', 'replace')}")
@@ -223,9 +240,11 @@ def save_shotlist_state(payload: dict[str, Any], backup: bool = True) -> dict[st
         "ok": True,
         "container": STORAGE_CONTAINER,
         "latest": STORAGE_LATEST,
+        "version": new_version,
+        "versionTag": version_tag,
         "backup": backup_name,
         "bytes": len(raw),
-        "savedAt": payload.get("savedAt"),
+        "savedAt": payload["savedAt"],
     }
 
 
@@ -367,37 +386,62 @@ def get_gemini_key() -> str:
     return get_openrouter_key()
 
 
+def clean_script_text(text: str) -> str:
+    """Sanitize AI output to guarantee clean, spoken prose with emotional markers and timestamps."""
+    text = (text or "").strip()
+    if text.startswith("```json") and text.endswith("```"):
+        text = text[7:-3].strip()
+    elif text.startswith("```markdown") and text.endswith("```"):
+        text = text[11:-3].strip()
+    elif text.startswith("```") and text.endswith("```"):
+        text = text[3:-3].strip()
+    
+    # Try parsing as JSON if wrapped
+    try:
+        data = json.loads(text)
+        if isinstance(data, dict) and "script" in data:
+            text = str(data["script"]).strip()
+    except Exception:
+        pass
+    
+    # Clean escaped newlines if any
+    if "\\n" in text and "\n" not in text:
+        text = text.replace("\\n", "\n")
+    return text
+
+
 def gemini_generate_voiceover(style: str = "resonant", prompt_override: str = "") -> dict[str, Any]:
     gemini_key = ""
     try:
         gemini_key = get_gemini_key()
-    except Exception as exc:
+    except Exception:
         pass
 
     system_prompt = (
         "You are the world-class voiceover director and scriptwriter for Rifat Erdem Sahin's high-retention animated YouTube video on his AI Second Brain.\n"
-        "Tone: Energetic, authoritative, booming resonance, and educational in Ali Abdaal's structured 3-Act style.\n"
-        "Tempo Constraint: Exactly ~3 words per second (150 WPM). Every sentence must punch clearly with zero filler words.\n"
+        "Tone & Style: Energetic, authoritative, booming resonance, and educational in Ali Abdaal's structured 3-Act style.\n"
+        "Tempo Constraint: Exactly ~3 words per second (150 WPM). Every sentence must punch with absolute clarity.\n"
+        "Emotional Markers: Include vivid emotional performance cues in brackets before key beats, such as [🔥 Visceral Pain / Drowning], [⚡ Energy Shift / Breakthrough], [🧠 Deep Strategic Clarity], [💡 Eureka Moment], [🚀 Inspiring Action CTA].\n"
         "Total Runtime: Exactly 200 seconds (00:00 to 03:20) mapped across 6 scenes.\n\n"
-        "Return a clean JSON object with a single key 'script' containing the full Markdown script formatted scene-by-scene with timestamps [MM:SS]."
+        "Format Output: Return ONLY the clean, ready-to-record voiceover script in Markdown with timestamped beat headers [MM:SS] and emotional cues. DO NOT wrap in JSON or code blocks."
     )
 
     user_prompt = prompt_override.strip() or (
-        "Generate the master 200-second voiceover script covering:\n"
-        "Scene 1 [00:00 - 00:18]: Drowning in 46,000 Obsidian notes.\n"
-        "Scene 2 [00:19 - 00:48]: The breakthrough: AI Knowledge Engine running background synthesis.\n"
-        "Scene 3 [00:49 - 01:24]: P.A.R.A. Framework (Projects, Areas, Resources, Archive).\n"
-        "Scene 4 [01:25 - 01:58]: Dual-Agent Orchestration (Gemini + Claude syncing GitHub/Drive/Proxmox).\n"
-        "Scene 5 [01:59 - 02:32]: The 4-Step Conveyor Loop: Tell -> Show -> Do -> Apply.\n"
-        "Scene 6 [02:33 - 03:20]: Resolution: Second brain awakening + Free Sunday live cohort build CTA.\n"
+        "Generate the master 200-second voiceover script for Rifat Erdem Sahin with emotional delivery marks covering:\n"
+        "- Scene 1 [00:00 - 00:18] [🔥 Visceral Pain]: Drowning in 46,000 Obsidian notes.\n"
+        "- Scene 2 [00:19 - 00:48] [⚡ Energy Shift]: The breakthrough: AI Knowledge Engine running background synthesis.\n"
+        "- Scene 3 [00:49 - 01:24] [🧠 Structured Clarity]: P.A.R.A. Framework (Projects, Areas, Resources, Archive).\n"
+        "- Scene 4 [01:25 - 01:58] [⚙️ Relentless Engine]: Dual-Agent Orchestration (Gemini + Claude syncing GitHub/Drive/Proxmox).\n"
+        "- Scene 5 [01:59 - 02:32] [💡 Rhythmic Momentum]: The 4-Step Conveyor Loop: Tell -> Show -> Do -> Apply.\n"
+        "- Scene 6 [02:33 - 03:20] [🚀 Community Awakening]: Resolution: Second brain awakening + Free Sunday live cohort build CTA.\n"
     )
 
-    # 1. Try Direct Google Gemini API first if key looks like an AIzaSy key
+    # 1. Try Direct Google Gemini API first
     if gemini_key and gemini_key.startswith("AIzaSy"):
         url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={gemini_key}"
         payload = {
             "contents": [{"parts": [{"text": f"{system_prompt}\n\n{user_prompt}"}]}],
-            "generationConfig": {"temperature": 0.35, "maxOutputTokens": 3000},
+            "generationConfig": {"temperature": 0.4, "maxOutputTokens": 3000},
         }
         req = urllib.request.Request(
             url,
@@ -409,9 +453,8 @@ def gemini_generate_voiceover(style: str = "resonant", prompt_override: str = ""
             with urllib.request.urlopen(req, timeout=60) as resp:
                 data = json.loads(resp.read().decode("utf-8"))
                 text = data["candidates"][0]["content"]["parts"][0]["text"]
-                return {"ok": True, "script": text, "engine": "gemini-2.5-flash-direct", "key_source": "azure-keyvault"}
-        except Exception as exc:
-            # Fall through to OpenRouter
+                return {"ok": True, "script": clean_script_text(text), "engine": "gemini-2.5-flash", "key_source": "azure-keyvault"}
+        except Exception:
             pass
 
     # 2. OpenRouter fallback with Gemini or GPT-4o
@@ -439,6 +482,7 @@ def gemini_generate_voiceover(style: str = "resonant", prompt_override: str = ""
     with urllib.request.urlopen(req, timeout=60) as resp:
         data = json.loads(resp.read().decode("utf-8"))
         text = data["choices"][0]["message"]["content"]
+        return {"ok": True, "script": clean_script_text(text), "engine": payload["model"], "key_source": "azure-keyvault"}
 _elevenlabs_key_cache: str | None = None
 _fal_key_cache: str | None = None
 
