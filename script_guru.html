@@ -518,18 +518,64 @@ function copyMasterScript(){
   });
 }
 
-// Fetch live state if available
-(async function initScriptGuru(){
+// Dynamic 200-Second Voiceover Script Generator
+async function loadFullVoiceoverScript(){
+  let manifest = [];
+  let customTakes = {};
+  
+  // 1. Fetch frames_manifest.json (200 seconds complete)
   try {
-    const res = await fetch("/api/state", { cache: "no-store" });
-    if(res.ok){
-      const data = await res.json();
-      if(data && data.ok && data.state && data.state.finalVoiceoverScript){
-        document.getElementById("guruScriptArea").value = data.state.finalVoiceoverScript;
+    const mRes = await fetch("3_Simulation/rawexport/frames_manifest.json", { cache: "no-store" });
+    if(mRes.ok){
+      const mData = await mRes.json();
+      if(mData && mData.frames) manifest = mData.frames;
+    }
+  } catch(e){}
+
+  // 2. Fetch Azure state
+  try {
+    const aRes = await fetch("/api/state", { cache: "no-store" });
+    if(aRes.ok){
+      const aData = await aRes.json();
+      if(aData && aData.ok && aData.state){
+        if(aData.state.voiceoverCustomTakes){
+          customTakes = aData.state.voiceoverCustomTakes;
+        } else if(aData.state.finalVoiceoverScript && aData.state.finalVoiceoverScript.length > 500){
+          document.getElementById("guruScriptArea").value = aData.state.finalVoiceoverScript;
+          return;
+        }
       }
     }
   } catch(e){}
-})();
+
+  // 3. Assemble full 200s script
+  if(manifest.length > 0){
+    let currentScene = null;
+    let currentBeat = null;
+    let md = "# 🎙️ Master Voiceover Script — WIG Animation\n";
+    md += "> Complete 200-Second (03:20) Storyboard Script | Pacing: ~3 words/sec (150 WPM)\n\n";
+    
+    manifest.forEach(f => {
+      if(f.scene_num !== currentScene){
+        currentScene = f.scene_num;
+        md += `\n### 🎬 Scene ${f.scene_num} · ${f.scene_name}\n`;
+      }
+      
+      const localTake = localStorage.getItem("voiceover_take_" + f.second);
+      const takeText = (customTakes[f.second] || localTake || f.base_vo || "").trim();
+      
+      if(f.beat_title !== currentBeat){
+        currentBeat = f.beat_title;
+        md += `\n**[${f.timecode}]** *(${f.beat_title})*\n${takeText}\n`;
+      }
+    });
+    
+    document.getElementById("guruScriptArea").value = md;
+  }
+}
+
+// Initialize on page load
+loadFullVoiceoverScript();
 </script>
 </body>
 </html>
