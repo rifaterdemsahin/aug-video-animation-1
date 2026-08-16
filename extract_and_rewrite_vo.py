@@ -1560,9 +1560,9 @@ async function runFalAudioGeneration(){{
   
   // Extract all spoken text across all frames/scenes (200s timeline)
   const fullScript = (outputEl?.value || document.getElementById("finalVoiceoverOutput")?.value || "").trim();
-  const allSpokenText = fullScript.split('\n')
+  const allSpokenText = fullScript.split(String.fromCharCode(10))
     .filter(l => l.trim() && !l.startsWith('#') && !l.startsWith('>'))
-    .map(l => l.replace(/^\[\d{{2}}:\d{{2}}\]\s*(\[[^\]]+\]\s*)?(\([^)]*\)\s*)?/, '').trim())
+    .map(l => l.replace(/^\\[\\d{{2}}:\\d{{2}}\\]\\s*(\\[[^\\]]+\\]\\s*)?(\\([^)]*\\)\\s*)?/, '').trim())
     .filter(Boolean)
     .join(' ');
 
@@ -1571,7 +1571,7 @@ async function runFalAudioGeneration(){{
     return;
   }}
 
-  const wordCount = allSpokenText.split(/\s+/).length;
+  const wordCount = allSpokenText.split(/\\s+/).length;
   if(statusEl) statusEl.textContent = `⏳ Generating Fal.ai audio for ALL ${{wordCount}} words (200s timeline)...`;
   if(btnRun){{
     btnRun.disabled = true;
