@@ -267,6 +267,7 @@ def generate_html_inspector(manifest_entries: list, video_name: str, duration: f
   --bg:#0c0c12; --panel:#161622; --ink:#f4f4f8; --muted:#9498a8;
   --line:#262638; --gold:#e8b84a; --cyan:#4ed8eb; --chip:#1e1e2d;
   --accent:#e74c3c; --accent2:#6366f1; --accent3:#27ae60; --purple:#af52de;
+  --card-bg:#161622; --card-hover:#1c1c2b; --shadow:0 4px 20px rgba(0,0,0,0.35);
 }}
 * {{ box-sizing:border-box; }}
 body {{ margin:0; background:var(--bg); color:var(--ink); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; line-height:1.5; }}
@@ -281,25 +282,91 @@ header {{ position:sticky; top:0; z-index:50; background:var(--panel); border-bo
 .btn {{ font:inherit; font-size:12.5px; font-weight:650; cursor:pointer; border:1px solid var(--line); background:var(--chip); color:var(--ink); border-radius:8px; padding:7px 12px; display:inline-flex; align-items:center; gap:6px; transition:all 0.15s ease; text-decoration:none; }}
 .btn:hover {{ border-color:var(--cyan); color:var(--cyan); text-decoration:none; }}
 .btn.primary {{ background:var(--accent2); border-color:var(--accent2); color:#fff; }}
+.btn.success {{ background:var(--accent3); border-color:var(--accent3); color:#fff; }}
+
+/* Sticky Stats Bar */
+.sticky-stats-bar {{
+  position:sticky; top:57px; z-index:40; background:rgba(22,22,34,0.95); backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line); padding:10px 16px;
+}}
+.stats-bar-inner {{
+  max-width:1440px; margin:0 auto; display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px;
+}}
+.metric-pill {{
+  display:inline-flex; align-items:center; gap:6px; background:var(--chip); border:1px solid var(--line);
+  padding:5px 12px; border-radius:8px; font-size:12.5px; font-weight:600;
+}}
+.metric-val {{ font-weight:800; color:var(--cyan); }}
+.azure-pill {{
+  font-size:11.5px; font-weight:750; padding:5px 10px; border-radius:8px;
+  background:rgba(78,216,235,0.12); color:var(--cyan); border:1px solid rgba(78,216,235,0.3);
+  display:inline-flex; align-items:center; gap:5px;
+}}
+
+/* Main Container */
 .container {{ max-width:1440px; margin:0 auto; padding:20px 16px 80px; }}
-.inspector-grid {{ display:grid; grid-template-columns:repeat(auto-fill, minmax(360px, 1fr)); gap:20px; margin-top:20px; }}
-.frame-card {{ background:var(--panel); border:1px solid var(--line); border-radius:12px; overflow:hidden; display:flex; flex-direction:column; }}
+
+/* Streamlined Inspector Grid (Image + Textbox) */
+.inspector-grid {{
+  display:grid; grid-template-columns:repeat(auto-fill, minmax(360px, 1fr)); gap:20px; margin-top:20px;
+}}
+.frame-card {{
+  background:var(--panel); border:1px solid var(--line); border-radius:12px; overflow:hidden;
+  display:flex; flex-direction:column; box-shadow:var(--shadow); transition:transform .15s ease, border-color .15s ease;
+}}
+.frame-card:hover {{ border-color:var(--cyan); }}
 .frame-thumb {{ position:relative; aspect-ratio:16/9; background:#000; overflow:hidden; }}
-.frame-thumb img {{ width:100%; height:100%; object-fit:cover; }}
+.frame-thumb img {{ width:100%; height:100%; object-fit:cover; display:block; }}
 .tc-badge {{ position:absolute; bottom:8px; right:8px; background:rgba(0,0,0,0.85); color:#fff; font-family:monospace; font-size:12px; font-weight:700; padding:3px 7px; border-radius:4px; }}
 .stage-badge {{ position:absolute; top:8px; left:8px; background:var(--accent2); color:#fff; font-size:10.5px; font-weight:700; padding:3px 8px; border-radius:4px; }}
-.frame-body {{ padding:14px 16px; display:flex; flex-direction:column; gap:10px; flex:1; }}
-.vo-option {{ background:var(--chip); border:1px solid var(--line); border-radius:6px; padding:8px 10px; font-size:12px; cursor:pointer; transition:all .15s ease; }}
-.vo-option:hover {{ border-color:var(--cyan); }}
-.vo-option.selected {{ border-color:var(--accent3); background:rgba(39,174,96,0.12); }}
-.vo-tag {{ font-size:10px; font-weight:800; text-transform:uppercase; color:var(--muted); margin-bottom:2px; display:flex; justify-content:space-between; }}
-.custom-input {{ width:100%; background:var(--bg); border:1px solid var(--line); border-radius:6px; color:var(--ink); font:inherit; font-size:12.5px; padding:8px 10px; resize:vertical; min-height:55px; }}
+
+/* Frame Body */
+.frame-body {{ padding:14px; display:flex; flex-direction:column; gap:10px; flex:1; }}
+.ai-pills-row {{ display:flex; flex-wrap:wrap; gap:6px; }}
+.ai-quick-btn {{
+  background:var(--chip); border:1px solid var(--line); border-radius:6px; padding:4px 8px;
+  font-size:11px; font-weight:700; color:var(--muted); cursor:pointer; transition:all .15s ease;
+  display:inline-flex; align-items:center; gap:4px;
+}}
+.ai-quick-btn:hover {{ border-color:var(--cyan); color:var(--cyan); }}
+.ai-quick-btn.active {{ background:rgba(39,174,96,0.15); border-color:var(--accent3); color:var(--accent3); }}
+
+/* Custom Resonant Textbox */
+.textbox-label {{
+  font-size:11.5px; font-weight:750; color:var(--gold); display:flex; justify-content:space-between; align-items:center;
+}}
+.custom-input {{
+  width:100%; background:var(--bg); border:1px solid var(--line); border-radius:8px; color:var(--ink);
+  font:inherit; font-size:13px; line-height:1.45; padding:10px 12px; resize:vertical; min-height:80px;
+  transition:border-color .15s ease;
+}}
 .custom-input:focus {{ outline:none; border-color:var(--cyan); }}
-.toast {{ position:fixed; bottom:20px; right:20px; background:var(--ink); color:var(--bg); padding:10px 16px; border-radius:8px; font-size:13px; font-weight:700; opacity:0; pointer-events:none; transition:opacity .2s ease; }}
+
+/* Bottom Final Voiceover Section */
+.final-vo-panel {{
+  background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:24px 28px;
+  margin-top:40px; box-shadow:var(--shadow); display:flex; flex-direction:column; gap:16px;
+}}
+.final-vo-header {{
+  display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px;
+}}
+.final-vo-textarea {{
+  width:100%; background:var(--bg); border:1px solid var(--line); border-radius:10px; color:var(--ink);
+  font-family:ui-monospace,SFMono-Regular,Consolas,monospace; font-size:13px; line-height:1.55;
+  padding:16px; min-height:260px; resize:vertical;
+}}
+.final-vo-textarea:focus {{ outline:none; border-color:var(--cyan); }}
+
+.toast {{
+  position:fixed; bottom:24px; right:24px; z-index:100; background:var(--ink); color:var(--bg);
+  padding:10px 18px; border-radius:8px; font-size:13px; font-weight:750; opacity:0; pointer-events:none;
+  transition:opacity .2s ease; box-shadow:0 4px 16px rgba(0,0,0,0.4);
+}}
 .toast.show {{ opacity:1; }}
 </style>
 </head>
 <body>
+
 <header>
   <div class="header-bar">
     <div class="title"><a href="../../index.html">WIG Animation</a></div>
@@ -316,25 +383,47 @@ header {{ position:sticky; top:0; z-index:50; background:var(--panel); border-bo
       <a href="voiceover_inspector.html" class="nav-item active"><span>🎙️</span> VO Inspector</a>
       <a href="https://canva.link/p4u3nwvsmio19jp" class="nav-item" target="_blank" rel="noopener noreferrer" style="color:var(--purple,#af52de);" title="Canva Implementation Deck"><span>🎨</span> Implementation ↗</a>
     </nav>
-    <button class="btn primary" onclick="copyAllScript()">📋 Copy Script</button>
+    <button class="btn primary" onclick="scrollToFinalVO()">📋 Generate Final Voiceover</button>
     <a href="https://www.canva.com/design/DAHRZe5KBoA/OJU0sL318CozUaTBpkdT2g/edit" class="btn" target="_blank" rel="noopener noreferrer" style="color:var(--purple,#af52de);border-color:rgba(175,82,222,0.35);background:rgba(175,82,222,0.1);" title="Open Canva Document">🎨 Canva Document ↗</a>
   </div>
 </header>
+
+<!-- Sticky Stats & Word Count Bar -->
+<div class="sticky-stats-bar">
+  <div class="stats-bar-inner">
+    <div style="display:flex; flex-wrap:wrap; align-items:center; gap:8px;">
+      <div class="metric-pill"><span>📝 Word Count:</span> <span class="metric-val" id="metricWordCount">0 words</span></div>
+      <div class="metric-pill"><span>⏱️ Estimated Audio:</span> <span class="metric-val" id="metricAudioDuration">0:00</span> <small style="color:var(--muted);">(150 WPM)</small></div>
+      <div class="metric-pill"><span>🎞️ Video Length:</span> <span class="metric-val" id="metricVideoLength">{format_tc(int(duration))} ({int(duration)}s)</span></div>
+      <div class="metric-pill" id="metricPacingStatus"><span>🎯 Pacing:</span> <span style="color:#27ae60;font-weight:750;">Calculating...</span></div>
+    </div>
+    <div style="display:flex; align-items:center; gap:8px;">
+      <div class="azure-pill" id="azureStat">☁️ Azure Synced</div>
+      <button class="btn" onclick="saveToAzure(true)">☁️ Save to Azure</button>
+    </div>
+  </div>
+</div>
+
 <div class="container">
   <div style="background:var(--chip); border:1px solid var(--line); border-radius:10px; padding:16px 20px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
     <div>
-      <strong style="font-size:14px;">1-Second Screen Visual Rewrite Inspector</strong>
-      <div style="font-size:12.5px; color:var(--muted);">Total Seconds Extracted: {len(manifest_entries)} | Click any suggested VO pill or type your custom take directly.</div>
+      <strong style="font-size:15px; font-weight:800;">1-Second Screen Visual Rewrite Inspector</strong>
+      <div style="font-size:12.5px; color:var(--muted);">Total Seconds Extracted: {len(manifest_entries)} | Edits automatically persist to cookies / localStorage &amp; Azure Blob.</div>
     </div>
     <div>
-      <input type="search" id="filterInput" oninput="filterFrames()" placeholder="Filter by scene, second, or text…" style="padding:6px 12px; font:inherit; font-size:12.5px; border-radius:6px; border:1px solid var(--line); background:var(--bg); color:var(--ink); min-width:240px;">
+      <input type="search" id="filterInput" oninput="filterFrames()" placeholder="Filter by scene, second, or script keyword…" style="padding:7px 12px; font:inherit; font-size:12.5px; border-radius:6px; border:1px solid var(--line); background:var(--bg); color:var(--ink); min-width:260px;">
     </div>
   </div>
 
+  <!-- Streamlined Grid: 1 Image -> Textbox -->
   <div class="inspector-grid" id="grid">
 """
 
     for e in manifest_entries:
+        escaped_punchy = e['ai_punchy'].replace('`', '').replace('"', '&quot;')
+        escaped_strategic = e['ai_strategic'].replace('`', '').replace('"', '&quot;')
+        escaped_conv = e['ai_conversational'].replace('`', '').replace('"', '&quot;')
+        
         html_content += f"""
     <div class="frame-card" data-sec="{e['second']}" data-scene="{e['scene_num']}">
       <div class="frame-thumb">
@@ -343,21 +432,23 @@ header {{ position:sticky; top:0; z-index:50; background:var(--panel); border-bo
         <span class="tc-badge">{e['timecode']}</span>
       </div>
       <div class="frame-body">
-        <div class="vo-option" onclick="selectVO(this, {e['second']}, `{e['ai_punchy'].replace('`', '')}`)">
-          <div class="vo-tag"><span>⚡ AI Punchy</span><span>~165 WPM</span></div>
-          <div>"{e['ai_punchy']}"</div>
-        </div>
-        <div class="vo-option" onclick="selectVO(this, {e['second']}, `{e['ai_strategic'].replace('`', '')}`)">
-          <div class="vo-tag"><span>🧠 AI Strategic</span><span>~140 WPM</span></div>
-          <div>"{e['ai_strategic']}"</div>
-        </div>
-        <div class="vo-option" onclick="selectVO(this, {e['second']}, `{e['ai_conversational'].replace('`', '')}`)">
-          <div class="vo-tag"><span>🔥 AI Conversational</span><span>~145 WPM</span></div>
-          <div>"{e['ai_conversational']}"</div>
+        <div class="ai-pills-row">
+          <button type="button" class="ai-quick-btn" onclick="applySuggestion({e['second']}, `{escaped_conv}`, this)" title="Click to fill conversational take">
+            🔥 AI Conversational
+          </button>
+          <button type="button" class="ai-quick-btn" onclick="applySuggestion({e['second']}, `{escaped_punchy}`, this)" title="Click to fill punchy take">
+            ⚡ AI Punchy
+          </button>
+          <button type="button" class="ai-quick-btn" onclick="applySuggestion({e['second']}, `{escaped_strategic}`, this)" title="Click to fill strategic take">
+            🧠 AI Strategic
+          </button>
         </div>
         <div>
-          <label style="font-size:11px; font-weight:700; color:var(--cyan); display:block; margin-bottom:4px;">✍️ Custom Resonant Take (Second {e['second']}):</label>
-          <textarea class="custom-input" id="take_{e['second']}" placeholder="Type your custom resonant take for this frame…">{e['base_vo']}</textarea>
+          <div class="textbox-label">
+            <span>✍️ Custom Resonant Take (Second {e['second']}):</span>
+            <span style="font-size:11px; color:var(--muted);" id="wc_take_{e['second']}">0 w</span>
+          </div>
+          <textarea class="custom-input" id="take_{e['second']}" oninput="onTakeInput({e['second']})" placeholder="Type your custom resonant voiceover for this frame…">{e['base_vo']}</textarea>
         </div>
       </div>
     </div>
@@ -365,32 +456,247 @@ header {{ position:sticky; top:0; z-index:50; background:var(--panel); border-bo
 
     html_content += """
   </div>
+
+  <!-- Bottom Final Voiceover Assembly & Generator Panel -->
+  <div class="final-vo-panel" id="finalVoPanel">
+    <div class="final-vo-header">
+      <div>
+        <span class="azure-pill" style="margin-bottom:6px;">🎙️ Complete Voiceover Output</span>
+        <h2 style="margin:4px 0 0; font-size:18px; font-weight:800;">Generated Final Voiceover Script</h2>
+        <div style="font-size:13px; color:var(--muted); margin-top:2px;">
+          Assembled in real-time from all frame takes above. Ready to record, paste into ElevenLabs, or sync to Azure.
+        </div>
+      </div>
+      <div style="display:flex; flex-wrap:wrap; gap:8px; align-items:center;">
+        <button class="btn primary" onclick="copyFinalScript()">📋 Copy Script</button>
+        <button class="btn success" onclick="saveToAzure(true)">☁️ Save to Azure</button>
+        <button class="btn" onclick="downloadScript()">📥 Download .md</button>
+        <button class="btn" onclick="buildFinalVoiceover(true)">🔄 Re-Assemble</button>
+      </div>
+    </div>
+
+    <textarea class="final-vo-textarea" id="finalVoiceoverOutput" readonly></textarea>
+  </div>
 </div>
+
 <div id="toast" class="toast"></div>
+
 <script>
-function selectVO(el, sec, text){
-  const parent = el.closest('.frame-body');
-  parent.querySelectorAll('.vo-option').forEach(opt => opt.classList.remove('selected'));
-  el.classList.add('selected');
-  const ta = document.getElementById('take_' + sec);
-  if(ta){
-    ta.value = text;
-    showToast(`Updated Second ${sec} script!`);
-  }
-}
-function copyAllScript(){
-  const takes = [];
-  document.querySelectorAll('.custom-input').forEach((ta, idx) => {
-    const val = ta.value.trim();
-    if(val && !takes.includes(val)){
-      takes.push(val);
+const STORAGE_PREFIX = "aug_vo_take_";
+let debounceTimer = null;
+
+// Initialize on page load
+window.addEventListener("DOMContentLoaded", () => {
+  loadSavedTakes();
+  buildFinalVoiceover();
+  updateLiveMetrics();
+});
+
+// Load takes from localStorage/cookie
+function loadSavedTakes(){
+  document.querySelectorAll('.custom-input').forEach(ta => {
+    const sec = ta.id.replace('take_', '');
+    const saved = localStorage.getItem(STORAGE_PREFIX + sec);
+    if(saved !== null){
+      ta.value = saved;
     }
   });
-  const fullScript = takes.join("\\n\\n");
-  navigator.clipboard.writeText(fullScript).then(() => {
-    showToast("📋 Copied full combined voiceover script!");
+}
+
+// On take input change
+function onTakeInput(sec){
+  const ta = document.getElementById('take_' + sec);
+  if(!ta) return;
+  const val = ta.value;
+  
+  // Save to localStorage
+  try{ localStorage.setItem(STORAGE_PREFIX + sec, val); }catch(e){}
+  
+  // Update card word count
+  updateCardWordCount(sec, val);
+  
+  // Debounce metrics and Azure sync
+  clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(() => {
+    updateLiveMetrics();
+    buildFinalVoiceover();
+    saveToAzure(false);
+  }, 400);
+}
+
+function applySuggestion(sec, text, btn){
+  const ta = document.getElementById('take_' + sec);
+  if(!ta) return;
+  ta.value = text;
+  onTakeInput(sec);
+  
+  const parent = btn.closest('.ai-pills-row');
+  parent.querySelectorAll('.ai-quick-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  showToast(`Applied suggestion for Second ${sec}!`);
+}
+
+function updateCardWordCount(sec, text){
+  const el = document.getElementById('wc_take_' + sec);
+  if(el){
+    const words = text.trim() ? text.trim().split(/\\s+/).length : 0;
+    el.textContent = words + ' w';
+  }
+}
+
+// Calculate live script metrics
+function updateLiveMetrics(){
+  const uniqueTakes = getCleanSequentialTakes();
+  const fullText = uniqueTakes.map(t => t.text).join(' ');
+  const wordCount = fullText.trim() ? fullText.trim().split(/\\s+/).length : 0;
+  
+  // Estimated audio duration at 150 WPM (2.5 words/sec)
+  const estSeconds = Math.round((wordCount / 150) * 60);
+  const estMin = Math.floor(estSeconds / 60);
+  const estSec = estSeconds % 60;
+  const estFormatted = `${estMin}:${estSec.toString().padStart(2, '0')}`;
+  
+  document.getElementById('metricWordCount').textContent = wordCount + ' words';
+  document.getElementById('metricAudioDuration').textContent = estFormatted;
+  
+  // Pacing status against 200s video
+  const videoSec = 200;
+  const pacingEl = document.getElementById('metricPacingStatus');
+  const delta = videoSec - estSeconds;
+  if(delta >= 0 && delta <= 30){
+    pacingEl.innerHTML = `<span>🎯 Pacing:</span> <span style="color:#27ae60;font-weight:750;">Perfect (${delta}s breathing room)</span>`;
+  } else if(delta > 30){
+    pacingEl.innerHTML = `<span>🎯 Pacing:</span> <span style="color:var(--cyan);font-weight:750;">Fast / Spacious (+${delta}s margin)</span>`;
+  } else {
+    pacingEl.innerHTML = `<span>🎯 Pacing:</span> <span style="color:var(--accent);font-weight:750;">Over-Length (${Math.abs(delta)}s too long)</span>`;
+  }
+}
+
+// Get deduplicated sequential takes grouped logically
+function getCleanSequentialTakes(){
+  const takes = [];
+  let lastText = "";
+  
+  document.querySelectorAll('.custom-input').forEach(ta => {
+    const sec = parseInt(ta.id.replace('take_', ''), 10);
+    const card = ta.closest('.frame-card');
+    const scene = card ? card.getAttribute('data-scene') : "1";
+    const text = ta.value.trim();
+    
+    if(text && text !== lastText){
+      takes.push({ second: sec, scene: scene, text: text });
+      lastText = text;
+    }
+  });
+  return takes;
+}
+
+// Build Final Assembled Voiceover Text
+function buildFinalVoiceover(showFeedback = false){
+  const takes = getCleanSequentialTakes();
+  const scenesMap = {
+    "1": "Scene 1 · Hook & Problem Setup",
+    "2": "Scene 2 · The Realization Moment",
+    "3": "Scene 3 · P.A.R.A. Method Framework",
+    "4": "Scene 4 · The Engine: Dual-Agent System",
+    "5": "Scene 5 · The 4-Step Workflow",
+    "6": "Scene 6 · Call to Action & Closing"
+  };
+  
+  let md = "# 🎙️ Master Voiceover Script — WIG Animation\\n";
+  md += `> Assembled from 1-second frame rewrite workbench | Total Words: ${document.getElementById('metricWordCount').textContent}\\n\\n`;
+  
+  let currentScene = null;
+  takes.forEach(t => {
+    if(t.scene !== currentScene){
+      currentScene = t.scene;
+      const sName = scenesMap[currentScene] || `Scene ${currentScene}`;
+      md += `\\n### 🎬 ${sName}\\n`;
+    }
+    const mm = Math.floor(t.second / 60);
+    const ss = t.second % 60;
+    const tc = `${mm.toString().padStart(2, '0')}:${ss.toString().padStart(2, '0')}`;
+    md += `\\n**[${tc}]** ${t.text}\\n`;
+  });
+  
+  const outArea = document.getElementById('finalVoiceoverOutput');
+  if(outArea){
+    outArea.value = md;
+  }
+  if(showFeedback){
+    showToast("🔄 Final voiceover script re-assembled!");
+  }
+}
+
+// Copy script to clipboard
+function copyFinalScript(){
+  const outArea = document.getElementById('finalVoiceoverOutput');
+  if(!outArea) return;
+  navigator.clipboard.writeText(outArea.value).then(() => {
+    showToast("📋 Copied Master Voiceover Script to clipboard!");
   });
 }
+
+function scrollToFinalVO(){
+  const panel = document.getElementById('finalVoPanel');
+  if(panel){
+    panel.scrollIntoView({ behavior: 'smooth' });
+    buildFinalVoiceover(true);
+  }
+}
+
+// Download as markdown
+function downloadScript(){
+  const text = document.getElementById('finalVoiceoverOutput').value;
+  const blob = new Blob([text], { type: 'text/markdown;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = "master_voiceover_script.md";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  showToast("📥 Downloaded master_voiceover_script.md");
+}
+
+// Save to Azure Blob Storage
+async function saveToAzure(manual = false){
+  const stat = document.getElementById('azureStat');
+  if(stat) stat.textContent = "☁️ Saving to Azure…";
+  
+  const customTakes = {};
+  document.querySelectorAll('.custom-input').forEach(ta => {
+    const sec = ta.id.replace('take_', '');
+    customTakes[sec] = ta.value;
+  });
+  
+  const payload = {
+    state: {
+      voiceoverCustomTakes: customTakes,
+      finalVoiceoverScript: document.getElementById('finalVoiceoverOutput')?.value || "",
+      savedAt: new Date().toISOString()
+    },
+    backup: false
+  };
+  
+  try {
+    const res = await fetch("/api/state", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    if(res.ok){
+      const timeStr = new Date().toLocaleTimeString();
+      if(stat) stat.textContent = `☁️ Saved to Azure · ${timeStr}`;
+      if(manual) showToast(`☁️ Voiceover saved to Azure at ${timeStr}`);
+    } else {
+      if(stat) stat.textContent = "☁️ Local (Offline)";
+    }
+  } catch(err){
+    if(stat) stat.textContent = "☁️ Local (Saved)";
+  }
+}
+
+// Filter cards by search query
 function filterFrames(){
   const q = document.getElementById('filterInput').value.toLowerCase().trim();
   document.querySelectorAll('.frame-card').forEach(card => {
@@ -398,13 +704,14 @@ function filterFrames(){
     card.style.display = (!q || text.includes(q)) ? "flex" : "none";
   });
 }
+
 let toastTimer;
 function showToast(msg){
   const el = document.getElementById('toast');
   el.textContent = msg;
   el.classList.add('show');
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => el.classList.remove('show'), 2200);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2400);
 }
 </script>
 </body>
@@ -413,6 +720,7 @@ function showToast(msg){
     with open(DEFAULT_HTML_DOC, "w", encoding="utf-8") as f:
         f.write(html_content)
     print(f"🌐 Generated Interactive HTML Inspector: {DEFAULT_HTML_DOC}")
+
 
 def main():
     parser = argparse.ArgumentParser(description="Extract 1 frame per second and generate AI Voiceover rewrite workbench.")
