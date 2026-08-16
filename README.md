@@ -17,6 +17,7 @@ I am turning a Canva production plan into a YouTube/LinkedIn video — shotlist,
 | [scenes.html](scenes.html) | Scene Editor for scene-only details |
 | [voice_over.html](voice_over.html) | Voiceover script text and checklist |
 | [_script.md](_script.md) | Flagship VO (Part A) + stage walkthrough (Part B) |
+| [SPECIFICATIONS.md](SPECIFICATIONS.md) | Reverse-engineered system specifications and recreation blueprint |
 | [stills/images_manifest.json](stills/images_manifest.json) | Catalog of every still (paths, stage, caption) |
 | [video_flow/video_flow_manifest.json](video_flow/video_flow_manifest.json) | Catalog of the 26 Flow clips |
 
