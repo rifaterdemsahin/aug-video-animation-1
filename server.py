@@ -439,7 +439,115 @@ def gemini_generate_voiceover(style: str = "resonant", prompt_override: str = ""
     with urllib.request.urlopen(req, timeout=60) as resp:
         data = json.loads(resp.read().decode("utf-8"))
         text = data["choices"][0]["message"]["content"]
-        return {"ok": True, "script": text, "engine": payload["model"], "key_source": "azure-keyvault"}
+_elevenlabs_key_cache: str | None = None
+_fal_key_cache: str | None = None
+
+
+def get_elevenlabs_key() -> str:
+    global _elevenlabs_key_cache
+    if _elevenlabs_key_cache:
+        return _elevenlabs_key_cache
+    env_key = (os.environ.get("ELEVEN_LABS_API_KEY") or os.environ.get("ELEVENLABS_API_KEY") or "").strip()
+    if env_key:
+        _elevenlabs_key_cache = env_key
+        return env_key
+    try:
+        val = kv_secret("ELEVEN-LABS-API-KEY")
+        if val:
+            _elevenlabs_key_cache = val
+            return val
+    except Exception:
+        pass
+    raise RuntimeError("Could not load ElevenLabs API key from environment or Azure Key Vault")
+
+
+def get_fal_key() -> str:
+    global _fal_key_cache
+    if _fal_key_cache:
+        return _fal_key_cache
+    env_key = (os.environ.get("FAL_AI_KEY") or os.environ.get("FAL_KEY") or "").strip()
+    if env_key:
+        _fal_key_cache = env_key
+        return env_key
+    try:
+        val = kv_secret("FAL-AI-KEY")
+        if val:
+            _fal_key_cache = val
+            return val
+    except Exception:
+        pass
+    raise RuntimeError("Could not load Fal.ai API key from environment or Azure Key Vault")
+
+
+def generate_tts_audio(engine: str = "elevenlabs", text: str = "I was drowning in 46,000 notes across Obsidian.", voice_id: str = "JBFqnCBsd6RMkjVDRZzb") -> dict[str, Any]:
+    text = (text or "").strip()
+    if not text:
+        raise ValueError("Text for TTS cannot be empty")
+
+    # 1. Fal.ai TTS Engine
+    if engine.lower() in ("fal", "fal.ai", "fal-ai"):
+        fal_key = get_fal_key()
+        url = "https://fal.run/fal-ai/playht/tts"
+        payload = {
+            "text": text,
+            "voice": "en-US-Standard-C",
+        }
+        req = urllib.request.Request(
+            url,
+            data=json.dumps(payload).encode("utf-8"),
+            headers={
+                "Authorization": f"Key {fal_key}",
+                "Content-Type": "application/json",
+            },
+            method="POST",
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=60) as resp:
+                data = json.loads(resp.read().decode("utf-8"))
+                audio_url = data.get("audio", {}).get("url") if isinstance(data.get("audio"), dict) else data.get("audio_url", "")
+                return {
+                    "ok": True,
+                    "engine": "fal.ai",
+                    "audio_url": audio_url,
+                    "text": text,
+                    "key_source": "azure-keyvault (FAL-AI-KEY)",
+                }
+        except Exception as exc:
+            pass
+
+    # 2. ElevenLabs TTS Engine (Default / High Quality)
+    eleven_key = get_elevenlabs_key()
+    url = f"https://api.elevenlabs.io/v1/text-to-speech/{voice_id}"
+    payload = {
+        "text": text,
+        "model_id": "eleven_turbo_v2_5",
+        "voice_settings": {"stability": 0.5, "similarity_boost": 0.75},
+    }
+    req = urllib.request.Request(
+        url,
+        data=json.dumps(payload).encode("utf-8"),
+        headers={
+            "xi-api-key": eleven_key,
+            "Content-Type": "application/json",
+            "Accept": "audio/mpeg",
+        },
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=60) as resp:
+            audio_bytes = resp.read()
+            b64 = base64.b64encode(audio_bytes).decode("utf-8")
+            return {
+                "ok": True,
+                "engine": "elevenlabs",
+                "audio_base64": f"data:audio/mpeg;base64,{b64}",
+                "text": text,
+                "bytes": len(audio_bytes),
+                "key_source": "azure-keyvault (ELEVEN-LABS-API-KEY)",
+            }
+    except urllib.error.HTTPError as exc:
+        err_detail = exc.read().decode("utf-8", errors="replace")
+        return {"ok": False, "error": f"ElevenLabs API error HTTP {exc.code}: {err_detail[:400]}"}
 
 
 def should_skip_dir(name: str) -> bool:
@@ -661,11 +769,18 @@ class ShotlistHandler(SimpleHTTPRequestHandler):
 
     def do_POST(self):  # noqa: N802
         path = self.path.split("?", 1)[0]
-        if path not in ("/api/text", "/api/vo-edit", "/api/state", "/api/ai/generate-vo"):
+        if path not in ("/api/text", "/api/vo-edit", "/api/state", "/api/ai/generate-vo", "/api/ai/tts"):
             self.send_error(404, "Not found")
             return
         try:
             body = self._read_json_body()
+            if path == "/api/ai/tts":
+                engine = body.get("engine", "elevenlabs")
+                text = body.get("text", "I was drowning in 46,000 notes across Obsidian.")
+                voice_id = body.get("voice_id", "JBFqnCBsd6RMkjVDRZzb")
+                result = generate_tts_audio(engine=engine, text=text, voice_id=voice_id)
+                self._send_json(200, result)
+                return
             if path == "/api/ai/generate-vo":
                 style = body.get("style", "resonant")
                 prompt = body.get("prompt", "")
