@@ -139,6 +139,25 @@ header{
   outline:none;cursor:pointer;
 }
 
+/* Hide Toggles */
+.toggle-pill{
+  display:inline-flex;align-items:center;gap:5px;
+  font-size:12px;font-weight:650;padding:5px 10px;border-radius:999px;
+  border:1px solid var(--line);background:var(--chip);color:var(--muted);
+  cursor:pointer;user-select:none;transition:all 0.15s ease;
+}
+.toggle-pill:hover{color:var(--ink);border-color:var(--cyan)}
+.toggle-pill input[type="checkbox"]{
+  margin:0;cursor:pointer;accent-color:var(--cyan);
+}
+.toggle-pill.checked{
+  background:rgba(78,216,235,0.12);border-color:var(--cyan);color:var(--ink);
+}
+.toggle-pill.checked-out{
+  background:rgba(230,126,34,0.12);border-color:var(--out-scope);color:var(--out-scope);
+}
+
+
 /* Search Suggestions Bar */
 .search-suggest-row{
   max-width:1440px;margin:8px auto 0;display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:11.5px;color:var(--muted);
@@ -447,6 +466,14 @@ main{
         <option value="13">Stage 13 · Metadata</option>
         <option value="15">Stage 15 · Tactics</option>
       </select>
+      <label class="toggle-pill" id="lblHideUsed" title="Do not display assets marked as Used">
+        <input type="checkbox" id="toggleHideUsed">
+        <span>🙈 Hide Used</span>
+      </label>
+      <label class="toggle-pill" id="lblHideOut" title="Do not display assets marked as Out of Scope">
+        <input type="checkbox" id="toggleHideOut">
+        <span>🚫 Hide Out of Scope</span>
+      </label>
     </div>
     <div class="filter-group">
       <input type="search" class="search-input" id="searchInput" placeholder="Search: e.g. 46k Notes Haystack, Obsidian, Dual-agent…">
@@ -615,6 +642,13 @@ let currentFilterType = "all";
 let currentStage = "all";
 let searchQuery = "";
 let currentModalAsset = null;
+
+let hideUsed = false;
+let hideOut = false;
+try{
+  hideUsed = localStorage.getItem("aug-gallery-hide-used") === "true";
+  hideOut = localStorage.getItem("aug-gallery-hide-out") === "true";
+}catch(e){}
 
 let appState = null;
 let assetStatus = {}; // { [file]: 'used' | 'out_of_scope' | 'available' }
@@ -993,6 +1027,9 @@ function filterAndRender(){
   const scoredList = [];
   allAssets.forEach(item => {
     const status = getAssetStatus(item);
+    if(hideUsed && status === "used") return;
+    if(hideOut && status === "out_of_scope") return;
+
     if(currentFilterType === "video" && item.kind !== "video") return;
     if(currentFilterType === "still" && item.kind !== "still") return;
     if(currentFilterType === "used" && status !== "used") return;
@@ -1194,6 +1231,34 @@ function removeAllUsed(){
 }
 
 document.getElementById("btnRemoveAllUsed").addEventListener("click", removeAllUsed);
+
+// Wire Hide Toggles
+const chkHideUsed = document.getElementById("toggleHideUsed");
+const chkHideOut = document.getElementById("toggleHideOut");
+const lblHideUsed = document.getElementById("lblHideUsed");
+const lblHideOut = document.getElementById("lblHideOut");
+
+if(chkHideUsed){
+  chkHideUsed.checked = hideUsed;
+  if(lblHideUsed) lblHideUsed.classList.toggle("checked", hideUsed);
+  chkHideUsed.addEventListener("change", (e) => {
+    hideUsed = e.target.checked;
+    try{ localStorage.setItem("aug-gallery-hide-used", String(hideUsed)); }catch(err){}
+    if(lblHideUsed) lblHideUsed.classList.toggle("checked", hideUsed);
+    filterAndRender();
+  });
+}
+
+if(chkHideOut){
+  chkHideOut.checked = hideOut;
+  if(lblHideOut) lblHideOut.classList.toggle("checked-out", hideOut);
+  chkHideOut.addEventListener("change", (e) => {
+    hideOut = e.target.checked;
+    try{ localStorage.setItem("aug-gallery-hide-out", String(hideOut)); }catch(err){}
+    if(lblHideOut) lblHideOut.classList.toggle("checked-out", hideOut);
+    filterAndRender();
+  });
+}
 
 document.getElementById("btnCopyAllPaths").addEventListener("click", () => {
   const paths = filteredAssets.map(a => a.file).join("\n");
