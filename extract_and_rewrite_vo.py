@@ -483,7 +483,7 @@ header {{ position:sticky; top:0; z-index:50; background:var(--panel); border-bo
     <button class="btn blue" onclick="downloadPlainTextVO()" title="Download spoken voiceover audio text only (.txt)">🎙️ Download Voiceover</button>
     <button class="btn" onclick="downloadAzureVoiceoverTxt()" title="Download synced Azure Blob object containing voiceover as a text file">☁️ Download Azure VO (.txt)</button>
     <button class="btn" onclick="downloadAsPDF()" title="Download storyboard cards as PDF (Image + Voice + Voiceover)">📄 Download as PDF</button>
-    <a href="https://www.canva.com/design/DAHRZe5KBoA/OJU0sL318CozUaTBpkdT2g/edit" class="btn" target="_blank" rel="noopener noreferrer" style="color:var(--purple,#af52de);border-color:rgba(175,82,222,0.35);background:rgba(175,82,222,0.1);" title="Open Canva Document">🎨 Canva Document ↗</a>
+    <a href="https://www.canva.com/design/DAHSclip-pU/334Oj5O6Ooupiai4shEr_g/edit" class="btn" target="_blank" rel="noopener noreferrer" style="color:var(--purple,#af52de);border-color:rgba(175,82,222,0.35);background:rgba(175,82,222,0.1);" title="Open Canva Document">🎨 Canva Document ↗</a>
   </div>
 </header>
 
