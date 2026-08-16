@@ -1,0 +1,759 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>System & Tactics Analysis — WIG Animation</title>
+<meta name="description" content="Comprehensive analysis of video production tactics, workbench pages, usefulness scores, and the end-to-end AI Second Brain delivery pipeline.">
+<script>
+(function(){
+  try{
+    var key = "aug-video-theme";
+    var theme = localStorage.getItem(key);
+    if(theme !== "light" && theme !== "dark"){
+      theme = window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+    }
+    document.documentElement.setAttribute("data-theme", theme);
+    document.documentElement.style.colorScheme = theme;
+  }catch(e){
+    document.documentElement.setAttribute("data-theme", "dark");
+  }
+})();
+</script>
+<style>
+:root, html[data-theme="dark"]{
+  --bg:#0c0c12; --panel:#161622; --ink:#f4f4f8; --muted:#9498a8;
+  --line:#262638; --gold:#e8b84a; --cyan:#4ed8eb; --chip:#1e1e2d;
+  --accent:#e74c3c; --accent2:#6366f1; --accent3:#27ae60; --purple:#af52de;
+  --card-bg:#161622; --card-hover:#1c1c2b; --shadow:0 4px 20px rgba(0,0,0,0.35);
+  --success-bg:rgba(39,174,96,0.15); --warning-bg:rgba(232,184,74,0.15);
+  --info-bg:rgba(78,216,235,0.12); --purple-bg:rgba(175,82,222,0.15);
+}
+html[data-theme="light"]{
+  --bg:#f6f6f9; --panel:#ffffff; --ink:#171727; --muted:#6c7082;
+  --line:#e3e4ed; --gold:#b37d0c; --cyan:#088395; --chip:#edf0f7;
+  --accent:#d63031; --accent2:#4f46e5; --accent3:#16a085; --purple:#8e44ad;
+  --card-bg:#ffffff; --card-hover:#fbfbfe; --shadow:0 4px 16px rgba(0,0,0,0.06);
+  --success-bg:rgba(39,174,96,0.1); --warning-bg:rgba(232,184,74,0.1);
+  --info-bg:rgba(78,216,235,0.1); --purple-bg:rgba(175,82,222,0.1);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased;line-height:1.5}
+a{color:var(--cyan);text-decoration:none}
+a:hover{text-decoration:underline}
+
+/* Header */
+header{
+  position:sticky;top:0;z-index:50;background:var(--panel);border-bottom:1px solid var(--line);
+  padding:10px 16px;box-shadow:0 2px 10px rgba(0,0,0,0.1);
+}
+.header-bar{
+  max-width:1440px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;
+}
+.title{font-weight:800;font-size:16px;letter-spacing:.02em;display:flex;align-items:center;gap:8px}
+.title a{color:inherit;text-decoration:none}
+
+.shared-nav {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+  margin-right: auto;
+  background: var(--chip);
+  padding: 4px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+}
+.shared-nav a {
+  color: var(--muted);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 13px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.shared-nav a:hover {
+  color: var(--cyan);
+  background: var(--panel);
+}
+.shared-nav a.active {
+  color: var(--ink);
+  background: var(--panel);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  border: 1px solid var(--line);
+}
+
+.btn{
+  font:inherit;font-size:12.5px;font-weight:650;cursor:pointer;
+  border:1px solid var(--line);background:var(--chip);color:var(--ink);
+  border-radius:8px;padding:7px 12px;display:inline-flex;align-items:center;gap:6px;
+  transition:all 0.15s ease;text-decoration:none;
+}
+.btn:hover{border-color:var(--cyan);color:var(--cyan);text-decoration:none}
+.btn.primary{background:var(--accent2);border-color:var(--accent2);color:#fff}
+.btn.primary:hover{opacity:0.9;border-color:var(--accent2);color:#fff}
+.btn.gold{background:var(--gold);border-color:var(--gold);color:#1a1406}
+.btn.success{background:var(--accent3);border-color:var(--accent3);color:#fff}
+
+/* Main Container */
+main{max-width:1440px;margin:0 auto;padding:24px 16px 80px;}
+
+/* Hero Banner */
+.hero-banner{
+  background:linear-gradient(135deg, rgba(99,102,241,0.14), rgba(78,216,235,0.09), rgba(175,82,222,0.08));
+  border:1px solid var(--line);border-radius:14px;padding:24px 28px;margin-bottom:24px;
+  display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:18px;
+}
+.hero-text h1{margin:0 0 6px;font-size:24px;font-weight:800}
+.hero-text p{margin:0;font-size:14px;color:var(--muted);max-width:880px}
+
+/* Stats Badges */
+.stats-grid{
+  display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));gap:14px;margin-bottom:24px;
+}
+.stat-card{
+  background:var(--panel);border:1px solid var(--line);border-radius:12px;
+  padding:16px 18px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:4px;
+}
+.stat-label{font-size:11.5px;font-weight:700;text-transform:uppercase;color:var(--muted);letter-spacing:0.04em}
+.stat-val{font-size:26px;font-weight:800;color:var(--ink)}
+.stat-sub{font-size:12px;color:var(--muted)}
+
+/* Section Heading */
+.section-header{
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;
+  margin:32px 0 16px;padding-bottom:8px;border-bottom:1px solid var(--line);
+}
+.section-header h2{margin:0;font-size:18px;font-weight:800;display:flex;align-items:center;gap:8px}
+
+/* Value Stream Flowchart */
+.value-stream-wrap{
+  background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px 24px;margin-bottom:28px;
+  box-shadow:var(--shadow);
+}
+.pipeline-flow{
+  display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:12px;margin-top:14px;
+}
+.flow-node{
+  background:var(--chip);border:1px solid var(--line);border-radius:10px;padding:14px;
+  display:flex;flex-direction:column;gap:6px;position:relative;
+}
+.flow-node-num{
+  font-size:10.5px;font-weight:800;color:var(--cyan);text-transform:uppercase;letter-spacing:0.05em;
+}
+.flow-node-title{font-size:13.5px;font-weight:750;color:var(--ink)}
+.flow-node-desc{font-size:12px;color:var(--muted);line-height:1.4}
+.flow-node-badge{
+  margin-top:auto;display:inline-flex;align-items:center;gap:4px;
+  font-size:10.5px;font-weight:700;padding:2px 6px;border-radius:4px;width:fit-content;
+}
+
+/* Page Analysis Cards */
+.page-grid{
+  display:grid;grid-template-columns:repeat(auto-fit, minmax(330px, 1fr));gap:18px;margin-bottom:32px;
+}
+.page-card{
+  background:var(--card-bg);border:1px solid var(--line);border-radius:12px;
+  padding:20px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:12px;
+  transition:transform 0.15s ease, border-color 0.15s ease;
+}
+.page-card:hover{transform:translateY(-2px);border-color:var(--cyan)}
+.page-card-header{
+  display:flex;align-items:flex-start;justify-content:space-between;gap:10px;
+}
+.page-title{font-size:16px;font-weight:800;display:flex;align-items:center;gap:6px}
+.score-pill{
+  font-size:11.5px;font-weight:800;padding:4px 8px;border-radius:6px;
+  background:var(--success-bg);color:#27ae60;border:1px solid rgba(39,174,96,0.3);
+  display:inline-flex;align-items:center;gap:4px;white-space:nowrap;
+}
+.page-role{font-size:12px;font-weight:700;color:var(--cyan);text-transform:uppercase;letter-spacing:0.04em}
+.page-desc{font-size:13px;color:var(--muted);line-height:1.45}
+.feature-list{
+  display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--ink);
+  background:var(--chip);border-radius:8px;padding:10px 12px;
+}
+.feature-item{display:flex;align-items:center;gap:6px}
+.page-card-footer{
+  margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:8px;
+  padding-top:10px;border-top:1px solid var(--line);
+}
+
+/* Tactics Deep-Dive Grid */
+.tactics-grid{
+  display:grid;grid-template-columns:repeat(auto-fit, minmax(320px, 1fr));gap:18px;margin-bottom:32px;
+}
+.tactic-card{
+  background:var(--card-bg);border:1px solid var(--line);border-radius:12px;
+  padding:20px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:12px;
+}
+.tactic-card-top{
+  display:flex;align-items:flex-start;justify-content:space-between;gap:8px;
+}
+.tactic-title{font-size:15px;font-weight:800;color:var(--ink);line-height:1.3}
+.tactic-badge{
+  font-size:10px;font-weight:700;padding:3px 7px;border-radius:999px;
+  text-transform:uppercase;letter-spacing:0.04em;white-space:nowrap;
+}
+.tactic-badge.purple{background:var(--purple-bg);color:var(--purple);}
+.tactic-badge.green{background:var(--success-bg);color:var(--accent3);}
+.tactic-badge.gold{background:var(--warning-bg);color:var(--gold);}
+.tactic-badge.cyan{background:var(--info-bg);color:var(--cyan);}
+.tactic-desc{font-size:13px;color:var(--muted);line-height:1.45}
+.tactic-multiplier{
+  background:var(--chip);border-left:3px solid var(--cyan);border-radius:4px;
+  padding:8px 12px;font-size:12px;color:var(--ink);line-height:1.4;
+}
+
+/* Matrix Table */
+.matrix-wrap{
+  background:var(--panel);border:1px solid var(--line);border-radius:12px;
+  overflow:hidden;box-shadow:var(--shadow);margin-bottom:32px;
+}
+.matrix-table{width:100%;border-collapse:collapse;font-size:13px;}
+.matrix-table th{
+  text-align:left;padding:10px 14px;background:var(--chip);font-size:11.5px;
+  font-weight:750;text-transform:uppercase;color:var(--muted);letter-spacing:0.04em;
+  border-bottom:1px solid var(--line);
+}
+.matrix-table td{
+  padding:12px 14px;border-bottom:1px solid var(--line);vertical-align:middle;
+}
+.matrix-table tr:last-child td{border-bottom:none;}
+.matrix-table tr:hover td{background:rgba(255,255,255,0.02);}
+
+/* Site Footer */
+.site-footer {
+  margin-top: 48px;border-top: 1px solid var(--line);background: var(--panel);
+  color: var(--muted);padding: 24px 16px;font-size: 13px;
+}
+.site-footer-inner {
+  max-width: 1440px;margin: 0 auto;display: flex;flex-wrap: wrap;
+  align-items: center;justify-content: space-between;gap: 16px;
+}
+.site-footer-brand {display: flex;flex-direction: column;gap: 3px;}
+.site-footer-title {font-weight: 750;color: var(--ink);}
+.site-footer-desc {font-size: 12px;color: var(--muted);}
+.site-footer-links {display: flex;flex-wrap: wrap;align-items: center;gap: 10px;}
+.footer-btn {
+  display: inline-flex;align-items: center;gap: 6px;padding: 6px 12px;
+  border-radius: 8px;border: 1px solid var(--line);background: var(--chip);
+  color: var(--ink);text-decoration: none;font-size: 12.5px;font-weight: 600;
+  transition: all 0.15s ease;
+}
+.footer-btn:hover {border-color: var(--cyan);color: var(--cyan);}
+.pulse-dot {
+  width: 7px;height: 7px;border-radius: 50%;background: #27ae60;
+  box-shadow: 0 0 0 0 rgba(39, 174, 96, 0.7);animation: pulse-green 1.8s infinite;
+}
+@keyframes pulse-green {
+  0% { box-shadow: 0 0 0 0 rgba(39, 174, 96, 0.7); }
+  70% { box-shadow: 0 0 0 6px rgba(39, 174, 96, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(39, 174, 96, 0); }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-bar">
+    <div class="title"><a href="index.html">WIG Animation</a></div>
+    <nav class="shared-nav" aria-label="Main Navigation">
+      <a href="index.html" class="nav-item"><span>🏠</span> Overview</a>
+      <a href="research.html" class="nav-item"><span>🎬</span> Research</a>
+      <a href="gallery.html" class="nav-item"><span>🖼️</span> Gallery</a>
+      <a href="scenes.html" class="nav-item"><span>🗂️</span> Scenes</a>
+      <a href="timeline.html" class="nav-item"><span>↔️</span> Timeline</a>
+      <a href="shotlist.html" class="nav-item"><span>📊</span> Shot List</a>
+      <a href="voice_over.html" class="nav-item"><span>📜</span> VoiceOver</a>
+      <a href="tactic.html" class="nav-item"><span>🎯</span> Tactics</a>
+      <a href="analysis.html" class="nav-item active"><span>📈</span> Analysis</a>
+      <a href="https://canva.link/p4u3nwvsmio19jp" class="nav-item" target="_blank" rel="noopener noreferrer" style="color:var(--purple,#af52de);" title="Canva Implementation Deck"><span>🎨</span> Implementation ↗</a>
+    </nav>
+    <a href="https://www.canva.com/design/DAHRZe5KBoA/OJU0sL318CozUaTBpkdT2g/edit" class="btn" target="_blank" rel="noopener noreferrer" style="color:var(--purple,#af52de);border-color:rgba(175,82,222,0.35);background:rgba(175,82,222,0.1);" title="Open Canva Document">🎨 Canva Document ↗</a>
+    <button type="button" class="btn" id="themeToggle">Toggle Theme</button>
+  </div>
+</header>
+
+<main>
+  <!-- Hero Banner -->
+  <div class="hero-banner">
+    <div class="hero-text">
+      <h1>Tactical Architecture &amp; Page Usefulness Analysis</h1>
+      <p>
+        Detailed evaluation of the 8 purpose-built video workbench pages, our 5 production tactics, and how each component accelerates delivery of the <b>AI Second Brain (2:58)</b> video cut.
+      </p>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <a href="gallery.html" class="btn primary">🖼️ Asset Gallery (131)</a>
+      <a href="tactic.html" class="btn gold">🎯 Production Tactics</a>
+    </div>
+  </div>
+
+  <!-- Key Metrics -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <span class="stat-label">Total Workbench Pages</span>
+      <span class="stat-val">8</span>
+      <span class="stat-sub">Specialized production views</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Production Tactics</span>
+      <span class="stat-val" style="color:var(--cyan);">5</span>
+      <span class="stat-sub">Core operational strategies</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Total Visual Assets</span>
+      <span class="stat-val" style="color:#27ae60;">131</span>
+      <span class="stat-sub">26 Flow MP4s + 105 Stills</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Average Page Usefulness</span>
+      <span class="stat-val" style="color:var(--gold);">9.4 / 10</span>
+      <span class="stat-sub">High utility, zero fluff</span>
+    </div>
+  </div>
+
+  <!-- Value Stream Flowchart -->
+  <div class="value-stream-wrap">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+      <h3 style="margin:0;font-size:16px;font-weight:800;display:flex;align-items:center;gap:6px;">
+        <span>🔄</span> End-to-End Production Value Stream
+      </h3>
+      <span style="font-size:12px;color:var(--muted);">From raw context in Canva &rarr; Live Sunday cohort</span>
+    </div>
+    <div class="pipeline-flow">
+      <div class="flow-node">
+        <span class="flow-node-num">Step 1</span>
+        <span class="flow-node-title">Canva Visual Setup</span>
+        <span class="flow-node-desc">Create visual frames in master Canva deck. Set layout, branding, and color palette.</span>
+        <span class="flow-node-badge" style="background:var(--purple-bg);color:var(--purple);">🎨 Canva Deck</span>
+      </div>
+      <div class="flow-node">
+        <span class="flow-node-num">Step 2</span>
+        <span class="flow-node-title">Post-It Script Iteration</span>
+        <span class="flow-node-desc">Place sticky notes directly on Canva slides. Iterate phrasing until discovering the booming voiceover.</span>
+        <span class="flow-node-badge" style="background:var(--warning-bg);color:var(--gold);">📝 Post-It Notes</span>
+      </div>
+      <div class="flow-node">
+        <span class="flow-node-num">Step 3</span>
+        <span class="flow-node-title">Asset Triage &amp; Tagging</span>
+        <span class="flow-node-desc">Search 131 clips in Gallery. Tag candidates as <code>Used</code> or <code>Out of Scope</code> with Azure cloud sync.</span>
+        <span class="flow-node-badge" style="background:var(--info-bg);color:var(--cyan);">🖼️ Gallery &amp; Azure</span>
+      </div>
+      <div class="flow-node">
+        <span class="flow-node-num">Step 4</span>
+        <span class="flow-node-title">Timeline Tail Auditioning</span>
+        <span class="flow-node-desc">Drag candidates past 2:58 tail. Test native playback before cutting into locked main track.</span>
+        <span class="flow-node-badge" style="background:var(--success-bg);color:#27ae60;">↔️ Tail Sandbox</span>
+      </div>
+      <div class="flow-node">
+        <span class="flow-node-num">Step 5</span>
+        <span class="flow-node-title">Fluid Post-Placement Cut</span>
+        <span class="flow-node-desc">Adapt voiceover cadence to match motion. Lock 6 scene blocks and export for Sunday delivery.</span>
+        <span class="flow-node-badge" style="background:rgba(99,102,241,0.15);color:var(--accent2);">🎯 Final Lock</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page Usefulness Analysis Grid -->
+  <div class="section-header">
+    <h2><span>📑</span> Page-by-Page Usefulness Evaluation</h2>
+    <span style="font-size:13px;color:var(--muted);">All 8 workbench surfaces ranked by utility</span>
+  </div>
+
+  <div class="page-grid">
+    <!-- Gallery -->
+    <div class="page-card">
+      <div class="page-card-header">
+        <div>
+          <span class="page-role">Asset Hub &amp; Discovery</span>
+          <div class="page-title"><span>🖼️</span> Gallery (gallery.html)</div>
+        </div>
+        <span class="score-pill">⭐ 9.8 / 10</span>
+      </div>
+      <div class="page-desc">
+        Complete catalog of 131 assets (26 Google Flow loops + 105 stage stills). Deep multi-term search (e.g. <i>"46k Notes Haystack"</i>), Used/Out-of-Scope tagging, hide toggles, and Azure Blob persistence.
+      </div>
+      <div class="feature-list">
+        <div class="feature-item"><span>🔍</span> Multi-term fuzzy search with highlight snippets</div>
+        <div class="feature-item"><span>🏷️</span> Interactive Used / Out-of-Scope tagging &amp; Azure sync</div>
+        <div class="feature-item"><span>🙈</span> Hide Used &amp; Hide Out of Scope exclusion toggles</div>
+        <div class="feature-item"><span>▶️</span> Fullscreen in-modal video player &amp; Markdown embed copy</div>
+      </div>
+      <div class="page-card-footer">
+        <span style="font-size:12px;color:var(--muted);">Primary Asset Source</span>
+        <a href="gallery.html" class="btn primary sm">Open Gallery &rarr;</a>
+      </div>
+    </div>
+
+    <!-- Timeline -->
+    <div class="page-card">
+      <div class="page-card-header">
+        <div>
+          <span class="page-role">Runtime &amp; Pacing Engine</span>
+          <div class="page-title"><span>↔️</span> Timeline (timeline.html)</div>
+        </div>
+        <span class="score-pill">⭐ 9.6 / 10</span>
+      </div>
+      <div class="page-desc">
+        Proportional horizontal timeline modeling the 2:58 master runtime across 6 scene blocks. Slide-up inspection drawer, quick voiceover export to clipboard, and toast notifications.
+      </div>
+      <div class="feature-list">
+        <div class="feature-item"><span>📋</span> 1-Click "Copy Voice Over" to clipboard</div>
+        <div class="feature-item"><span>⏱️</span> Proportional shot width rendering by duration</div>
+        <div class="feature-item"><span>🔍</span> Slide-up inspection drawer with shot VO copy</div>
+        <div class="feature-item"><span>🎨</span> Color-coded scene stages (00–16)</div>
+      </div>
+      <div class="page-card-footer">
+        <span style="font-size:12px;color:var(--muted);">Core Editing Surface</span>
+        <a href="timeline.html" class="btn sm">Open Timeline &rarr;</a>
+      </div>
+    </div>
+
+    <!-- Tactics -->
+    <div class="page-card">
+      <div class="page-card-header">
+        <div>
+          <span class="page-role">Strategy &amp; Guardrails</span>
+          <div class="page-title"><span>🎯</span> Tactics (tactic.html)</div>
+        </div>
+        <span class="score-pill">⭐ 9.5 / 10</span>
+      </div>
+      <div class="page-desc">
+        Tactical workbench containing anti-gold-plating guardrails, Canva reverse-engineering matrix, Post-It voiceover iteration guides, Timeline Tail Sandbox, and live decision logging.
+      </div>
+      <div class="feature-list">
+        <div class="feature-item"><span>📝</span> Post-It Voiceover Iteration technique showcase</div>
+        <div class="feature-item"><span>⚡</span> End-of-Timeline Auditioning Sandbox workflow</div>
+        <div class="feature-item"><span>📁</span> Canva Uploads Player &amp; 'Used' folder hierarchy</div>
+        <div class="feature-item"><span>🌊</span> Fluid Voiceover Post-Placement reality principle</div>
+      </div>
+      <div class="page-card-footer">
+        <span style="font-size:12px;color:var(--muted);">Operational Playbook</span>
+        <a href="tactic.html" class="btn sm">Open Tactics &rarr;</a>
+      </div>
+    </div>
+
+    <!-- Research -->
+    <div class="page-card">
+      <div class="page-card-header">
+        <div>
+          <span class="page-role">Deep Stage Research</span>
+          <div class="page-title"><span>🎬</span> Research (research.html)</div>
+        </div>
+        <span class="score-pill">⭐ 9.3 / 10</span>
+      </div>
+      <div class="page-desc">
+        Stage-by-stage (00–16) research portal. Full script textarea editor, media manifests, prompt logs, Stage 16 Video Flow quick jumps, and bidirectional Azure Blob synchronization.
+      </div>
+      <div class="feature-list">
+        <div class="feature-item"><span>🗂️</span> Full 17-stage visual &amp; audio breakdown</div>
+        <div class="feature-item"><span>📝</span> Live script editor with word count &amp; timing</div>
+        <div class="feature-item"><span>☁️</span> Bi-directional Azure state sync (POST /api/state)</div>
+        <div class="feature-item"><span>🎥</span> Sticky sub-navigation &amp; Video Flow jump</div>
+      </div>
+      <div class="page-card-footer">
+        <span style="font-size:12px;color:var(--muted);">Detailed Stage Specs</span>
+        <a href="research.html" class="btn sm">Open Research &rarr;</a>
+      </div>
+    </div>
+
+    <!-- VoiceOver -->
+    <div class="page-card">
+      <div class="page-card-header">
+        <div>
+          <span class="page-role">Audio &amp; Teleprompter</span>
+          <div class="page-title"><span>📜</span> VoiceOver (voice_over.html)</div>
+        </div>
+        <span class="score-pill">⭐ 9.2 / 10</span>
+      </div>
+      <div class="page-desc">
+        Dedicated narration teleprompter, WPM calculation matrix, delivery guidelines, pronunciation phonetic keys (Obsidian, P.A.R.A, CCAR-P), and ElevenLabs voice settings.
+      </div>
+      <div class="feature-list">
+        <div class="feature-item"><span>🎙️</span> Scene-by-scene script blocks &amp; timing targets</div>
+        <div class="feature-item"><span>⚡</span> WPM pacing meter (140–160 WPM target)</div>
+        <div class="feature-item"><span>🗣️</span> ElevenLabs voice settings (Thomas/Aria, 0.8 sim)</div>
+        <div class="feature-item"><span>📋</span> Script copy shortcuts for recording sessions</div>
+      </div>
+      <div class="page-card-footer">
+        <span style="font-size:12px;color:var(--muted);">Audio Recording Tool</span>
+        <a href="voice_over.html" class="btn sm">Open VoiceOver &rarr;</a>
+      </div>
+    </div>
+
+    <!-- Shotlist -->
+    <div class="page-card">
+      <div class="page-card-header">
+        <div>
+          <span class="page-role">Production Shot Matrix</span>
+          <div class="page-title"><span>📊</span> Shot List (shotlist.html)</div>
+        </div>
+        <span class="score-pill">⭐ 9.1 / 10</span>
+      </div>
+      <div class="page-desc">
+        Structured tabular shot list showing timecodes, shot durations, voiceover lines, attached image/video files, and production completion status.
+      </div>
+      <div class="feature-list">
+        <div class="feature-item"><span>⏱️</span> Timecode calculations (In/Out/Duration)</div>
+        <div class="feature-item"><span>🖼️</span> Thumbnail previews on each table row</div>
+        <div class="feature-item"><span>📊</span> Word count to duration validation</div>
+        <div class="feature-item"><span>🎯</span> Scene stage grouping &amp; filter tags</div>
+      </div>
+      <div class="page-card-footer">
+        <span style="font-size:12px;color:var(--muted);">Shot Data Table</span>
+        <a href="shotlist.html" class="btn sm">Open Shot List &rarr;</a>
+      </div>
+    </div>
+
+    <!-- Scenes -->
+    <div class="page-card">
+      <div class="page-card-header">
+        <div>
+          <span class="page-role">Visual Storyboard</span>
+          <div class="page-title"><span>🗂️</span> Scenes (scenes.html)</div>
+        </div>
+        <span class="score-pill">⭐ 9.0 / 10</span>
+      </div>
+      <div class="page-desc">
+        Visual storyboard presenting the 6 narrative scene blocks as large visual cards with motion descriptions, voiceover scripts, and candidate stills.
+      </div>
+      <div class="feature-list">
+        <div class="feature-item"><span>🎬</span> 6 Narrative Scenes (Hook, Realization, PARA, Engine, Workflow, CTA)</div>
+        <div class="feature-item"><span>🖼️</span> High-res visual reference banners</div>
+        <div class="feature-item"><span>📝</span> Scene narrative objectives &amp; key takeaways</div>
+      </div>
+      <div class="page-card-footer">
+        <span style="font-size:12px;color:var(--muted);">Visual Story Deck</span>
+        <a href="scenes.html" class="btn sm">Open Scenes &rarr;</a>
+      </div>
+    </div>
+
+    <!-- Overview -->
+    <div class="page-card">
+      <div class="page-card-header">
+        <div>
+          <span class="page-role">Executive Dashboard</span>
+          <div class="page-title"><span>🏠</span> Overview (index.html)</div>
+        </div>
+        <span class="score-pill">⭐ 8.9 / 10</span>
+      </div>
+      <div class="page-desc">
+        Main entry dashboard summarizing the WIG Animation framework, video production status, key architecture links, and quick jump buttons across the whole toolset.
+      </div>
+      <div class="feature-list">
+        <div class="feature-item"><span>🚀</span> Quick start commands and port documentation</div>
+        <div class="feature-item"><span>🗺️</span> 16-Stage WIG framework map overview</div>
+        <div class="feature-item"><span>🔗</span> Direct links to Canva decks, GitHub, and Fly.io</div>
+      </div>
+      <div class="page-card-footer">
+        <span style="font-size:12px;color:var(--muted);">Main Portal</span>
+        <a href="index.html" class="btn sm">Open Overview &rarr;</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tactics Deep-Dive Analysis -->
+  <div class="section-header">
+    <h2><span>🧠</span> Deep-Dive: The 5 Core Production Tactics</h2>
+    <span style="font-size:13px;color:var(--muted);">How tactical practices solve real-world video friction</span>
+  </div>
+
+  <div class="tactics-grid">
+    <!-- Tactic 1 -->
+    <div class="tactic-card">
+      <div class="tactic-card-top">
+        <span class="tactic-title">1. Canva Post-It Notes for Voiceover Iteration</span>
+        <span class="tactic-badge purple">Scripting</span>
+      </div>
+      <div class="tactic-desc">
+        Drafting narration directly on virtual sticky notes placed over visual Canva slides. Allows testing multiple phrasings in-situ until locking in the booming voiceover take.
+      </div>
+      <div class="tactic-multiplier">
+        <strong>Why it works:</strong> You hear and see the synergy simultaneously. Eliminates writer's block and avoids rewriting scripts in external apps disconnected from visual frames.
+      </div>
+    </div>
+
+    <!-- Tactic 2 -->
+    <div class="tactic-card">
+      <div class="tactic-card-top">
+        <span class="tactic-title">2. End-of-Timeline Auditioning Sandbox</span>
+        <span class="tactic-badge green">Editing</span>
+      </div>
+      <div class="tactic-desc">
+        Dragging candidate Google Flow MP4s or Canva stills past the active 2:58 timeline cut mark. Watch, evaluate, and trim in native playback before splicing into the main cut.
+      </div>
+      <div class="tactic-multiplier">
+        <strong>Why it works:</strong> Zero disruption to locked audio timings or existing ripple edits. Provides full-screen context without risking project layout integrity.
+      </div>
+    </div>
+
+    <!-- Tactic 3 -->
+    <div class="tactic-card">
+      <div class="tactic-card-top">
+        <span class="tactic-title">3. Canva Uploads Player &amp; 'Used' Folder Separation</span>
+        <span class="tactic-badge gold">Asset Mgmt</span>
+      </div>
+      <div class="tactic-desc">
+        Leveraging Canva's upload sidebar video player for inline previews, and moving placed assets into a dedicated <code>📁 Used</code> folder.
+      </div>
+      <div class="tactic-multiplier">
+        <strong>Why it works:</strong> Prevents duplicate asset usage and keeps the upload drawer clean. Perfectly mirrors the <code>Used</code> &amp; <code>Out of Scope</code> Azure state in the gallery.
+      </div>
+    </div>
+
+    <!-- Tactic 4 -->
+    <div class="tactic-card">
+      <div class="tactic-card-top">
+        <span class="tactic-title">4. Fluid Script Evolution Post-Placement</span>
+        <span class="tactic-badge cyan">Reality Rule</span>
+      </div>
+      <div class="tactic-desc">
+        Accepting that the voiceover must actively adapt once footage is placed on the timeline. The script serves the timeline pacing, not dogmatic pre-written text.
+      </div>
+      <div class="tactic-multiplier">
+        <strong>Why it works:</strong> Eliminates clunky timings where voiceover is too long or animations finish too early. Puts cadence and emotional resonance first.
+      </div>
+    </div>
+
+    <!-- Tactic 5 -->
+    <div class="tactic-card">
+      <div class="tactic-card-top">
+        <span class="tactic-title">5. Anti-Gold-Plating 80/20 Delivery Rule</span>
+        <span class="tactic-badge purple">Productivity</span>
+      </div>
+      <div class="tactic-desc">
+        Canva still baseline first. Maximum 2 prompt iterations per Flow clip. A finished 85% video delivered to real cohort learners beats a 99% video trapped in editing.
+      </div>
+      <div class="tactic-multiplier">
+        <strong>Why it works:</strong> Guaranteed delivery before Sunday cohort deadline. Prevents rabbit holes in particle generation or excessive color grading.
+      </div>
+    </div>
+  </div>
+
+  <!-- Usefulness Comparison Matrix Table -->
+  <div class="section-header">
+    <h2><span>📊</span> Tactical Utility &amp; Feature Comparison Matrix</h2>
+  </div>
+
+  <div class="matrix-wrap">
+    <table class="matrix-table">
+      <thead>
+        <tr>
+          <th>Page / Tool</th>
+          <th>Primary User Objective</th>
+          <th>Key Friction Solved</th>
+          <th>Azure Sync</th>
+          <th>Usefulness</th>
+          <th>Quick Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>🖼️ gallery.html</strong></td>
+          <td>Browse, search, tag 131 video/still assets</td>
+          <td>Finding exact footage by script terms (e.g. <i>"46k Notes Haystack"</i>)</td>
+          <td><span style="color:#27ae60;font-weight:700;">✅ Full Sync</span></td>
+          <td><span class="score-pill">9.8 / 10</span></td>
+          <td><a href="gallery.html" class="btn sm">Open &rarr;</a></td>
+        </tr>
+        <tr>
+          <td><strong>↔️ timeline.html</strong></td>
+          <td>Interactive 2:58 timeline pacing &amp; VO export</td>
+          <td>Visualizing scene duration balance &amp; batch VO export</td>
+          <td><span style="color:#27ae60;font-weight:700;">✅ Read/Write</span></td>
+          <td><span class="score-pill">9.6 / 10</span></td>
+          <td><a href="timeline.html" class="btn sm">Open &rarr;</a></td>
+        </tr>
+        <tr>
+          <td><strong>🎯 tactic.html</strong></td>
+          <td>Reverse-engineering Canva to code &amp; guardrails</td>
+          <td>Scope creep, gold-plating, and voiceover dissonance</td>
+          <td><span style="color:#27ae60;font-weight:700;">✅ Log Sync</span></td>
+          <td><span class="score-pill">9.5 / 10</span></td>
+          <td><a href="tactic.html" class="btn sm">Open &rarr;</a></td>
+        </tr>
+        <tr>
+          <td><strong>🎬 research.html</strong></td>
+          <td>Deep stage-by-stage 00–16 analysis &amp; live script</td>
+          <td>Connecting raw Obsidian vault concepts to video stages</td>
+          <td><span style="color:#27ae60;font-weight:700;">✅ Full Sync</span></td>
+          <td><span class="score-pill">9.3 / 10</span></td>
+          <td><a href="research.html" class="btn sm">Open &rarr;</a></td>
+        </tr>
+        <tr>
+          <td><strong>📜 voice_over.html</strong></td>
+          <td>Teleprompter pacing, WPM meter &amp; voice setup</td>
+          <td>Inconsistent speaking rate or pronunciation mistakes</td>
+          <td><span style="color:var(--muted)">Static Copy</span></td>
+          <td><span class="score-pill">9.2 / 10</span></td>
+          <td><a href="voice_over.html" class="btn sm">Open &rarr;</a></td>
+        </tr>
+        <tr>
+          <td><strong>📊 shotlist.html</strong></td>
+          <td>Tabular shot matrix with timecodes &amp; attachments</td>
+          <td>Missing assets or shot timing mismatches</td>
+          <td><span style="color:#27ae60;font-weight:700;">✅ State Sync</span></td>
+          <td><span class="score-pill">9.1 / 10</span></td>
+          <td><a href="shotlist.html" class="btn sm">Open &rarr;</a></td>
+        </tr>
+        <tr>
+          <td><strong>🗂️ scenes.html</strong></td>
+          <td>6 Narrative scene blocks with visual cards</td>
+          <td>Losing sight of the overarching story arc</td>
+          <td><span style="color:var(--muted)">State View</span></td>
+          <td><span class="score-pill">9.0 / 10</span></td>
+          <td><a href="scenes.html" class="btn sm">Open &rarr;</a></td>
+        </tr>
+        <tr>
+          <td><strong>🏠 index.html</strong></td>
+          <td>Framework overview &amp; executive dashboard</td>
+          <td>New contributor onboarding &amp; tool navigation</td>
+          <td><span style="color:var(--muted)">Portal View</span></td>
+          <td><span class="score-pill">8.9 / 10</span></td>
+          <td><a href="index.html" class="btn sm">Open &rarr;</a></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="site-footer-inner">
+    <div class="site-footer-brand">
+      <span class="site-footer-title">WIG Animation · AI Second Brain</span>
+      <span class="site-footer-desc">Production tactics &amp; system usefulness analysis</span>
+    </div>
+    <div class="site-footer-links">
+      <a href="https://www.canva.com/design/DAHRZe5KBoA/OJU0sL318CozUaTBpkdT2g/edit" target="_blank" rel="noopener noreferrer" class="footer-btn" style="color:var(--purple,#af52de);">
+        <span>🎨</span> Canva Document
+      </a>
+      <a href="https://aug-video-animation-1.fly.dev/analysis.html" target="_blank" rel="noopener" class="footer-btn live-btn">
+        <span class="pulse-dot"></span> Live App (Fly.io)
+      </a>
+      <a href="https://rifaterdemsahin.github.io/aug-video-animation-1/analysis.html" target="_blank" rel="noopener" class="footer-btn">
+        <span>📄</span> GitHub Pages
+      </a>
+      <a href="https://github.com/rifaterdemsahin/aug-video-animation-1" target="_blank" rel="noopener" class="footer-btn">
+        <span>🐙</span> Source Code
+      </a>
+    </div>
+  </div>
+</footer>
+
+<script>
+document.getElementById("themeToggle").addEventListener("click", () => {
+  const cur = document.documentElement.getAttribute("data-theme") || "dark";
+  const nxt = cur === "dark" ? "light" : "dark";
+  document.documentElement.setAttribute("data-theme", nxt);
+  document.documentElement.style.colorScheme = nxt;
+  try{ localStorage.setItem("aug-video-theme", nxt); }catch(e){}
+});
+</script>
+</body>
+</html>
