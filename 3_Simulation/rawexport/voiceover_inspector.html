@@ -25,6 +25,8 @@ header { position:sticky; top:0; z-index:50; background:var(--panel); border-bot
 .btn:hover { border-color:var(--cyan); color:var(--cyan); text-decoration:none; }
 .btn.primary { background:var(--accent2); border-color:var(--accent2); color:#fff; }
 .btn.success { background:var(--accent3); border-color:var(--accent3); color:#fff; }
+.btn.blue { background:#2563eb; border-color:#2563eb; color:#fff; }
+.btn.blue:hover { background:#1d4ed8; border-color:#1d4ed8; color:#fff; }
 
 /* Sticky Stats Bar */
 .sticky-stats-bar {
@@ -175,6 +177,7 @@ header { position:sticky; top:0; z-index:50; background:var(--panel); border-bot
     </nav>
     <button class="btn primary" onclick="scrollToFinalVO()">📋 Generate Final Voiceover</button>
     <button class="btn success" onclick="downloadHTMLDoc()" title="Save all changes and download updated voiceover_inspector.html">💾 Save &amp; Download HTML</button>
+    <button class="btn blue" onclick="downloadPlainTextVO()" title="Download spoken voiceover audio text only (.txt)">🎙️ Download Voiceover</button>
     <a href="https://www.canva.com/design/DAHRZe5KBoA/OJU0sL318CozUaTBpkdT2g/edit" class="btn" target="_blank" rel="noopener noreferrer" style="color:var(--purple,#af52de);border-color:rgba(175,82,222,0.35);background:rgba(175,82,222,0.1);" title="Open Canva Document">🎨 Canva Document ↗</a>
   </div>
 </header>
@@ -196,6 +199,7 @@ header { position:sticky; top:0; z-index:50; background:var(--panel); border-bot
       <div class="azure-pill" id="azureStat">☁️ Azure Synced</div>
       <button class="btn" onclick="saveToAzure(true)">☁️ Save to Azure</button>
       <button class="btn success" onclick="downloadHTMLDoc()" title="Download current HTML page with all edits baked in">📥 Download HTML</button>
+      <button class="btn blue" onclick="downloadPlainTextVO()" title="Download spoken plain text voiceover only (.txt)">🎙️ Download Voiceover</button>
     </div>
   </div>
 </div>
@@ -5874,9 +5878,9 @@ header { position:sticky; top:0; z-index:50; background:var(--panel); border-bot
         <button class="btn primary" onclick="copyFinalScript()">📋 Copy Full Script</button>
         <button class="btn" onclick="copyPlainTextVO()" title="Copy only the spoken voiceover text for ElevenLabs / TTS">🎙️ Copy Plain Text</button>
         <button class="btn success" onclick="saveToAzure(true)">☁️ Save to Azure</button>
-        <button class="btn" onclick="downloadPlainTextVO()" title="Download plain text voiceover only (.txt)">📥 Download .txt</button>
+        <button class="btn blue" onclick="downloadPlainTextVO()" title="Download plain text voiceover only (.txt)">🎙️ Download Voiceover (.txt)</button>
+        <button class="btn success" onclick="downloadHTMLDoc()" title="Download complete HTML inspector page">📥 Download HTML</button>
         <button class="btn" onclick="downloadScript()" title="Download script as markdown with timecodes">📥 Download .md</button>
-        <button class="btn" onclick="downloadHTMLDoc()" title="Download complete HTML inspector page">📥 Download HTML</button>
         <button class="btn" onclick="downloadJSONState()" title="Download state as JSON">📥 Download JSON</button>
         <button class="btn" onclick="buildFinalVoiceover(true)">🔄 Re-Assemble</button>
       </div>
