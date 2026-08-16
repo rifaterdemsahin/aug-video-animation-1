@@ -393,6 +393,69 @@ header {{ position:sticky; top:0; z-index:50; background:var(--panel); border-bo
   transition:opacity .2s ease; box-shadow:0 4px 16px rgba(0,0,0,0.4);
 }}
 .toast.show {{ opacity:1; }}
+
+/* Print / PDF Storyboard Styles (Image + Voice + Voiceover) */
+@media print {{
+  @page {{
+    size: A4 portrait;
+    margin: 10mm 12mm;
+  }}
+  body {{
+    background: #fff !important;
+    color: #111 !important;
+    font-size: 10pt !important;
+  }}
+  header, .sticky-stats-bar, .shared-nav, .ai-pills-row, .btn, .view-switch, .azure-pill, #gridControlBar, .slideshow-panel, .final-vo-panel, .toast, footer {{
+    display: none !important;
+  }}
+  .container {{
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }}
+  .inspector-grid {{
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 14px !important;
+    margin-top: 0 !important;
+  }}
+  .frame-card {{
+    background: #fff !important;
+    border: 1px solid #ccc !important;
+    border-radius: 6px !important;
+    box-shadow: none !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    color: #111 !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }}
+  .frame-thumb {{
+    background: #000 !important;
+    max-height: 160px !important;
+  }}
+  .frame-thumb img {{
+    object-fit: cover !important;
+  }}
+  .stage-badge, .tc-badge {{
+    background: rgba(0,0,0,0.85) !important;
+    color: #fff !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }}
+  .frame-body {{
+    padding: 10px !important;
+    gap: 6px !important;
+  }}
+  .custom-input {{
+    background: #fdfdfd !important;
+    color: #000 !important;
+    border: 1px solid #bbb !important;
+    font-size: 9.5pt !important;
+    min-height: 55px !important;
+    resize: none !important;
+  }}
+}}
 </style>
 </head>
 <body>
@@ -417,6 +480,7 @@ header {{ position:sticky; top:0; z-index:50; background:var(--panel); border-bo
     <button class="btn success" onclick="downloadHTMLDoc()" title="Save all changes and download updated voiceover_inspector.html">💾 Save &amp; Download HTML</button>
     <button class="btn blue" onclick="downloadPlainTextVO()" title="Download spoken voiceover audio text only (.txt)">🎙️ Download Voiceover</button>
     <button class="btn" onclick="downloadAzureVoiceoverTxt()" title="Download synced Azure Blob object containing voiceover as a text file">☁️ Download Azure VO (.txt)</button>
+    <button class="btn" onclick="downloadAsPDF()" title="Download storyboard cards as PDF (Image + Voice + Voiceover)">📄 Download as PDF</button>
     <a href="https://www.canva.com/design/DAHRZe5KBoA/OJU0sL318CozUaTBpkdT2g/edit" class="btn" target="_blank" rel="noopener noreferrer" style="color:var(--purple,#af52de);border-color:rgba(175,82,222,0.35);background:rgba(175,82,222,0.1);" title="Open Canva Document">🎨 Canva Document ↗</a>
   </div>
 </header>
@@ -439,7 +503,8 @@ header {{ position:sticky; top:0; z-index:50; background:var(--panel); border-bo
       <button class="btn" onclick="saveToAzure(true)">☁️ Save to Azure</button>
       <button class="btn success" onclick="downloadHTMLDoc()" title="Download current HTML page with all edits baked in">📥 Download HTML</button>
       <button class="btn blue" onclick="downloadPlainTextVO()" title="Download spoken plain text voiceover only (.txt)">🎙️ Download Voiceover</button>
-      <button class="btn" onclick="downloadAzureVoiceoverTxt()" title="Download synced Azure Blob object containing voiceover as a text file">☁️ Download Azure VO (.txt)</button>
+      <button class="btn" onclick="downloadAzureVoiceoverTxt()" title="Download synced Azure Blob object containing voiceover as a text file">☁️ Download Azure VO</button>
+      <button class="btn" onclick="downloadAsPDF()" title="Download storyboard as PDF (Image + Voice + Voiceover)">📄 Download PDF</button>
     </div>
   </div>
 </div>
@@ -568,6 +633,7 @@ header {{ position:sticky; top:0; z-index:50; background:var(--panel); border-bo
         <button class="btn success" onclick="saveToAzure(true)">☁️ Save to Azure</button>
         <button class="btn blue" onclick="downloadPlainTextVO()" title="Download plain text voiceover only (.txt)">🎙️ Download Voiceover (.txt)</button>
         <button class="btn" onclick="downloadAzureVoiceoverTxt()" title="Download synced Azure Blob object containing voiceover as a text file">☁️ Download Azure VO (.txt)</button>
+        <button class="btn" onclick="downloadAsPDF()" title="Download storyboard as PDF (Image + Voice + Voiceover)">📄 Download as PDF</button>
         <button class="btn success" onclick="downloadHTMLDoc()" title="Download complete HTML inspector page">📥 Download HTML</button>
         <button class="btn" onclick="downloadScript()" title="Download script as markdown with timecodes">📥 Download .md</button>
         <button class="btn" onclick="downloadJSONState()" title="Download state as JSON">📥 Download JSON</button>
@@ -1079,6 +1145,23 @@ async function downloadAzureVoiceoverTxt(){{
   document.body.removeChild(a);
   showToast("📥 Downloaded azure_voiceover_object.txt!");
 }}
+
+// Download storyboard as PDF (Image + Voice + Voiceover)
+function downloadAsPDF(){{
+  // Switch to grid view so all 200 frame cards render cleanly in PDF
+  setViewMode('grid');
+  
+  // Make sure all textarea values are synchronized
+  document.querySelectorAll('.inspector-grid .custom-input').forEach(ta => {{
+    ta.textContent = ta.value;
+  }});
+  
+  showToast("📄 Opening Print to PDF dialog… Select 'Save as PDF'");
+  setTimeout(() => {{
+    window.print();
+  }}, 250);
+}}
+
 
 function scrollToFinalVO(){{
   const panel = document.getElementById('finalVoPanel');
