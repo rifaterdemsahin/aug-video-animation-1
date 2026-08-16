@@ -1,0 +1,31 @@
+{
+  "original_file": "aug 1 video implement (1).mp4",
+  "original_size_bytes": 51117235,
+  "original_size_mb": 48.75,
+  "original_sha256": "5b9511785460bbe908ff7b0d80d09351acb82282de0fbf8a1277c6c9ef6542d8",
+  "chunk_size_mb": 24,
+  "total_parts": 3,
+  "parts": [
+    {
+      "part_number": 1,
+      "filename": "aug_1_video_implement_1.part_001",
+      "size_bytes": 25165824,
+      "size_mb": 24.0,
+      "sha256": "7f1d0085682454c710bfa6071129bfdd5a6ee03aff07aa5a3ac1b192e4878c00"
+    },
+    {
+      "part_number": 2,
+      "filename": "aug_1_video_implement_1.part_002",
+      "size_bytes": 25165824,
+      "size_mb": 24.0,
+      "sha256": "c0ca90c66d4e1cb3cddcab43f26d23b44a24900d41992f9b983c22862d6c3be6"
+    },
+    {
+      "part_number": 3,
+      "filename": "aug_1_video_implement_1.part_003",
+      "size_bytes": 785587,
+      "size_mb": 0.75,
+      "sha256": "d0220b34167a096db431f1bc8fe702028d049a1ab6ddc7cf3f36a94c8fcaa7c7"
+    }
+  ]
+}

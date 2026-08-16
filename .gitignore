@@ -5,3 +5,7 @@ __pycache__/
 *.log
 .idea/
 .vscode/
+
+# Ignore large raw video files in rawexport (use 24MB split parts_* instead for GitHub)
+3_Simulation/rawexport/*.mp4
+3_Simulation/rawexport/*.mov
