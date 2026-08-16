@@ -748,6 +748,25 @@ header{position:sticky;top:0;z-index:50;background:var(--panel);border-bottom:1p
   margin-top:10px;
   border:1px solid rgba(255,255,255,0.1);
 }
+.cadence-box{
+  background:rgba(78,216,235,0.06);
+  border:1px solid rgba(78,216,235,0.25);
+  border-left:4px solid var(--cyan);
+  border-radius:8px;
+  padding:14px 18px;
+  margin-top:14px;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+.cadence-title{
+  font-size:13.5px;
+  font-weight:750;
+  color:var(--cyan);
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
 
 
 /* Footer with GitHub Pages */
@@ -1263,6 +1282,30 @@ footer{
     <div class="extractor-cmd-box">
       <span><span style="color:#4ade80;">$</span> python3 extract_and_rewrite_vo.py</span>
       <button class="btn-copy-cmd" onclick="copySnippet('python3 extract_and_rewrite_vo.py')">Copy Command</button>
+    </div>
+
+    <!-- The 3 Words / Second Rhythm Rule -->
+    <div class="cadence-box">
+      <div class="cadence-title">
+        <span>⏱️</span> The "3 Words a Second" Visual Rhythm Rule
+      </div>
+      <div style="font-size:13px; color:var(--ink); line-height:1.45;">
+        In <a href="3_Simulation/rawexport/voiceover_inspector.html" target="_blank" rel="noopener noreferrer" style="color:var(--cyan);font-weight:700;">VO Inspector</a>, we step second-by-second across the 200 frame screenshots and calibrate our voiceover script at an exact pace of <b>~2.5 to 3 words per second (150–180 WPM)</b>.
+      </div>
+      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:10px; margin-top:8px;">
+        <div style="background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:8px 12px; font-size:12px;">
+          <strong style="color:var(--gold);">1 Sec Screen Time:</strong> ~3 words<br>
+          <span style="color:var(--muted); font-size:11px;">e.g. <i>"No more chaos."</i></span>
+        </div>
+        <div style="background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:8px 12px; font-size:12px;">
+          <strong style="color:var(--gold);">2 Secs Screen Time:</strong> ~5–6 words<br>
+          <span style="color:var(--muted); font-size:11px;">e.g. <i>"I built an AI-native brain."</i></span>
+        </div>
+        <div style="background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:8px 12px; font-size:12px;">
+          <strong style="color:var(--gold);">4 Secs Screen Time:</strong> ~10–12 words<br>
+          <span style="color:var(--muted); font-size:11px;">e.g. <i>"AI agents query and update my entire knowledge base."</i></span>
+        </div>
+      </div>
     </div>
   </div>
 
