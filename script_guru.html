@@ -428,9 +428,13 @@ header{
         <h3 style="margin:0; font-size:17px; font-weight:800;">🎙️ Master Voiceover Script Live Review</h3>
         <span style="font-size:12.5px; color:var(--muted);">Synchronized across VO Inspector, Azure Blob state, and local storage</span>
       </div>
-      <div style="display:flex; gap:8px;">
-        <a href="3_Simulation/rawexport/voiceover_inspector.html" class="btn primary">Open Frame Inspector</a>
-        <button type="button" class="btn" onclick="copyMasterScript()">📋 Copy Script</button>
+      <div style="display:flex; flex-wrap:wrap; gap:8px; align-items:center;">
+        <button type="button" class="btn primary" onclick="copyMasterScript()">📋 Copy Script</button>
+        <button type="button" class="btn" style="background:#2563eb; color:#fff; border-color:#2563eb;" onclick="downloadVoiceoverTxt()" title="Download plain text voiceover only (.txt)">🎙️ Download .txt</button>
+        <button type="button" class="btn success" onclick="downloadScriptMd()" title="Download complete markdown script with timecodes">📥 Download .md</button>
+        <button type="button" class="btn" onclick="downloadAzureVoiceoverTxt()" title="Download synced Azure Blob object containing voiceover">☁️ Download Azure VO</button>
+        <button type="button" class="btn" onclick="downloadAsPDF()" title="Download as PDF Storyboard">📄 Download PDF</button>
+        <a href="3_Simulation/rawexport/voiceover_inspector.html" class="btn" style="border-color:var(--cyan); color:var(--cyan);">Open Frame Inspector ↗</a>
       </div>
     </div>
 
@@ -516,6 +520,71 @@ function copyMasterScript(){
   navigator.clipboard.writeText(ta.value).then(() => {
     alert("📋 Copied Master Voiceover Script to clipboard!");
   });
+}
+
+function downloadScriptMd(){
+  const text = document.getElementById("guruScriptArea")?.value || "";
+  const blob = new Blob([text], { type: 'text/markdown;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = "master_voiceover_script.md";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+function downloadVoiceoverTxt(){
+  const full = document.getElementById("guruScriptArea")?.value || "";
+  // Strip markdown headers and timecodes for speech synthesis / ElevenLabs
+  const plain = full.split('\n')
+    .filter(l => l.trim() && !l.startsWith('#') && !l.startsWith('>'))
+    .map(l => l.replace(/^\[\d{2}:\d{2}\]\s*(\([^)]*\)\s*)?/, '').trim())
+    .filter(Boolean)
+    .join('\n\n');
+  
+  const blob = new Blob([plain], { type: 'text/plain;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = "voiceover_script.txt";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+async function downloadAzureVoiceoverTxt(){
+  let content = "";
+  try {
+    const res = await fetch("/api/state", { cache: "no-store" });
+    if(res.ok){
+      const data = await res.json();
+      if(data && data.ok && data.state && data.state.finalVoiceoverScript){
+        content = data.state.finalVoiceoverScript;
+      }
+    }
+  } catch(e){}
+  
+  if(!content){
+    content = document.getElementById("guruScriptArea")?.value || "";
+  }
+  
+  const output = "=======================================================\n"
+    + "☁️ AZURE BLOB OBJECT VOICEOVER EXPORT\n"
+    + "Source: Azure Blob (aug-video-animation-1/shotlist/latest.json)\n"
+    + "Timestamp: " + new Date().toISOString() + "\n"
+    + "=======================================================\n\n"
+    + content;
+    
+  const blob = new Blob([output], { type: 'text/plain;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = "azure_voiceover_object.txt";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+function downloadAsPDF(){
+  window.print();
 }
 
 // Dynamic 200-Second Voiceover Script Generator
