@@ -256,6 +256,7 @@ def build_manifest_and_docs(video_path: str, frames: list, fps: float = 1.0):
     generate_html_inspector(manifest_entries, video_name, duration)
 
 def generate_html_inspector(manifest_entries: list, video_name: str, duration: float):
+    manifest_json_str = json.dumps(manifest_entries)
     html_content = f"""<!doctype html>
 <html lang="en">
 <head>
@@ -303,8 +304,56 @@ header {{ position:sticky; top:0; z-index:50; background:var(--panel); border-bo
   display:inline-flex; align-items:center; gap:5px;
 }}
 
+/* View Switcher */
+.view-switch {{
+  display:inline-flex; background:var(--chip); padding:3px; border-radius:8px; border:1px solid var(--line);
+}}
+.view-btn {{
+  background:transparent; border:none; color:var(--muted); font:inherit; font-size:12px; font-weight:700;
+  padding:5px 10px; border-radius:6px; cursor:pointer; display:inline-flex; align-items:center; gap:5px;
+  transition:all .15s ease;
+}}
+.view-btn.active {{
+  background:var(--panel); color:var(--ink); box-shadow:0 1px 3px rgba(0,0,0,0.2); border:1px solid var(--line);
+}}
+
 /* Main Container */
 .container {{ max-width:1440px; margin:0 auto; padding:20px 16px 80px; }}
+
+/* Slide Show Mode Panel */
+.slideshow-panel {{
+  background:var(--panel); border:1px solid var(--line); border-radius:14px; overflow:hidden;
+  box-shadow:var(--shadow); margin-top:20px; display:none; flex-direction:column;
+}}
+.slideshow-stage {{
+  position:relative; aspect-ratio:16/9; background:#000; width:100%; max-height:560px; overflow:hidden;
+}}
+.slideshow-stage img {{
+  width:100%; height:100%; object-fit:contain; background:#000;
+}}
+.slideshow-controls {{
+  background:var(--chip); border-top:1px solid var(--line); border-bottom:1px solid var(--line);
+  padding:14px 20px; display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:14px;
+}}
+.nav-btn-group {{
+  display:flex; align-items:center; gap:8px;
+}}
+.nav-btn {{
+  background:var(--panel); border:1px solid var(--line); color:var(--ink); font:inherit; font-size:13px;
+  font-weight:750; padding:8px 14px; border-radius:8px; cursor:pointer; display:inline-flex; align-items:center;
+  gap:6px; transition:all .15s ease;
+}}
+.nav-btn:hover {{ border-color:var(--cyan); color:var(--cyan); }}
+.nav-btn.primary {{ background:var(--accent2); border-color:var(--accent2); color:#fff; }}
+.scrubber-wrap {{
+  flex:1; min-width:240px; display:flex; align-items:center; gap:10px;
+}}
+.scrubber-slider {{
+  flex:1; accent-color:var(--cyan); cursor:pointer;
+}}
+.slideshow-body {{
+  padding:20px 24px; display:flex; flex-direction:column; gap:14px;
+}}
 
 /* Streamlined Inspector Grid (Image + Textbox) */
 .inspector-grid {{
@@ -392,6 +441,10 @@ header {{ position:sticky; top:0; z-index:50; background:var(--panel); border-bo
 <div class="sticky-stats-bar">
   <div class="stats-bar-inner">
     <div style="display:flex; flex-wrap:wrap; align-items:center; gap:8px;">
+      <div class="view-switch">
+        <button type="button" class="view-btn active" id="btnGridView" onclick="setViewMode('grid')">📱 Grid View</button>
+        <button type="button" class="view-btn" id="btnSlideView" onclick="setViewMode('slideshow')">📽️ Slide Show Mode</button>
+      </div>
       <div class="metric-pill"><span>📝 Word Count:</span> <span class="metric-val" id="metricWordCount">0 words</span></div>
       <div class="metric-pill"><span>⏱️ Estimated Audio:</span> <span class="metric-val" id="metricAudioDuration">0:00</span> <small style="color:var(--muted);">(150 WPM)</small></div>
       <div class="metric-pill"><span>🎞️ Video Length:</span> <span class="metric-val" id="metricVideoLength">{format_tc(int(duration))} ({int(duration)}s)</span></div>
@@ -405,10 +458,54 @@ header {{ position:sticky; top:0; z-index:50; background:var(--panel); border-bo
 </div>
 
 <div class="container">
-  <div style="background:var(--chip); border:1px solid var(--line); border-radius:10px; padding:16px 20px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+  <!-- Slide Show Mode Panel -->
+  <div class="slideshow-panel" id="slideshowPanel">
+    <div class="slideshow-stage">
+      <img id="slideImg" src="screenshots/{manifest_entries[0]['image_file']}" alt="Slide Frame">
+      <span class="stage-badge" id="slideStageBadge">Scene 1 · Hook &amp; Problem Setup</span>
+      <span class="tc-badge" id="slideTcBadge">00:00</span>
+    </div>
+    <div class="slideshow-controls">
+      <div class="nav-btn-group">
+        <button type="button" class="nav-btn" onclick="prevSlide()" title="Keyboard Left Arrow">⬅️ Prev Frame</button>
+        <button type="button" class="nav-btn primary" onclick="toggleAutoPlay()" id="btnAutoPlay">▶️ Auto-Play</button>
+        <button type="button" class="nav-btn" onclick="nextSlide()" title="Keyboard Right Arrow">Next Frame ➡️</button>
+      </div>
+      <div class="scrubber-wrap">
+        <span style="font-size:12px; font-weight:700; color:var(--muted);" id="slideCounter">Frame 1 / {len(manifest_entries)}</span>
+        <input type="range" class="scrubber-slider" min="0" max="{len(manifest_entries)-1}" value="0" id="slideScrubber" oninput="onScrub(this.value)">
+      </div>
+      <div>
+        <button type="button" class="btn" onclick="setViewMode('grid')">✖️ Exit Slide Show</button>
+      </div>
+    </div>
+    <div class="slideshow-body">
+      <div class="ai-pills-row">
+        <button type="button" class="ai-quick-btn" id="btnSlideConv" onclick="applySlideSuggestion('conv')">
+          🔥 AI Conversational
+        </button>
+        <button type="button" class="ai-quick-btn" id="btnSlidePunchy" onclick="applySlideSuggestion('punchy')">
+          ⚡ AI Punchy
+        </button>
+        <button type="button" class="ai-quick-btn" id="btnSlideStrat" onclick="applySlideSuggestion('strategic')">
+          🧠 AI Strategic
+        </button>
+      </div>
+      <div>
+        <div class="textbox-label">
+          <span id="slideTakeLabel">✍️ Custom Resonant Take (Second 0):</span>
+          <span style="font-size:11.5px; color:var(--muted);" id="slideWordCount">0 w</span>
+        </div>
+        <textarea class="custom-input" id="slideTakeInput" oninput="onSlideTakeInput()" placeholder="Type your custom resonant voiceover for this frame…"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- Grid Mode Controls -->
+  <div id="gridControlBar" style="background:var(--chip); border:1px solid var(--line); border-radius:10px; padding:16px 20px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
     <div>
       <strong style="font-size:15px; font-weight:800;">1-Second Screen Visual Rewrite Inspector</strong>
-      <div style="font-size:12.5px; color:var(--muted);">Total Seconds Extracted: {len(manifest_entries)} | Edits automatically persist to cookies / localStorage &amp; Azure Blob.</div>
+      <div style="font-size:12.5px; color:var(--muted);">Total Seconds Extracted: {len(manifest_entries)} | Click <b>📽️ Slide Show Mode</b> for full-screen stepping with back/forth buttons.</div>
     </div>
     <div>
       <input type="search" id="filterInput" oninput="filterFrames()" placeholder="Filter by scene, second, or script keyword…" style="padding:7px 12px; font:inherit; font-size:12.5px; border-radius:6px; border:1px solid var(--line); background:var(--bg); color:var(--ink); min-width:260px;">
@@ -426,7 +523,7 @@ header {{ position:sticky; top:0; z-index:50; background:var(--panel); border-bo
         
         html_content += f"""
     <div class="frame-card" data-sec="{e['second']}" data-scene="{e['scene_num']}">
-      <div class="frame-thumb">
+      <div class="frame-thumb" onclick="openSlideAt({e['second']})" style="cursor:pointer;" title="Click to view in Slide Show Mode">
         <img src="screenshots/{e['image_file']}" alt="Second {e['second']}" loading="lazy">
         <span class="stage-badge">Scene {e['scene_num']} · {e['scene_name']}</span>
         <span class="tc-badge">{e['timecode']}</span>
@@ -454,7 +551,7 @@ header {{ position:sticky; top:0; z-index:50; background:var(--panel); border-bo
     </div>
 """
 
-    html_content += """
+    html_content += f"""
   </div>
 
   <!-- Bottom Final Voiceover Assembly & Generator Panel -->
@@ -482,49 +579,222 @@ header {{ position:sticky; top:0; z-index:50; background:var(--panel); border-bo
 <div id="toast" class="toast"></div>
 
 <script>
+const MANIFEST_DATA = {manifest_json_str};
 const STORAGE_PREFIX = "aug_vo_take_";
+let currentSlideIndex = 0;
+let autoPlayTimer = null;
 let debounceTimer = null;
 
 // Initialize on page load
-window.addEventListener("DOMContentLoaded", () => {
+window.addEventListener("DOMContentLoaded", () => {{
   loadSavedTakes();
   buildFinalVoiceover();
   updateLiveMetrics();
-});
+  setupKeyboardNav();
+}});
+
+function setViewMode(mode){{
+  const gridEl = document.getElementById('grid');
+  const gridBar = document.getElementById('gridControlBar');
+  const slidePanel = document.getElementById('slideshowPanel');
+  const btnGrid = document.getElementById('btnGridView');
+  const btnSlide = document.getElementById('btnSlideView');
+  
+  if(mode === 'slideshow'){{
+    gridEl.style.display = 'none';
+    gridBar.style.display = 'none';
+    slidePanel.style.display = 'flex';
+    btnGrid.classList.remove('active');
+    btnSlide.classList.add('active');
+    renderCurrentSlide();
+    slidePanel.scrollIntoView({{ behavior: 'smooth' }});
+  }} else {{
+    stopAutoPlay();
+    gridEl.style.display = 'grid';
+    gridBar.style.display = 'flex';
+    slidePanel.style.display = 'none';
+    btnGrid.classList.add('active');
+    btnSlide.classList.remove('active');
+  }}
+}}
+
+function openSlideAt(second){{
+  const idx = MANIFEST_DATA.findIndex(e => e.second === second);
+  if(idx !== -1){{
+    currentSlideIndex = idx;
+  }}
+  setViewMode('slideshow');
+}}
+
+function renderCurrentSlide(){{
+  const item = MANIFEST_DATA[currentSlideIndex];
+  if(!item) return;
+  
+  document.getElementById('slideImg').src = 'screenshots/' + item.image_file;
+  document.getElementById('slideStageBadge').textContent = 'Scene ' + item.scene_num + ' · ' + item.scene_name;
+  document.getElementById('slideTcBadge').textContent = item.timecode;
+  document.getElementById('slideCounter').textContent = 'Frame ' + (currentSlideIndex + 1) + ' / ' + MANIFEST_DATA.length + ' (' + item.timecode + ')';
+  document.getElementById('slideScrubber').value = currentSlideIndex;
+  
+  document.getElementById('slideTakeLabel').textContent = '✍️ Custom Resonant Take (Second ' + item.second + '):';
+  
+  // Read value from grid textarea or localStorage
+  const gridTa = document.getElementById('take_' + item.second);
+  const val = gridTa ? gridTa.value : (localStorage.getItem(STORAGE_PREFIX + item.second) || item.base_vo);
+  const slideTa = document.getElementById('slideTakeInput');
+  slideTa.value = val;
+  updateSlideWordCount(val);
+}}
+
+function onSlideTakeInput(){{
+  const item = MANIFEST_DATA[currentSlideIndex];
+  if(!item) return;
+  const val = document.getElementById('slideTakeInput').value;
+  
+  // Sync to grid input
+  const gridTa = document.getElementById('take_' + item.second);
+  if(gridTa) gridTa.value = val;
+  
+  // Save to localStorage
+  try{{ localStorage.setItem(STORAGE_PREFIX + item.second, val); }}catch(e){{}}
+  
+  updateSlideWordCount(val);
+  updateCardWordCount(item.second, val);
+  
+  clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(() => {{
+    updateLiveMetrics();
+    buildFinalVoiceover();
+    saveToAzure(false);
+  }}, 400);
+}}
+
+function applySlideSuggestion(type){{
+  const item = MANIFEST_DATA[currentSlideIndex];
+  if(!item) return;
+  let text = item.ai_conversational;
+  if(type === 'punchy') text = item.ai_punchy;
+  if(type === 'strategic') text = item.ai_strategic;
+  
+  document.getElementById('slideTakeInput').value = text;
+  onSlideTakeInput();
+  showToast('Applied ' + type + ' take for Second ' + item.second + '!');
+}}
+
+function updateSlideWordCount(text){{
+  const words = text.trim() ? text.trim().split(/\\s+/).length : 0;
+  document.getElementById('slideWordCount').textContent = words + ' w';
+}}
+
+function prevSlide(){{
+  if(currentSlideIndex > 0){{
+    currentSlideIndex--;
+    renderCurrentSlide();
+  }} else {{
+    showToast("Beginning of video frames.");
+  }}
+}}
+
+function nextSlide(){{
+  if(currentSlideIndex < MANIFEST_DATA.length - 1){{
+    currentSlideIndex++;
+    renderCurrentSlide();
+  }} else {{
+    stopAutoPlay();
+    showToast("Reached end of video frames.");
+  }}
+}}
+
+function onScrub(val){{
+  currentSlideIndex = parseInt(val, 10);
+  renderCurrentSlide();
+}}
+
+function toggleAutoPlay(){{
+  if(autoPlayTimer){{
+    stopAutoPlay();
+  }} else {{
+    startAutoPlay();
+  }}
+}}
+
+function startAutoPlay(){{
+  const btn = document.getElementById('btnAutoPlay');
+  btn.textContent = "⏸️ Pause";
+  btn.style.background = "var(--accent)";
+  autoPlayTimer = setInterval(() => {{
+    if(currentSlideIndex < MANIFEST_DATA.length - 1){{
+      nextSlide();
+    }} else {{
+      stopAutoPlay();
+    }}
+  }}, 1000);
+}}
+
+function stopAutoPlay(){{
+  if(autoPlayTimer){{
+    clearInterval(autoPlayTimer);
+    autoPlayTimer = null;
+    const btn = document.getElementById('btnAutoPlay');
+    if(btn){{
+      btn.textContent = "▶️ Auto-Play";
+      btn.style.background = "var(--accent2)";
+    }}
+  }}
+}}
+
+// Keyboard Navigation Handler
+function setupKeyboardNav(){{
+  window.addEventListener('keydown', (e) => {{
+    const activeEl = document.activeElement;
+    const isTyping = activeEl && (activeEl.tagName === 'TEXTAREA' || activeEl.tagName === 'INPUT');
+    
+    // In Slideshow mode, Left/Right arrow keys navigate if not typing
+    if(document.getElementById('slideshowPanel').style.display === 'flex'){{
+      if(e.key === 'ArrowLeft' && !isTyping){{
+        e.preventDefault();
+        prevSlide();
+      }} else if((e.key === 'ArrowRight' || e.key === ' ') && !isTyping){{
+        e.preventDefault();
+        nextSlide();
+      }} else if(e.key === 'Escape'){{
+        setViewMode('grid');
+      }}
+    }}
+  }});
+}}
 
 // Load takes from localStorage/cookie
-function loadSavedTakes(){
-  document.querySelectorAll('.custom-input').forEach(ta => {
+function loadSavedTakes(){{
+  document.querySelectorAll('.custom-input').forEach(ta => {{
     const sec = ta.id.replace('take_', '');
     const saved = localStorage.getItem(STORAGE_PREFIX + sec);
-    if(saved !== null){
+    if(saved !== null){{
       ta.value = saved;
-    }
-  });
-}
+    }}
+  }});
+}}
 
-// On take input change
-function onTakeInput(sec){
+// On take input change in Grid Mode
+function onTakeInput(sec){{
   const ta = document.getElementById('take_' + sec);
   if(!ta) return;
   const val = ta.value;
   
   // Save to localStorage
-  try{ localStorage.setItem(STORAGE_PREFIX + sec, val); }catch(e){}
+  try{{ localStorage.setItem(STORAGE_PREFIX + sec, val); }}catch(e){{}}
   
-  // Update card word count
   updateCardWordCount(sec, val);
   
-  // Debounce metrics and Azure sync
   clearTimeout(debounceTimer);
-  debounceTimer = setTimeout(() => {
+  debounceTimer = setTimeout(() => {{
     updateLiveMetrics();
     buildFinalVoiceover();
     saveToAzure(false);
-  }, 400);
-}
+  }}, 400);
+}}
 
-function applySuggestion(sec, text, btn){
+function applySuggestion(sec, text, btn){{
   const ta = document.getElementById('take_' + sec);
   if(!ta) return;
   ta.value = text;
@@ -533,122 +803,120 @@ function applySuggestion(sec, text, btn){
   const parent = btn.closest('.ai-pills-row');
   parent.querySelectorAll('.ai-quick-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-  showToast(`Applied suggestion for Second ${sec}!`);
-}
+  showToast('Applied suggestion for Second ' + sec + '!');
+}}
 
-function updateCardWordCount(sec, text){
+function updateCardWordCount(sec, text){{
   const el = document.getElementById('wc_take_' + sec);
-  if(el){
+  if(el){{
     const words = text.trim() ? text.trim().split(/\\s+/).length : 0;
     el.textContent = words + ' w';
-  }
-}
+  }}
+}}
 
 // Calculate live script metrics
-function updateLiveMetrics(){
+function updateLiveMetrics(){{
   const uniqueTakes = getCleanSequentialTakes();
   const fullText = uniqueTakes.map(t => t.text).join(' ');
   const wordCount = fullText.trim() ? fullText.trim().split(/\\s+/).length : 0;
   
-  // Estimated audio duration at 150 WPM (2.5 words/sec)
   const estSeconds = Math.round((wordCount / 150) * 60);
   const estMin = Math.floor(estSeconds / 60);
   const estSec = estSeconds % 60;
-  const estFormatted = `${estMin}:${estSec.toString().padStart(2, '0')}`;
+  const estFormatted = estMin + ':' + estSec.toString().padStart(2, '0');
   
   document.getElementById('metricWordCount').textContent = wordCount + ' words';
   document.getElementById('metricAudioDuration').textContent = estFormatted;
   
-  // Pacing status against 200s video
   const videoSec = 200;
   const pacingEl = document.getElementById('metricPacingStatus');
   const delta = videoSec - estSeconds;
-  if(delta >= 0 && delta <= 30){
-    pacingEl.innerHTML = `<span>🎯 Pacing:</span> <span style="color:#27ae60;font-weight:750;">Perfect (${delta}s breathing room)</span>`;
-  } else if(delta > 30){
-    pacingEl.innerHTML = `<span>🎯 Pacing:</span> <span style="color:var(--cyan);font-weight:750;">Fast / Spacious (+${delta}s margin)</span>`;
-  } else {
-    pacingEl.innerHTML = `<span>🎯 Pacing:</span> <span style="color:var(--accent);font-weight:750;">Over-Length (${Math.abs(delta)}s too long)</span>`;
-  }
-}
+  if(delta >= 0 && delta <= 30){{
+    pacingEl.innerHTML = '<span>🎯 Pacing:</span> <span style="color:#27ae60;font-weight:750;">Perfect (' + delta + 's breathing room)</span>';
+  }} else if(delta > 30){{
+    pacingEl.innerHTML = '<span>🎯 Pacing:</span> <span style="color:var(--cyan);font-weight:750;">Fast / Spacious (+' + delta + 's margin)</span>';
+  }} else {{
+    pacingEl.innerHTML = '<span>🎯 Pacing:</span> <span style="color:var(--accent);font-weight:750;">Over-Length (' + Math.abs(delta) + 's too long)</span>';
+  }}
+}}
 
 // Get deduplicated sequential takes grouped logically
-function getCleanSequentialTakes(){
+function getCleanSequentialTakes(){{
   const takes = [];
   let lastText = "";
   
-  document.querySelectorAll('.custom-input').forEach(ta => {
+  document.querySelectorAll('.inspector-grid .custom-input').forEach(ta => {{
     const sec = parseInt(ta.id.replace('take_', ''), 10);
     const card = ta.closest('.frame-card');
     const scene = card ? card.getAttribute('data-scene') : "1";
     const text = ta.value.trim();
     
-    if(text && text !== lastText){
-      takes.push({ second: sec, scene: scene, text: text });
+    if(text && text !== lastText){{
+      takes.push({{ second: sec, scene: scene, text: text }});
       lastText = text;
-    }
-  });
+    }}
+  }});
   return takes;
-}
+}}
 
 // Build Final Assembled Voiceover Text
-function buildFinalVoiceover(showFeedback = false){
+function buildFinalVoiceover(showFeedback = false){{
   const takes = getCleanSequentialTakes();
-  const scenesMap = {
+  const scenesMap = {{
     "1": "Scene 1 · Hook & Problem Setup",
     "2": "Scene 2 · The Realization Moment",
     "3": "Scene 3 · P.A.R.A. Method Framework",
     "4": "Scene 4 · The Engine: Dual-Agent System",
     "5": "Scene 5 · The 4-Step Workflow",
     "6": "Scene 6 · Call to Action & Closing"
-  };
+  }};
   
   let md = "# 🎙️ Master Voiceover Script — WIG Animation\\n";
-  md += `> Assembled from 1-second frame rewrite workbench | Total Words: ${document.getElementById('metricWordCount').textContent}\\n\\n`;
+  md += '> Assembled from 1-second frame rewrite workbench | Total Words: ' + document.getElementById('metricWordCount').textContent + '\\n\\n';
   
   let currentScene = null;
-  takes.forEach(t => {
-    if(t.scene !== currentScene){
+  takes.forEach(t => {{
+    if(t.scene !== currentScene){{
       currentScene = t.scene;
-      const sName = scenesMap[currentScene] || `Scene ${currentScene}`;
-      md += `\\n### 🎬 ${sName}\\n`;
-    }
+      const sName = scenesMap[currentScene] || ('Scene ' + currentScene);
+      md += '\\n### 🎬 ' + sName + '\\n';
+    }}
     const mm = Math.floor(t.second / 60);
     const ss = t.second % 60;
-    const tc = `${mm.toString().padStart(2, '0')}:${ss.toString().padStart(2, '0')}`;
-    md += `\\n**[${tc}]** ${t.text}\\n`;
-  });
+    const tc = mm.toString().padStart(2, '0') + ':' + ss.toString().padStart(2, '0');
+    md += '\\n**[' + tc + ']** ' + t.text + '\\n';
+  }});
   
   const outArea = document.getElementById('finalVoiceoverOutput');
-  if(outArea){
+  if(outArea){{
     outArea.value = md;
-  }
-  if(showFeedback){
+  }}
+  if(showFeedback){{
     showToast("🔄 Final voiceover script re-assembled!");
-  }
-}
+  }}
+}}
 
 // Copy script to clipboard
-function copyFinalScript(){
+function copyFinalScript(){{
   const outArea = document.getElementById('finalVoiceoverOutput');
   if(!outArea) return;
-  navigator.clipboard.writeText(outArea.value).then(() => {
+  navigator.clipboard.writeText(outArea.value).then(() => {{
     showToast("📋 Copied Master Voiceover Script to clipboard!");
-  });
-}
+  }});
+}}
 
-function scrollToFinalVO(){
+function scrollToFinalVO(){{
   const panel = document.getElementById('finalVoPanel');
-  if(panel){
-    panel.scrollIntoView({ behavior: 'smooth' });
+  if(panel){{
+    panel.scrollIntoView({{ behavior: 'smooth' }});
     buildFinalVoiceover(true);
-  }
-}
+  }}
+}}
 
 // Download as markdown
-function downloadScript(){
+function downloadScript(){{
   const text = document.getElementById('finalVoiceoverOutput').value;
-  const blob = new Blob([text], { type: 'text/markdown;charset=utf-8' });
+  const blob = new Blob([text], {{ type: 'text/markdown;charset=utf-8' }});
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   a.download = "master_voiceover_script.md";
@@ -656,63 +924,63 @@ function downloadScript(){
   a.click();
   document.body.removeChild(a);
   showToast("📥 Downloaded master_voiceover_script.md");
-}
+}}
 
 // Save to Azure Blob Storage
-async function saveToAzure(manual = false){
+async function saveToAzure(manual = false){{
   const stat = document.getElementById('azureStat');
   if(stat) stat.textContent = "☁️ Saving to Azure…";
   
-  const customTakes = {};
-  document.querySelectorAll('.custom-input').forEach(ta => {
+  const customTakes = {{}};
+  document.querySelectorAll('.inspector-grid .custom-input').forEach(ta => {{
     const sec = ta.id.replace('take_', '');
     customTakes[sec] = ta.value;
-  });
+  }});
   
-  const payload = {
-    state: {
+  const payload = {{
+    state: {{
       voiceoverCustomTakes: customTakes,
       finalVoiceoverScript: document.getElementById('finalVoiceoverOutput')?.value || "",
       savedAt: new Date().toISOString()
-    },
+    }},
     backup: false
-  };
+  }};
   
-  try {
-    const res = await fetch("/api/state", {
+  try {{
+    const res = await fetch("/api/state", {{
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {{ "Content-Type": "application/json" }},
       body: JSON.stringify(payload)
-    });
-    if(res.ok){
+    }});
+    if(res.ok){{
       const timeStr = new Date().toLocaleTimeString();
-      if(stat) stat.textContent = `☁️ Saved to Azure · ${timeStr}`;
-      if(manual) showToast(`☁️ Voiceover saved to Azure at ${timeStr}`);
-    } else {
+      if(stat) stat.textContent = '☁️ Saved to Azure · ' + timeStr;
+      if(manual) showToast('☁️ Voiceover saved to Azure at ' + timeStr);
+    }} else {{
       if(stat) stat.textContent = "☁️ Local (Offline)";
-    }
-  } catch(err){
+    }}
+  }} catch(err){{
     if(stat) stat.textContent = "☁️ Local (Saved)";
-  }
-}
+  }}
+}}
 
 // Filter cards by search query
-function filterFrames(){
+function filterFrames(){{
   const q = document.getElementById('filterInput').value.toLowerCase().trim();
-  document.querySelectorAll('.frame-card').forEach(card => {
+  document.querySelectorAll('.frame-card').forEach(card => {{
     const text = card.textContent.toLowerCase();
     card.style.display = (!q || text.includes(q)) ? "flex" : "none";
-  });
-}
+  }});
+}}
 
 let toastTimer;
-function showToast(msg){
+function showToast(msg){{
   const el = document.getElementById('toast');
   el.textContent = msg;
   el.classList.add('show');
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => el.classList.remove('show'), 2400);
-}
+}}
 </script>
 </body>
 </html>
