@@ -583,15 +583,49 @@ const MANIFEST_DATA = {manifest_json_str};
 const STORAGE_PREFIX = "aug_vo_take_";
 let currentSlideIndex = 0;
 let autoPlayTimer = null;
-let debounceTimer = null;
-
 // Initialize on page load
-window.addEventListener("DOMContentLoaded", () => {{
-  loadSavedTakes();
-  buildFinalVoiceover();
-  updateLiveMetrics();
+window.addEventListener("DOMContentLoaded", async () => {{
   setupKeyboardNav();
+  await loadTakes();
 }});
+
+async function loadTakes(){{
+  // 1. Load from localStorage first for instant paint
+  loadSavedTakes();
+  updateLiveMetrics();
+  buildFinalVoiceover();
+
+  // 2. Fetch latest synced state from Azure Blob Storage (/api/state)
+  try {{
+    const res = await fetch("/api/state", {{ cache: "no-store" }});
+    if(res.ok){{
+      const data = await res.json();
+      if(data && data.ok && data.state && data.state.voiceoverCustomTakes){{
+        const takes = data.state.voiceoverCustomTakes;
+        let loadedCount = 0;
+        Object.keys(takes).forEach(sec => {{
+          const ta = document.getElementById('take_' + sec);
+          if(ta && takes[sec]){{
+            ta.value = takes[sec];
+            try {{ localStorage.setItem(STORAGE_PREFIX + sec, takes[sec]); }}catch(e){{}}
+            loadedCount++;
+          }}
+        }});
+        const stat = document.getElementById('azureStat');
+        if(stat) stat.textContent = "☁️ Azure Synced";
+        updateLiveMetrics();
+        buildFinalVoiceover();
+        if(loadedCount > 0){{
+          showToast('Loaded ' + loadedCount + ' takes from Azure Blob');
+        }}
+      }}
+    }}
+  }} catch(e){{
+    // Running on static GitHub Pages or offline
+    const stat = document.getElementById('azureStat');
+    if(stat) stat.textContent = "💾 Local Storage";
+  }}
+}}
 
 function setViewMode(mode){{
   const gridEl = document.getElementById('grid');
