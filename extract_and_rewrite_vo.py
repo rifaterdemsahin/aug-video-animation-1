@@ -530,13 +530,13 @@ header {{ position:sticky; top:0; z-index:50; background:var(--panel); border-bo
       </div>
       <div class="frame-body">
         <div class="ai-pills-row">
-          <button type="button" class="ai-quick-btn" onclick="applySuggestion({e['second']}, `{escaped_conv}`, this)" title="Click to fill conversational take">
+          <button type="button" class="ai-quick-btn" tabindex="-1" onclick="applySuggestion({e['second']}, `{escaped_conv}`, this)" title="Click to fill conversational take">
             🔥 AI Conversational
           </button>
-          <button type="button" class="ai-quick-btn" onclick="applySuggestion({e['second']}, `{escaped_punchy}`, this)" title="Click to fill punchy take">
+          <button type="button" class="ai-quick-btn" tabindex="-1" onclick="applySuggestion({e['second']}, `{escaped_punchy}`, this)" title="Click to fill punchy take">
             ⚡ AI Punchy
           </button>
-          <button type="button" class="ai-quick-btn" onclick="applySuggestion({e['second']}, `{escaped_strategic}`, this)" title="Click to fill strategic take">
+          <button type="button" class="ai-quick-btn" tabindex="-1" onclick="applySuggestion({e['second']}, `{escaped_strategic}`, this)" title="Click to fill strategic take">
             🧠 AI Strategic
           </button>
         </div>
@@ -748,6 +748,29 @@ function setupKeyboardNav(){{
   window.addEventListener('keydown', (e) => {{
     const activeEl = document.activeElement;
     const isTyping = activeEl && (activeEl.tagName === 'TEXTAREA' || activeEl.tagName === 'INPUT');
+    
+    // Tab and Shift+Tab navigation exclusively across textboxes in Grid View
+    if(e.key === 'Tab'){{
+      if(activeEl && activeEl.classList.contains('custom-input') && activeEl.id.startsWith('take_')){{
+        e.preventDefault();
+        const allInputs = Array.from(document.querySelectorAll('.inspector-grid .custom-input'));
+        const currentIndex = allInputs.indexOf(activeEl);
+        
+        let targetIndex = e.shiftKey ? currentIndex - 1 : currentIndex + 1;
+        if(targetIndex >= 0 && targetIndex < allInputs.length){{
+          const targetInput = allInputs[targetIndex];
+          targetInput.focus();
+          targetInput.select();
+          const card = targetInput.closest('.frame-card');
+          if(card){{
+            card.scrollIntoView({{ behavior: 'smooth', block: 'nearest' }});
+          }}
+          const sec = targetInput.id.replace('take_', '');
+          showToast('Focused Second ' + sec + ' textbox');
+        }}
+        return;
+      }}
+    }}
     
     // In Slideshow mode, Left/Right arrow keys navigate if not typing
     if(document.getElementById('slideshowPanel').style.display === 'flex'){{
