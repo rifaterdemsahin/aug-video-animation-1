@@ -1319,26 +1319,47 @@ footer{
       <button class="btn-copy-cmd" onclick="copySnippet('python3 extract_and_rewrite_vo.py')">Copy Command</button>
     </div>
 
-    <!-- The 3 Words / Second Rhythm Rule -->
+    <!-- The 3 Words / Second Rhythm Rule & Tab-Flow Velocity -->
     <div class="cadence-box">
       <div class="cadence-title">
-        <span>⏱️</span> The "3 Words a Second" Visual Rhythm Rule
+        <span>⏱️</span> The 6-Scene Storyboard &amp; Tab-Key Flow ("Writing at Erdem's Speed")
       </div>
-      <div style="font-size:13px; color:var(--ink); line-height:1.45;">
-        In <a href="3_Simulation/rawexport/voiceover_inspector.html" target="_blank" rel="noopener noreferrer" style="color:var(--cyan);font-weight:700;">VO Inspector</a>, we step second-by-second across the 200 frame screenshots and calibrate our voiceover script at an exact pace of <b>~2.5 to 3 words per second (150–180 WPM)</b>.
+      <div style="font-size:13px; color:var(--ink); line-height:1.5;">
+        In <a href="3_Simulation/rawexport/voiceover_inspector.html" target="_blank" rel="noopener noreferrer" style="color:var(--cyan);font-weight:700;">VO Inspector</a>, pairing the <b>6 narrative storyboard blocks</b> with <b>rapid <code>[Tab]</code> key textbox navigation</b> unlocked an unbroken creative flow state—what we call <i>"Writing at Erdem's Speed"</i>.
       </div>
-      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:10px; margin-top:8px;">
-        <div style="background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:8px 12px; font-size:12px;">
-          <strong style="color:var(--gold);">1 Sec Screen Time:</strong> ~3 words<br>
-          <span style="color:var(--muted); font-size:11px;">e.g. <i>"No more chaos."</i></span>
+
+      <!-- Erdem Speed Flow Steps -->
+      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:10px; margin-top:10px;">
+        <div style="background:var(--panel); border:1px solid var(--line); border-left:3px solid var(--gold); border-radius:6px; padding:10px 12px; font-size:12px;">
+          <strong style="color:var(--gold); display:flex; align-items:center; gap:5px;"><span>⌨️</span> 1. Rapid Tab Traversal</strong>
+          <span style="color:var(--muted); font-size:11.5px; display:block; margin-top:3px; line-height:1.4;">
+            Hitting <code>Tab</code> inside any textbox auto-scrolls to the next second, selects the text, and bypasses all AI buttons for zero mouse latency.
+          </span>
         </div>
-        <div style="background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:8px 12px; font-size:12px;">
-          <strong style="color:var(--gold);">2 Secs Screen Time:</strong> ~5–6 words<br>
-          <span style="color:var(--muted); font-size:11px;">e.g. <i>"I built an AI-native brain."</i></span>
+        <div style="background:var(--panel); border:1px solid var(--line); border-left:3px solid var(--cyan); border-radius:6px; padding:10px 12px; font-size:12px;">
+          <strong style="color:var(--cyan); display:flex; align-items:center; gap:5px;"><span>🗣️</span> 2. Natural 3 Words/Sec Tempo</strong>
+          <span style="color:var(--muted); font-size:11.5px; display:block; margin-top:3px; line-height:1.4;">
+            Typing at natural spoken cadence (~2.5–3 words/second) prevents over-intellectualizing and synchronizes perfectly with on-screen visual cuts.
+          </span>
         </div>
-        <div style="background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:8px 12px; font-size:12px;">
-          <strong style="color:var(--gold);">4 Secs Screen Time:</strong> ~10–12 words<br>
-          <span style="color:var(--muted); font-size:11px;">e.g. <i>"AI agents query and update my entire knowledge base."</i></span>
+        <div style="background:var(--panel); border:1px solid var(--line); border-left:3px solid var(--accent3); border-radius:6px; padding:10px 12px; font-size:12px;">
+          <strong style="color:var(--accent3); display:flex; align-items:center; gap:5px;"><span>🗂️</span> 3. 6 Storyboard Anchors</strong>
+          <span style="color:var(--muted); font-size:11.5px; display:block; margin-top:3px; line-height:1.4;">
+            Scene 1 to Scene 6 stage badges keep narrative intent locked, while live audio timers calculate total margin against the 200s video length.
+          </span>
+        </div>
+      </div>
+
+      <!-- Quick Cadence Reference Cards -->
+      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:8px; margin-top:10px;">
+        <div style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.08); border-radius:6px; padding:6px 10px; font-size:11.5px;">
+          <strong style="color:var(--gold);">1 Sec Frame:</strong> ~3 words <span style="color:var(--muted);">(<i>"No more chaos."</i>)</span>
+        </div>
+        <div style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.08); border-radius:6px; padding:6px 10px; font-size:11.5px;">
+          <strong style="color:var(--gold);">2 Secs Frame:</strong> ~5–6 words <span style="color:var(--muted);">(<i>"I built an AI-native brain."</i>)</span>
+        </div>
+        <div style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.08); border-radius:6px; padding:6px 10px; font-size:11.5px;">
+          <strong style="color:var(--gold);">4 Secs Frame:</strong> ~10–12 words <span style="color:var(--muted);">(<i>"AI agents query and update my knowledge base."</i>)</span>
         </div>
       </div>
     </div>
