@@ -477,6 +477,7 @@ header {{ position:sticky; top:0; z-index:50; background:var(--panel); border-bo
       <a href="voiceover_inspector.html" class="nav-item active"><span>🎙️</span> VO Inspector</a>
       <a href="https://canva.link/p4u3nwvsmio19jp" class="nav-item" target="_blank" rel="noopener noreferrer" style="color:var(--purple,#af52de);" title="Canva Implementation Deck"><span>🎨</span> Implementation ↗</a>
     </nav>
+    <button class="btn purple" onclick="openAIVoiceoverModal()" style="background:linear-gradient(135deg, #8e44ad, #6366f1); border-color:#8e44ad; color:#fff; font-weight:800; box-shadow:0 2px 10px rgba(142,68,173,0.35);">✨ AI Voiceover (Gemini)</button>
     <button class="btn primary" onclick="scrollToFinalVO()">📋 Generate Final Voiceover</button>
     <button class="btn success" onclick="downloadHTMLDoc()" title="Save all changes and download updated voiceover_inspector.html">💾 Save &amp; Download HTML</button>
     <button class="btn blue" onclick="downloadPlainTextVO()" title="Download spoken voiceover audio text only (.txt)">🎙️ Download Voiceover</button>
@@ -489,6 +490,110 @@ header {{ position:sticky; top:0; z-index:50; background:var(--panel); border-bo
 <!-- Sticky Stats & Word Count Bar -->
 <div class="sticky-stats-bar">
   <div class="stats-bar-inner">
+    <div style="display:flex; flex-wrap:wrap; align-items:center; gap:8px;">
+      <div class="view-switch">
+        <button type="button" class="view-btn active" id="btnGridView" onclick="setViewMode('grid')">📱 Grid View</button>
+        <button type="button" class="view-btn" id="btnSlideView" onclick="setViewMode('slideshow')">📽️ Slide Show Mode</button>
+      </div>
+      <div class="metric-pill"><span>📝 Word Count:</span> <span class="metric-val" id="metricWordCount">0 words</span></div>
+      <div class="metric-pill"><span>⏱️ Estimated Audio:</span> <span class="metric-val" id="metricAudioDuration">0:00</span> <small style="color:var(--muted);">(150 WPM)</small></div>
+      <div class="metric-pill"><span>🎞️ Video Length:</span> <span class="metric-val" id="metricVideoLength">{format_tc(int(duration))} ({int(duration)}s)</span></div>
+      <div class="metric-pill" id="metricPacingStatus"><span>🎯 Pacing:</span> <span style="color:#27ae60;font-weight:750;">Calculating...</span></div>
+    </div>
+    <div style="display:flex; align-items:center; gap:8px;">
+      <div class="azure-pill" id="azureStat">☁️ Azure Synced</div>
+      <button class="btn purple" onclick="openAIVoiceoverModal()" style="background:linear-gradient(135deg, #8e44ad, #6366f1); border-color:#8e44ad; color:#fff; font-weight:800;">✨ AI Voiceover (Gemini)</button>
+      <button class="btn" onclick="saveToAzure(true)">☁️ Save to Azure</button>
+      <button class="btn success" onclick="downloadHTMLDoc()" title="Download current HTML page with all edits baked in">📥 Download HTML</button>
+      <button class="btn blue" onclick="downloadPlainTextVO()" title="Download spoken plain text voiceover only (.txt)">🎙️ Download Voiceover</button>
+      <button class="btn" onclick="downloadAzureVoiceoverTxt()" title="Download synced Azure Blob object containing voiceover as a text file">☁️ Download Azure VO</button>
+      <button class="btn" onclick="downloadAsPDF()" title="Download storyboard as PDF (Image + Voice + Voiceover)">📄 Download PDF</button>
+    </div>
+  </div>
+</div>
+
+<!-- AI Voiceover Studio Modal Popup -->
+<div id="aiVoiceoverModal" class="ai-modal-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); backdrop-filter:blur(6px); z-index:9999; align-items:center; justify-content:center; padding:16px;">
+  <div class="ai-modal-content" style="background:var(--panel); border:1px solid var(--line); border-radius:16px; max-width:860px; width:100%; max-height:90vh; overflow-y:auto; padding:28px; box-shadow:0 20px 50px rgba(0,0,0,0.5); display:flex; flex-direction:column; gap:18px;">
+    
+    <!-- Modal Header -->
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; border-bottom:1px solid var(--line); padding-bottom:14px;">
+      <div>
+        <div style="display:inline-flex; align-items:center; gap:6px; background:rgba(142,68,173,0.15); color:var(--purple); padding:4px 10px; border-radius:999px; font-size:11.5px; font-weight:750; margin-bottom:6px;">
+          <span>⚡</span> Powered by Google Gemini &amp; Azure Key Vault
+        </div>
+        <h2 style="margin:0; font-size:22px; font-weight:850; display:flex; align-items:center; gap:8px;">
+          <span>✨</span> Gemini AI Voiceover Studio
+        </h2>
+        <p style="margin:4px 0 0; color:var(--muted); font-size:13px;">
+          Generates a synchronized 200-second voiceover script using keys from Azure Key Vault (<code>dp-kv-deliverypilot</code>).
+        </p>
+      </div>
+      <button type="button" class="btn" onclick="closeAIVoiceoverModal()" style="font-size:16px; padding:4px 10px;">✖</button>
+    </div>
+
+    <!-- 3 Target Parameter Cards -->
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:12px;">
+      <div style="background:var(--chip); border:1px solid var(--line); border-left:4px solid var(--purple); border-radius:10px; padding:12px 14px;">
+        <div style="font-size:11px; color:var(--muted); text-transform:uppercase; font-weight:750;">Persona &amp; Tone</div>
+        <div style="font-size:13.5px; font-weight:800; color:var(--ink); margin-top:2px;">Erdem's Booming Resonance</div>
+        <div style="font-size:11.5px; color:var(--muted); margin-top:2px;">Ali Abdaal 3-Act Retention</div>
+      </div>
+      <div style="background:var(--chip); border:1px solid var(--line); border-left:4px solid var(--cyan); border-radius:10px; padding:12px 14px;">
+        <div style="font-size:11px; color:var(--muted); text-transform:uppercase; font-weight:750;">Pacing Target</div>
+        <div style="font-size:13.5px; font-weight:800; color:var(--ink); margin-top:2px;">3 Words / Second</div>
+        <div style="font-size:11.5px; color:var(--muted); margin-top:2px;">~150 Spoken Words Per Minute</div>
+      </div>
+      <div style="background:var(--chip); border:1px solid var(--line); border-left:4px solid var(--accent3); border-radius:10px; padding:12px 14px;">
+        <div style="font-size:11px; color:var(--muted); text-transform:uppercase; font-weight:750;">Timeline Scope</div>
+        <div style="font-size:13.5px; font-weight:800; color:var(--ink); margin-top:2px;">200s (03:20 Total)</div>
+        <div style="font-size:11.5px; color:var(--muted); margin-top:2px;">Full Coverage (Scenes 1 &rarr; 6)</div>
+      </div>
+    </div>
+
+    <!-- Prompt & Context Inspector -->
+    <div>
+      <label style="font-size:12.5px; font-weight:750; color:var(--ink); display:block; margin-bottom:6px;">
+        📝 Custom Prompt &amp; Narrative Directives:
+      </label>
+      <textarea id="aiPromptInput" style="width:100%; background:var(--bg); border:1px solid var(--line); border-radius:8px; color:var(--ink); font-size:12.5px; padding:10px 12px; height:90px; resize:vertical; line-height:1.45;">Generate the master 200-second voiceover script for Rifat Erdem Sahin covering:
+- Scene 1 [00:00 - 00:18]: Drowning in 46,000 Obsidian notes.
+- Scene 2 [00:19 - 00:48]: The breakthrough: AI Knowledge Engine running background synthesis.
+- Scene 3 [00:49 - 01:24]: P.A.R.A. Framework (Projects, Areas, Resources, Archive).
+- Scene 4 [01:25 - 01:58]: Dual-Agent Orchestration (Gemini + Claude syncing GitHub/Drive/Proxmox).
+- Scene 5 [01:59 - 02:32]: The 4-Step Conveyor Loop: Tell -> Show -> Do -> Apply.
+- Scene 6 [02:33 - 03:20]: Resolution: Second brain awakening + Free Sunday live cohort build CTA.</textarea>
+    </div>
+
+    <!-- Generated Output Preview Area -->
+    <div>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+        <label style="font-size:12.5px; font-weight:750; color:var(--ink);">
+          ⚡ AI Generated Script Preview:
+        </label>
+        <span id="aiGenStatus" style="font-size:11.5px; color:var(--muted);">Ready to generate</span>
+      </div>
+      <textarea id="aiPreviewOutput" placeholder="Click 'Generate Voiceover with Gemini AI' below to run the AI engine..." style="width:100%; background:var(--bg); border:1px solid var(--line); border-radius:8px; color:var(--cyan); font-family:ui-monospace,SFMono-Regular,Consolas,monospace; font-size:12px; padding:12px; height:180px; resize:vertical; line-height:1.45;"></textarea>
+    </div>
+
+    <!-- Action Footer -->
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; border-top:1px solid var(--line); padding-top:14px;">
+      <div style="font-size:12px; color:var(--muted);">
+        🔑 Uses <code>GEMINI-API-KEY-PRIMARY</code> from Key Vault
+      </div>
+      <div style="display:flex; gap:8px;">
+        <button type="button" class="btn" onclick="closeAIVoiceoverModal()">Cancel</button>
+        <button type="button" class="btn purple" id="btnRunAIGen" onclick="runAIGeneration()" style="background:linear-gradient(135deg, #8e44ad, #6366f1); border-color:#8e44ad; color:#fff; font-weight:800;">
+          🚀 Generate Voiceover with Gemini AI
+        </button>
+        <button type="button" class="btn success" id="btnApplyAIGen" onclick="applyAIGeneratedScript()" style="display:none;">
+          💾 Apply to Voiceover Inspector &amp; Save
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
     <div style="display:flex; flex-wrap:wrap; align-items:center; gap:8px;">
       <div class="view-switch">
         <button type="button" class="view-btn active" id="btnGridView" onclick="setViewMode('grid')">📱 Grid View</button>
@@ -1274,6 +1379,65 @@ function filterFrames(){{
     const text = card.textContent.toLowerCase();
     card.style.display = (!q || text.includes(q)) ? "flex" : "none";
   }});
+}}
+
+// AI Voiceover Modal Controller
+function openAIVoiceoverModal(){{
+  const modal = document.getElementById("aiVoiceoverModal");
+  if(modal) modal.style.display = "flex";
+}}
+
+function closeAIVoiceoverModal(){{
+  const modal = document.getElementById("aiVoiceoverModal");
+  if(modal) modal.style.display = "none";
+}}
+
+async function runAIGeneration(){{
+  const prompt = document.getElementById("aiPromptInput")?.value || "";
+  const statusEl = document.getElementById("aiGenStatus");
+  const outputEl = document.getElementById("aiPreviewOutput");
+  const btnRun = document.getElementById("btnRunAIGen");
+  const btnApply = document.getElementById("btnApplyAIGen");
+
+  if(statusEl) statusEl.textContent = "⏳ Fetching Key Vault secret & running Gemini AI...";
+  if(btnRun){{
+    btnRun.disabled = true;
+    btnRun.textContent = "⚡ Generating with Gemini...";
+  }}
+
+  try {{
+    const res = await fetch("/api/ai/generate-vo", {{
+      method: "POST",
+      headers: {{ "Content-Type": "application/json" }},
+      body: JSON.stringify({{ prompt: prompt, style: "resonant" }}),
+    }});
+    const data = await res.json();
+    if(data.ok && data.script){{
+      if(outputEl) outputEl.value = data.script;
+      if(statusEl) statusEl.textContent = `✅ Generated via ${{data.engine}} (${{data.key_source || "Azure KV"}})`;
+      if(btnApply) btnApply.style.display = "inline-flex";
+    }} else {{
+      if(statusEl) statusEl.textContent = `⚠️ Error: ${{data.error || "Generation failed"}}`;
+    }}
+  }} catch(err){{
+    if(statusEl) statusEl.textContent = `❌ Network Error: ${{err.message}}`;
+  }} finally {{
+    if(btnRun){{
+      btnRun.disabled = false;
+      btnRun.textContent = "🚀 Re-Generate with Gemini AI";
+    }}
+  }}
+}}
+
+async function applyAIGeneratedScript(){{
+  const gen = document.getElementById("aiPreviewOutput")?.value;
+  if(!gen) return;
+  const out = document.getElementById("finalVoiceoverOutput");
+  if(out) out.value = gen;
+  
+  await saveToAzure(true);
+  closeAIVoiceoverModal();
+  showToast("🎉 Gemini AI Voiceover applied & saved to Azure Blob!");
 }}
 
 let toastTimer;

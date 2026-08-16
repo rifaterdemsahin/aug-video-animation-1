@@ -343,7 +343,103 @@ def openrouter_complete(action: str, text: str, model: str | None = None) -> str
     out = (content or "").strip()
     if len(out) >= 2 and ((out[0] == out[-1] == '"') or (out[0] == out[-1] == "'")):
         out = out[1:-1].strip()
-    return out
+_gemini_key_cache: str | None = None
+
+
+def get_gemini_key() -> str:
+    global _gemini_key_cache
+    if _gemini_key_cache:
+        return _gemini_key_cache
+    env_key = (os.environ.get("GEMINI_API_KEY") or "").strip()
+    if env_key:
+        _gemini_key_cache = env_key
+        return env_key
+    # Try Azure Key Vault GEMINI-API-KEY-PRIMARY, then SECONDARY
+    for sec_name in ("GEMINI-API-KEY-PRIMARY", "GEMINI-API-KEY-SECONDARY", "GEMINI_API_KEY"):
+        try:
+            val = kv_secret(sec_name)
+            if val:
+                _gemini_key_cache = val
+                return val
+        except Exception:
+            continue
+    # Fallback to OpenRouter key
+    return get_openrouter_key()
+
+
+def gemini_generate_voiceover(style: str = "resonant", prompt_override: str = "") -> dict[str, Any]:
+    gemini_key = ""
+    try:
+        gemini_key = get_gemini_key()
+    except Exception as exc:
+        pass
+
+    system_prompt = (
+        "You are the world-class voiceover director and scriptwriter for Rifat Erdem Sahin's high-retention animated YouTube video on his AI Second Brain.\n"
+        "Tone: Energetic, authoritative, booming resonance, and educational in Ali Abdaal's structured 3-Act style.\n"
+        "Tempo Constraint: Exactly ~3 words per second (150 WPM). Every sentence must punch clearly with zero filler words.\n"
+        "Total Runtime: Exactly 200 seconds (00:00 to 03:20) mapped across 6 scenes.\n\n"
+        "Return a clean JSON object with a single key 'script' containing the full Markdown script formatted scene-by-scene with timestamps [MM:SS]."
+    )
+
+    user_prompt = prompt_override.strip() or (
+        "Generate the master 200-second voiceover script covering:\n"
+        "Scene 1 [00:00 - 00:18]: Drowning in 46,000 Obsidian notes.\n"
+        "Scene 2 [00:19 - 00:48]: The breakthrough: AI Knowledge Engine running background synthesis.\n"
+        "Scene 3 [00:49 - 01:24]: P.A.R.A. Framework (Projects, Areas, Resources, Archive).\n"
+        "Scene 4 [01:25 - 01:58]: Dual-Agent Orchestration (Gemini + Claude syncing GitHub/Drive/Proxmox).\n"
+        "Scene 5 [01:59 - 02:32]: The 4-Step Conveyor Loop: Tell -> Show -> Do -> Apply.\n"
+        "Scene 6 [02:33 - 03:20]: Resolution: Second brain awakening + Free Sunday live cohort build CTA.\n"
+    )
+
+    # 1. Try Direct Google Gemini API first if key looks like an AIzaSy key
+    if gemini_key and gemini_key.startswith("AIzaSy"):
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={gemini_key}"
+        payload = {
+            "contents": [{"parts": [{"text": f"{system_prompt}\n\n{user_prompt}"}]}],
+            "generationConfig": {"temperature": 0.35, "maxOutputTokens": 3000},
+        }
+        req = urllib.request.Request(
+            url,
+            data=json.dumps(payload).encode("utf-8"),
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=60) as resp:
+                data = json.loads(resp.read().decode("utf-8"))
+                text = data["candidates"][0]["content"]["parts"][0]["text"]
+                return {"ok": True, "script": text, "engine": "gemini-2.5-flash-direct", "key_source": "azure-keyvault"}
+        except Exception as exc:
+            # Fall through to OpenRouter
+            pass
+
+    # 2. OpenRouter fallback with Gemini or GPT-4o
+    openrouter_key = get_openrouter_key()
+    payload = {
+        "model": "google/gemini-2.5-flash" if "google" in DEFAULT_MODEL else DEFAULT_MODEL,
+        "messages": [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt},
+        ],
+        "temperature": 0.4,
+        "max_tokens": 3000,
+    }
+    req = urllib.request.Request(
+        OPENROUTER_URL,
+        data=json.dumps(payload).encode("utf-8"),
+        headers={
+            "Authorization": f"Bearer {openrouter_key}",
+            "Content-Type": "application/json",
+            "HTTP-Referer": "http://localhost:8765/script_guru.html",
+            "X-Title": "WIGAnimation Script Guru",
+        },
+        method="POST",
+    )
+    with urllib.request.urlopen(req, timeout=60) as resp:
+        data = json.loads(resp.read().decode("utf-8"))
+        text = data["choices"][0]["message"]["content"]
+        return {"ok": True, "script": text, "engine": payload["model"], "key_source": "azure-keyvault"}
 
 
 def should_skip_dir(name: str) -> bool:
@@ -565,11 +661,17 @@ class ShotlistHandler(SimpleHTTPRequestHandler):
 
     def do_POST(self):  # noqa: N802
         path = self.path.split("?", 1)[0]
-        if path not in ("/api/text", "/api/vo-edit", "/api/state"):
+        if path not in ("/api/text", "/api/vo-edit", "/api/state", "/api/ai/generate-vo"):
             self.send_error(404, "Not found")
             return
         try:
             body = self._read_json_body()
+            if path == "/api/ai/generate-vo":
+                style = body.get("style", "resonant")
+                prompt = body.get("prompt", "")
+                result = gemini_generate_voiceover(style=style, prompt_override=prompt)
+                self._send_json(200, result)
+                return
             if path == "/api/state":
                 state = body.get("state") if isinstance(body.get("state"), dict) else body
                 if not isinstance(state, dict) or not state:
