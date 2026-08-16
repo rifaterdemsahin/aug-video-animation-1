@@ -638,6 +638,44 @@ header{position:sticky;top:0;z-index:50;background:var(--panel);border-bottom:1p
   line-height:1.4;
 }
 
+/* Canva Uploads & Used Folder Card */
+.canva-upload-panel{
+  background:linear-gradient(135deg, rgba(175,82,222,0.08), rgba(52,199,89,0.08));
+  border:1px solid rgba(175,82,222,0.3);
+  border-radius:14px;
+  padding:24px 28px;
+  margin-bottom:24px;
+  box-shadow:var(--shadow);
+}
+.canva-folder-tree{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));
+  gap:14px;
+  margin-top:16px;
+}
+.folder-card{
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:10px;
+  padding:16px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+.folder-card-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  font-size:13px;
+  font-weight:750;
+  color:var(--ink);
+}
+.folder-card-body{
+  font-size:12.5px;
+  color:var(--muted);
+  line-height:1.4;
+}
+
 
 /* Footer with GitHub Pages */
 footer{
@@ -1021,6 +1059,60 @@ footer{
         <div class="step-title"><span>🎯</span> 4. Slide into Locked Slot</div>
         <div class="step-desc">
           Slide the vetted clip straight into its designated shot number on the main track, or mark it <code>🚫 Out of Scope</code> if it doesn't fit.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Canva Upload Player & 'Used' Folder Structure Tactic -->
+  <div class="canva-upload-panel">
+    <div class="sandbox-header">
+      <div>
+        <span class="pill canva" style="margin-bottom:6px;">📁 Asset Management Tactic</span>
+        <h2>Canva Uploads Player &amp; 'Used' Folder Hierarchy</h2>
+        <p style="margin:4px 0 0; color:var(--muted); font-size:14px; max-width:860px;">
+          Canva's upload drawer features a <b>built-in video player</b> and custom folder structure. Auditioning raw clips directly inside the upload drawer and maintaining a dedicated <b><code>📁 Used</code></b> subfolder eliminates clutter and guarantees zero asset duplication across timeline cuts.
+        </p>
+      </div>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <a href="https://www.canva.com/design/DAHRZe5KBoA/OJU0sL318CozUaTBpkdT2g/edit" target="_blank" rel="noopener noreferrer" class="btn" style="color:var(--purple,#af52de);border-color:rgba(175,82,222,0.35);background:rgba(175,82,222,0.1);">
+          🎨 Canva Planning Deck ↗
+        </a>
+        <a href="gallery.html" class="btn success" title="View local asset gallery with Used tags">
+          🖼️ Open Asset Gallery
+        </a>
+      </div>
+    </div>
+
+    <!-- Folder Hierarchy Cards -->
+    <div class="canva-folder-tree">
+      <div class="folder-card" style="border-left:4px solid var(--purple,#af52de);">
+        <div class="folder-card-header">
+          <span style="display:flex;align-items:center;gap:6px;"><span>▶️</span> 1. In-Drawer Media Player</span>
+          <span class="pill canva">Preview</span>
+        </div>
+        <div class="folder-card-body">
+          Hover or click video clips right inside Canva's upload sidebar to preview full MP4 loops with zero context switching.
+        </div>
+      </div>
+
+      <div class="folder-card" style="border-left:4px solid var(--accent3,#34c759);">
+        <div class="folder-card-header">
+          <span style="display:flex;align-items:center;gap:6px;"><span>📁</span> 2. 'Used' Subfolder Pool</span>
+          <span class="pill done">Committed</span>
+        </div>
+        <div class="folder-card-body">
+          Once a clip or graphic is placed into the video sequence, move it into the <code>📁 Used</code> folder so the upload drawer only displays remaining candidate assets.
+        </div>
+      </div>
+
+      <div class="folder-card" style="border-left:4px solid var(--gold,#ff9500);">
+        <div class="folder-card-header">
+          <span style="display:flex;align-items:center;gap:6px;"><span>☁️</span> 3. Code &amp; Azure Harmony</span>
+          <span class="pill flow">Sync</span>
+        </div>
+        <div class="folder-card-body">
+          Mirrors the <code>✅ Used</code> &amp; <code>🚫 Out of Scope</code> tagging in the local Asset Gallery, keeping your Canva canvas, shotlist, and Azure Blob storage 100% synchronized.
         </div>
       </div>
     </div>
