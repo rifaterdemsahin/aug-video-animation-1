@@ -433,6 +433,7 @@ header {{ position:sticky; top:0; z-index:50; background:var(--panel); border-bo
       <a href="https://canva.link/p4u3nwvsmio19jp" class="nav-item" target="_blank" rel="noopener noreferrer" style="color:var(--purple,#af52de);" title="Canva Implementation Deck"><span>🎨</span> Implementation ↗</a>
     </nav>
     <button class="btn primary" onclick="scrollToFinalVO()">📋 Generate Final Voiceover</button>
+    <button class="btn success" onclick="downloadHTMLDoc()" title="Save all changes and download updated voiceover_inspector.html">💾 Save &amp; Download HTML</button>
     <a href="https://www.canva.com/design/DAHRZe5KBoA/OJU0sL318CozUaTBpkdT2g/edit" class="btn" target="_blank" rel="noopener noreferrer" style="color:var(--purple,#af52de);border-color:rgba(175,82,222,0.35);background:rgba(175,82,222,0.1);" title="Open Canva Document">🎨 Canva Document ↗</a>
   </div>
 </header>
@@ -453,6 +454,7 @@ header {{ position:sticky; top:0; z-index:50; background:var(--panel); border-bo
     <div style="display:flex; align-items:center; gap:8px;">
       <div class="azure-pill" id="azureStat">☁️ Azure Synced</div>
       <button class="btn" onclick="saveToAzure(true)">☁️ Save to Azure</button>
+      <button class="btn success" onclick="downloadHTMLDoc()" title="Download current HTML page with all edits baked in">📥 Download HTML</button>
     </div>
   </div>
 </div>
@@ -567,7 +569,9 @@ header {{ position:sticky; top:0; z-index:50; background:var(--panel); border-bo
       <div style="display:flex; flex-wrap:wrap; gap:8px; align-items:center;">
         <button class="btn primary" onclick="copyFinalScript()">📋 Copy Script</button>
         <button class="btn success" onclick="saveToAzure(true)">☁️ Save to Azure</button>
-        <button class="btn" onclick="downloadScript()">📥 Download .md</button>
+        <button class="btn" onclick="downloadHTMLDoc()" title="Download complete HTML inspector page">📥 Download HTML</button>
+        <button class="btn" onclick="downloadScript()" title="Download script as markdown">📥 Download .md</button>
+        <button class="btn" onclick="downloadJSONState()" title="Download state as JSON">📥 Download JSON</button>
         <button class="btn" onclick="buildFinalVoiceover(true)">🔄 Re-Assemble</button>
       </div>
     </div>
@@ -968,6 +972,50 @@ function scrollToFinalVO(){{
     panel.scrollIntoView({{ behavior: 'smooth' }});
     buildFinalVoiceover(true);
   }}
+}}
+
+// Download current HTML document with all edits baked in
+function downloadHTMLDoc(){{
+  saveToAzure(false);
+  
+  // Ensure all textareas have their current values set as inner text before snapshot
+  document.querySelectorAll('.inspector-grid .custom-input').forEach(ta => {{
+    ta.textContent = ta.value;
+  }});
+  
+  const htmlContent = '<!doctype html>\\n' + document.documentElement.outerHTML;
+  const blob = new Blob([htmlContent], {{ type: 'text/html;charset=utf-8' }});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = "voiceover_inspector.html";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  showToast("📥 Downloaded voiceover_inspector.html with all latest edits!");
+}}
+
+// Download as JSON state
+function downloadJSONState(){{
+  const customTakes = {{}};
+  document.querySelectorAll('.inspector-grid .custom-input').forEach(ta => {{
+    const sec = ta.id.replace('take_', '');
+    customTakes[sec] = ta.value;
+  }});
+  const payload = {{
+    source: "voiceover_inspector",
+    totalFrames: MANIFEST_DATA.length,
+    downloadedAt: new Date().toISOString(),
+    takes: customTakes,
+    finalScript: document.getElementById('finalVoiceoverOutput')?.value || ""
+  }};
+  const blob = new Blob([JSON.stringify(payload, null, 2)], {{ type: 'application/json;charset=utf-8' }});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = "voiceover_state.json";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  showToast("📥 Downloaded voiceover_state.json!");
 }}
 
 // Download as markdown
