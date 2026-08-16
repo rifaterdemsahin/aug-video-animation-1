@@ -437,6 +437,7 @@ header {{ position:sticky; top:0; z-index:50; background:var(--panel); border-bo
     <button class="btn primary" onclick="scrollToFinalVO()">📋 Generate Final Voiceover</button>
     <button class="btn success" onclick="downloadHTMLDoc()" title="Save all changes and download updated voiceover_inspector.html">💾 Save &amp; Download HTML</button>
     <button class="btn blue" onclick="downloadPlainTextVO()" title="Download spoken voiceover audio text only (.txt)">🎙️ Download Voiceover</button>
+    <button class="btn" onclick="downloadAzureVoiceoverTxt()" title="Download synced Azure Blob object containing voiceover as a text file">☁️ Download Azure VO (.txt)</button>
     <a href="https://www.canva.com/design/DAHRZe5KBoA/OJU0sL318CozUaTBpkdT2g/edit" class="btn" target="_blank" rel="noopener noreferrer" style="color:var(--purple,#af52de);border-color:rgba(175,82,222,0.35);background:rgba(175,82,222,0.1);" title="Open Canva Document">🎨 Canva Document ↗</a>
   </div>
 </header>
@@ -459,6 +460,7 @@ header {{ position:sticky; top:0; z-index:50; background:var(--panel); border-bo
       <button class="btn" onclick="saveToAzure(true)">☁️ Save to Azure</button>
       <button class="btn success" onclick="downloadHTMLDoc()" title="Download current HTML page with all edits baked in">📥 Download HTML</button>
       <button class="btn blue" onclick="downloadPlainTextVO()" title="Download spoken plain text voiceover only (.txt)">🎙️ Download Voiceover</button>
+      <button class="btn" onclick="downloadAzureVoiceoverTxt()" title="Download synced Azure Blob object containing voiceover as a text file">☁️ Download Azure VO (.txt)</button>
     </div>
   </div>
 </div>
@@ -575,6 +577,7 @@ header {{ position:sticky; top:0; z-index:50; background:var(--panel); border-bo
         <button class="btn" onclick="copyPlainTextVO()" title="Copy only the spoken voiceover text for ElevenLabs / TTS">🎙️ Copy Plain Text</button>
         <button class="btn success" onclick="saveToAzure(true)">☁️ Save to Azure</button>
         <button class="btn blue" onclick="downloadPlainTextVO()" title="Download plain text voiceover only (.txt)">🎙️ Download Voiceover (.txt)</button>
+        <button class="btn" onclick="downloadAzureVoiceoverTxt()" title="Download synced Azure Blob object containing voiceover as a text file">☁️ Download Azure VO (.txt)</button>
         <button class="btn success" onclick="downloadHTMLDoc()" title="Download complete HTML inspector page">📥 Download HTML</button>
         <button class="btn" onclick="downloadScript()" title="Download script as markdown with timecodes">📥 Download .md</button>
         <button class="btn" onclick="downloadJSONState()" title="Download state as JSON">📥 Download JSON</button>
@@ -1024,6 +1027,64 @@ function downloadPlainTextVO(){{
   a.click();
   document.body.removeChild(a);
   showToast("📥 Downloaded voiceover_script.txt (Audio Only)");
+}}
+
+// Download Azure Object as Text File with Voiceover
+async function downloadAzureVoiceoverTxt(){{
+  showToast("☁️ Fetching Azure Blob voiceover object…");
+  let voiceoverContent = "";
+  let sourceLabel = "Azure Blob Storage (projects/aug-video-animation-1/shotlist/latest.json)";
+  let retrievedAt = new Date().toISOString();
+
+  // 1. Try to fetch the latest state directly from Azure Blob (/api/state)
+  try {{
+    const res = await fetch("/api/state", {{ cache: "no-store" }});
+    if(res.ok){{
+      const data = await res.json();
+      if(data && data.ok && data.state){{
+        const st = data.state;
+        retrievedAt = st.savedAt || new Date().toISOString();
+        if(st.finalVoiceoverScript && st.finalVoiceoverScript.trim()){{
+          voiceoverContent = st.finalVoiceoverScript.trim();
+        }} else if(st.voiceoverCustomTakes){{
+          const lines = [];
+          Object.keys(st.voiceoverCustomTakes).sort((a,b) => parseInt(a)-parseInt(b)).forEach(sec => {{
+            const txt = st.voiceoverCustomTakes[sec];
+            if(txt && txt.trim()){{
+              const mm = Math.floor(sec/60).toString().padStart(2,'0');
+              const ss = (sec%60).toString().padStart(2,'0');
+              lines.push('[' + mm + ':' + ss + '] ' + txt.trim());
+            }}
+          }});
+          voiceoverContent = lines.join('\\n\\n');
+        }}
+      }}
+    }}
+  }} catch(err){{}}
+
+  // 2. Fallback to current assembled script if offline or API unavailable
+  if(!voiceoverContent || !voiceoverContent.trim()){{
+    sourceLabel = "Local Cache / State Fallback";
+    voiceoverContent = document.getElementById('finalVoiceoverOutput')?.value || getPureVoiceoverText();
+  }}
+
+  // 3. Format header and payload text
+  let outputTxt = "=======================================================\\n";
+  outputTxt += "☁️ AZURE BLOB OBJECT VOICEOVER EXPORT\\n";
+  outputTxt += "Source: " + sourceLabel + "\\n";
+  outputTxt += "Blob Key: aug-video-animation-1/shotlist/latest.json\\n";
+  outputTxt += "Timestamp: " + retrievedAt + "\\n";
+  outputTxt += "=======================================================\\n\\n";
+  outputTxt += voiceoverContent;
+
+  const blob = new Blob([outputTxt], {{ type: 'text/plain;charset=utf-8' }});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = "azure_voiceover_object.txt";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  showToast("📥 Downloaded azure_voiceover_object.txt!");
 }}
 
 function scrollToFinalVO(){{
