@@ -1476,7 +1476,28 @@ async function testEndpoint(engine){{
       const data = await res.json();
       if(data.ok && data.script){{
         if(outputEl) outputEl.value = `[00:00] (Tested via ${{data.engine}})\n${{data.script}}`;
-        if(statusEl) statusEl.textContent = `✅ Gemini Endpoint Verified (${{data.engine}})`;
+        if(statusEl) statusEl.textContent = `✅ Gemini Verified (${{data.engine}})`;
+
+        // Automatically save test to Azure with versioning
+        try {{
+          const saveRes = await fetch("/api/state", {{
+            method: "POST",
+            headers: {{ "Content-Type": "application/json" }},
+            body: JSON.stringify({{
+              lastTestedEngine: data.engine,
+              testType: "script_hook",
+              testInput: testText,
+              testScriptOutput: data.script,
+              savedAt: new Date().toISOString(),
+              backup: true
+            }})
+          }});
+          if(saveRes.ok){{
+            const d = await saveRes.json();
+            if(d.versionTag) statusEl.textContent += ` · Saved to Azure (${{d.versionTag}})`;
+          }}
+        }} catch(e){{}}
+
       }} else {{
         if(statusEl) statusEl.textContent = `⚠️ Gemini Test Failed: ${{data.error}}`;
       }}
@@ -1501,6 +1522,27 @@ async function testEndpoint(engine){{
         }}
         if(outputEl) outputEl.value = `🔊 Spoken Audio Generated for:\n"${{testText}}"\n\nEngine: ${{data.engine}}\nSource: ${{data.key_source || "Azure Key Vault"}}`;
         if(statusEl) statusEl.textContent = `✅ ${{data.engine.toUpperCase()}} Audio Generated & Playing!`;
+
+        // Automatically save audio test to Azure with versioning
+        try {{
+          const saveRes = await fetch("/api/state", {{
+            method: "POST",
+            headers: {{ "Content-Type": "application/json" }},
+            body: JSON.stringify({{
+              lastTestedEngine: data.engine,
+              testType: "tts_audio",
+              testInput: testText,
+              audioEngine: data.engine,
+              savedAt: new Date().toISOString(),
+              backup: true
+            }})
+          }});
+          if(saveRes.ok){{
+            const d = await saveRes.json();
+            if(d.versionTag) statusEl.textContent += ` · Saved to Azure (${{d.versionTag}})`;
+          }}
+        }} catch(e){{}}
+
       }} else {{
         if(statusEl) statusEl.textContent = `⚠️ ${{engine}} Test Failed: ${{data.error}}`;
       }}
@@ -1539,6 +1581,26 @@ async function runFalAudioGeneration(){{
       }}
       if(outputEl) outputEl.value = `⚡ Fal.ai Voiceover Audio Stream Ready!\nEngine: ${{data.engine}}\nSource: ${{data.key_source}}\nText: "${{data.text}}"`;
       if(statusEl) statusEl.textContent = `✅ Fal.ai Audio Generated successfully!`;
+
+      // Save Fal generation to Azure with versioning
+      try {{
+        const saveRes = await fetch("/api/state", {{
+          method: "POST",
+          headers: {{ "Content-Type": "application/json" }},
+          body: JSON.stringify({{
+            lastTestedEngine: "fal.ai",
+            testType: "fal_full_tts",
+            testInput: testText,
+            savedAt: new Date().toISOString(),
+            backup: true
+          }})
+        }});
+        if(saveRes.ok){{
+          const d = await saveRes.json();
+          if(d.versionTag) statusEl.textContent += ` · Saved to Azure (${{d.versionTag}})`;
+        }}
+      }} catch(e){{}}
+
     }} else {{
       if(statusEl) statusEl.textContent = `⚠️ Fal.ai Error: ${{data.error}}`;
     }}
