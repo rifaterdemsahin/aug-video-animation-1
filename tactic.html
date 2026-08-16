@@ -585,6 +585,59 @@ header{position:sticky;top:0;z-index:50;background:var(--panel);border-bottom:1p
   margin-top:18px;
 }
 
+/* Timeline Sandbox Staging Card */
+.sandbox-tactic-panel{
+  background:linear-gradient(135deg, rgba(78,216,235,0.08), rgba(99,102,241,0.08));
+  border:1px solid rgba(78,216,235,0.3);
+  border-radius:14px;
+  padding:24px 28px;
+  margin-bottom:24px;
+  box-shadow:var(--shadow);
+}
+.sandbox-header{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:16px;
+  flex-wrap:wrap;
+  margin-bottom:12px;
+}
+.sandbox-header h2{
+  margin:0 0 6px;
+  font-size:18px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.sandbox-flow-steps{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));
+  gap:14px;
+  margin-top:16px;
+}
+.sandbox-step-card{
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:10px;
+  padding:14px 16px;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+.sandbox-step-card .step-title{
+  font-size:13px;
+  font-weight:700;
+  color:var(--cyan);
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+.sandbox-step-card .step-desc{
+  font-size:12.5px;
+  color:var(--muted);
+  line-height:1.4;
+}
+
 
 /* Footer with GitHub Pages */
 footer{
@@ -923,6 +976,52 @@ footer{
         <a href="https://canva.link/p4u3nwvsmio19jp" target="_blank" rel="noopener noreferrer" class="btn primary">
           🎨 Implementation Deck ↗
         </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- End-of-Timeline Auditioning Sandbox Tactic -->
+  <div class="sandbox-tactic-panel">
+    <div class="sandbox-header">
+      <div>
+        <span class="pill flow" style="margin-bottom:6px;">⚡ Timeline Staging Tactic</span>
+        <h2>End-of-Timeline Auditioning Sandbox (Tail Buffer)</h2>
+        <p style="margin:4px 0 0; color:var(--muted); font-size:14px; max-width:860px;">
+          When evaluating new footage, animations, or Canva visual candidates, drag them to the <b>very end of the timeline (the buffer sandbox)</b>. Play and watch them in the native monitor first to check motion cadence before splicing them into the active story cut.
+        </p>
+      </div>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <a href="timeline.html" class="btn primary" title="View active horizontal timeline">
+          ↔️ Open Horizontal Timeline
+        </a>
+      </div>
+    </div>
+
+    <!-- 4 Step Workflow -->
+    <div class="sandbox-flow-steps">
+      <div class="sandbox-step-card">
+        <div class="step-title"><span>📥</span> 1. Drag to Tail Zone</div>
+        <div class="step-desc">
+          Drop incoming Google Flow MP4s or Canva stills well past the active 2:58 runtime mark. Keeps the primary edit completely safe.
+        </div>
+      </div>
+      <div class="sandbox-step-card">
+        <div class="step-title"><span>▶️</span> 2. Native Playback Test</div>
+        <div class="step-desc">
+          Watch the clip play in full screen and native framerate. Check loop smoothness, speed, and contrast against the UI palette.
+        </div>
+      </div>
+      <div class="sandbox-step-card">
+        <div class="step-title"><span>✂️</span> 3. Trim &amp; Lock In-Point</div>
+        <div class="step-desc">
+          Find the best 2–4 second motion slice that matches the voiceover punchline (e.g. the cyan lightning bolt flash).
+        </div>
+      </div>
+      <div class="sandbox-step-card">
+        <div class="step-title"><span>🎯</span> 4. Slide into Locked Slot</div>
+        <div class="step-desc">
+          Slide the vetted clip straight into its designated shot number on the main track, or mark it <code>🚫 Out of Scope</code> if it doesn't fit.
+        </div>
       </div>
     </div>
   </div>
