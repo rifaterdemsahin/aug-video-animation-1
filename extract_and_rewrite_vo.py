@@ -567,10 +567,12 @@ header {{ position:sticky; top:0; z-index:50; background:var(--panel); border-bo
         </div>
       </div>
       <div style="display:flex; flex-wrap:wrap; gap:8px; align-items:center;">
-        <button class="btn primary" onclick="copyFinalScript()">📋 Copy Script</button>
+        <button class="btn primary" onclick="copyFinalScript()">📋 Copy Full Script</button>
+        <button class="btn" onclick="copyPlainTextVO()" title="Copy only the spoken voiceover text for ElevenLabs / TTS">🎙️ Copy Plain Text</button>
         <button class="btn success" onclick="saveToAzure(true)">☁️ Save to Azure</button>
+        <button class="btn" onclick="downloadPlainTextVO()" title="Download plain text voiceover only (.txt)">📥 Download .txt</button>
+        <button class="btn" onclick="downloadScript()" title="Download script as markdown with timecodes">📥 Download .md</button>
         <button class="btn" onclick="downloadHTMLDoc()" title="Download complete HTML inspector page">📥 Download HTML</button>
-        <button class="btn" onclick="downloadScript()" title="Download script as markdown">📥 Download .md</button>
         <button class="btn" onclick="downloadJSONState()" title="Download state as JSON">📥 Download JSON</button>
         <button class="btn" onclick="buildFinalVoiceover(true)">🔄 Re-Assemble</button>
       </div>
@@ -957,13 +959,44 @@ function buildFinalVoiceover(showFeedback = false){{
   }}
 }}
 
-// Copy script to clipboard
+// Get pure voiceover text without markdown headings or timecodes
+function getPureVoiceoverText(){{
+  const takes = getCleanSequentialTakes();
+  return takes.map(t => t.text.trim()).filter(Boolean).join('\\n\\n');
+}}
+
+// Copy full markdown script to clipboard
 function copyFinalScript(){{
   const outArea = document.getElementById('finalVoiceoverOutput');
   if(!outArea) return;
   navigator.clipboard.writeText(outArea.value).then(() => {{
     showToast("📋 Copied Master Voiceover Script to clipboard!");
   }});
+}}
+
+// Copy only the spoken plain text voiceover
+function copyPlainTextVO(){{
+  const plain = getPureVoiceoverText();
+  if(!plain){{
+    showToast("No voiceover text found.");
+    return;
+  }}
+  navigator.clipboard.writeText(plain).then(() => {{
+    showToast("🎙️ Copied Plain Voiceover (Audio Only) to clipboard!");
+  }});
+}}
+
+// Download plain text voiceover only (.txt)
+function downloadPlainTextVO(){{
+  const plain = getPureVoiceoverText();
+  const blob = new Blob([plain], {{ type: 'text/plain;charset=utf-8' }});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = "voiceover_script.txt";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  showToast("📥 Downloaded voiceover_script.txt (Audio Only)");
 }}
 
 function scrollToFinalVO(){{
