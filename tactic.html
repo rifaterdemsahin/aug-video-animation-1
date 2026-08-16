@@ -585,6 +585,32 @@ header{position:sticky;top:0;z-index:50;background:var(--panel);border-bottom:1p
   margin-top:18px;
 }
 
+/* Reality Callout Box */
+.reality-callout{
+  background:rgba(231,76,60,0.06);
+  border:1px solid rgba(231,76,60,0.25);
+  border-left:4px solid var(--accent);
+  border-radius:8px;
+  padding:14px 18px;
+  margin-top:16px;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+.reality-callout-title{
+  font-size:13.5px;
+  font-weight:750;
+  color:var(--accent);
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+.reality-callout-desc{
+  font-size:13px;
+  color:var(--ink);
+  line-height:1.45;
+}
+
 /* Timeline Sandbox Staging Card */
 .sandbox-tactic-panel{
   background:linear-gradient(135deg, rgba(78,216,235,0.08), rgba(99,102,241,0.08));
@@ -837,8 +863,8 @@ footer{
         <label class="guardrail-item checked">
           <input type="checkbox" checked onchange="updateGuardrail(this)">
           <div class="text">
-            <div class="title">2. Lock Script &amp; Voiceover Beats</div>
-            <div class="desc">Do not tweak shot timings until the primary VoiceOver audio track is laid out. Sound drives the cuts.</div>
+            <div class="title">2. Fluid Voiceover Post-Placement</div>
+            <div class="desc">Never stick dogmatically to pre-written text. The voiceover remains fluid and actively evolves after footage is placed on the timeline to match visual cadence.</div>
           </div>
         </label>
 
@@ -994,6 +1020,16 @@ footer{
         <div style="margin-top:10px; font-size:11px; color:rgba(0,0,0,0.5);">
           🔥 <em>Action chant · builds energy toward CTA</em>
         </div>
+      </div>
+    </div>
+
+    <!-- Reality Callout: Post-Placement Fluidity -->
+    <div class="reality-callout">
+      <div class="reality-callout-title">
+        <span>🌊</span> Production Reality: Script Is Fluid After Placement
+      </div>
+      <div class="reality-callout-desc">
+        <strong>The script is never cast in stone.</strong> Once candidate clips, Canva slides, and motion loops hit the timeline, seeing the visual pacing in motion prompts immediate script rewrites. You don't stick rigidly to what was initially drafted—the words naturally evolve, trim down, and adapt to match the exact visual energy on screen.
       </div>
     </div>
 
