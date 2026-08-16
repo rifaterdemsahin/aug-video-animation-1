@@ -177,6 +177,14 @@ header{
   position:absolute;top:16px;right:16px
 }
 #saveNote{font-size:12px;color:var(--muted)}
+.toast{
+  position:fixed;bottom:24px;right:24px;z-index:999;
+  background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:8px;
+  font-size:13px;font-weight:600;box-shadow:0 4px 14px rgba(0,0,0,0.3);
+  opacity:0;transform:translateY(10px);transition:opacity 0.2s ease,transform 0.2s ease;
+  pointer-events:none;
+}
+.toast.show{opacity:1;transform:translateY(0)}
 
 /* Site Footer */
 .site-footer {
@@ -263,11 +271,15 @@ header{
   <nav class="shared-nav" aria-label="Main Navigation">
     <a href="index.html" class="nav-item"><span>🏠</span> Overview</a>
     <a href="research.html" class="nav-item"><span>🎬</span> Research</a>
+    <a href="gallery.html" class="nav-item"><span>🖼️</span> Gallery</a>
     <a href="scenes.html" class="nav-item"><span>🗂️</span> Scenes</a>
     <a href="timeline.html" class="nav-item active"><span>↔️</span> Timeline</a>
     <a href="shotlist.html" class="nav-item"><span>📊</span> Shot List</a>
     <a href="voice_over.html" class="nav-item"><span>📜</span> VoiceOver</a>
+    <a href="tactic.html" class="nav-item"><span>🎯</span> Tactics</a>
+    <a href="https://canva.link/p4u3nwvsmio19jp" class="nav-item" target="_blank" rel="noopener noreferrer" style="color:var(--purple,#af52de);" title="Canva Implementation Deck"><span>🎨</span> Implementation ↗</a>
   </nav>
+  <button type="button" class="btn primary" id="btnCopyVo" title="Copy entire voiceover script to clipboard">📋 Copy Voice Over</button>
   <a class="btn" href="research.html">↕ Vertical</a>
   <button type="button" class="btn" id="btnUnhideAll" style="display:none">Unhide All</button>
   <div class="stat">Scenes <b id="statScenes">0</b></div>
@@ -275,6 +287,7 @@ header{
   <div class="stat">Length <b id="statLen">00:00</b></div>
   <div class="stat" id="saveNote">Drag a card to move it · click to play</div>
 </header>
+<div id="toast" class="toast"></div>
 <div class="stage-lane" id="stageLane"></div>
 <div class="ruler" id="ruler"></div>
 <div class="board" id="board">
@@ -583,6 +596,79 @@ function unhideAll(){
   persist("Unhide all shots — Azure save in 5s");
   render();
 }
+let toastTimer = null;
+function showToast(msg){
+  const el = document.getElementById("toast");
+  if(!el) return;
+  el.textContent = msg;
+  el.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => {
+    el.classList.remove("show");
+  }, 2800);
+}
+
+function getAllVoiceoverText(plain = false){
+  const vis = visible();
+  if(plain){
+    return vis
+      .map(s => (s.vo || s.caption || "").trim())
+      .filter(Boolean)
+      .join("\n\n");
+  }
+  return vis
+    .map((s, i) => {
+      const vo = (s.vo || s.caption || "").trim();
+      if(!vo) return "";
+      const stageName = STAGE_NAMES[s.stage] || s.stage;
+      const fileName = (s.file || "").split("/").pop();
+      return (i + 1) + ". [Stage " + s.stage + " · " + stageName + (fileName ? " · " + fileName : "") + "]\n" + vo;
+    })
+    .filter(Boolean)
+    .join("\n\n");
+}
+
+async function copyToClipboard(text, successMsg){
+  if(!text || !text.trim()){
+    showToast("No voiceover text to copy.");
+    return false;
+  }
+  try{
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      await navigator.clipboard.writeText(text);
+    } else {
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+    }
+    const words = wordCount(text);
+    const msg = successMsg || ("Copied voiceover (" + words + " words)");
+    showToast(msg);
+    const saveNote = document.getElementById("saveNote");
+    if(saveNote) saveNote.textContent = "✓ " + msg;
+    return true;
+  } catch(e) {
+    showToast("Copy failed: " + e.message);
+    return false;
+  }
+}
+
+async function copyAllVoiceover(){
+  const text = getAllVoiceoverText(false);
+  const btn = document.getElementById("btnCopyVo");
+  const origText = btn ? btn.innerHTML : "";
+  const ok = await copyToClipboard(text, "Voiceover copied to clipboard (" + wordCount(text) + " words)");
+  if(ok && btn){
+    btn.innerHTML = "✓ Copied!";
+    setTimeout(() => { if(btn) btn.innerHTML = origText; }, 2000);
+  }
+}
+
 function closePlayer(){
   const player = document.getElementById("player");
   const stage = document.getElementById("playerStage");
@@ -594,12 +680,31 @@ function openPlayer(s, item){
   document.querySelectorAll(".card").forEach(el => el.classList.toggle("is-on", el.dataset.id === s.id));
   const drawer = document.getElementById("drawer");
   drawer.classList.add("open");
-  drawer.innerHTML = "<h2>Stage " + escapeHtml(s.stage) + " · " + escapeHtml(STAGE_NAMES[s.stage] || "") + "</h2>"
+  const voText = (s.vo || s.caption || "").trim();
+  drawer.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:8px;">'
+    + "<div><h2 style=\"margin:0;\">Stage " + escapeHtml(s.stage) + " · " + escapeHtml(STAGE_NAMES[s.stage] || "") + "</h2>"
     + '<div class="tc">' + formatTC(item.inn) + " → " + formatTC(item.out) + " · " + item.dur + "s · "
-    + wordCount(s.vo) + " words</div>"
+    + wordCount(s.vo) + " words</div></div>"
+    + '<div style="display:flex;gap:8px;align-items:center;">'
+    + '<button type="button" class="btn" id="btnCopyDrawerVo" title="Copy this shot\'s voiceover">📋 Copy Shot VO</button>'
+    + '<a class="btn primary" href="research.html">Open in vertical shotlist</a>'
+    + '</div>'
+    + '</div>'
     + (s.bookmarked ? "<p><b>Bookmark:</b> " + escapeHtml(s.bookmarkNote || "(no note)") + "</p>" : "")
-    + "<p>" + escapeHtml(s.vo || s.caption || "") + "</p>"
-    + '<p><a class="btn primary" href="research.html">Open in vertical shotlist</a></p>';
+    + "<p style=\"margin-top:8px;\">" + escapeHtml(voText || "(No voiceover on this shot)") + "</p>";
+
+  const btnCopyDrawer = document.getElementById("btnCopyDrawerVo");
+  if(btnCopyDrawer){
+    btnCopyDrawer.addEventListener("click", async (e) => {
+      e.stopPropagation();
+      const orig = btnCopyDrawer.innerHTML;
+      const ok = await copyToClipboard(voText, "Shot VO copied (" + wordCount(voText) + " words)");
+      if(ok){
+        btnCopyDrawer.innerHTML = "✓ Copied!";
+        setTimeout(() => { if(btnCopyDrawer) btnCopyDrawer.innerHTML = orig; }, 1800);
+      }
+    });
+  }
 
   const src = videoOf(s);
   const poster = posterOf(s);
@@ -632,6 +737,8 @@ document.getElementById("player").addEventListener("click", e => {
 });
 document.addEventListener("keydown", e => { if(e.key === "Escape") closePlayer(); });
 document.getElementById("btnUnhideAll").addEventListener("click", unhideAll);
+const btnCopyVo = document.getElementById("btnCopyVo");
+if(btnCopyVo) btnCopyVo.addEventListener("click", copyAllVoiceover);
 
 (async function boot(){
   const local = loadLocal();

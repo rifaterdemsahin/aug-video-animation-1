@@ -1,0 +1,1065 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tactics & Reverse-Engineering — WIG Animation</title>
+<meta name="description" content="Tactical workbench for reverse-engineering video production needs from Canva, cutting gold-plating, and keeping a live execution log.">
+<script>
+(function(){
+  try{
+    var key = "aug-video-theme";
+    var theme = localStorage.getItem(key);
+    if(theme !== "light" && theme !== "dark"){
+      theme = window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+    }
+    document.documentElement.setAttribute("data-theme", theme);
+    document.documentElement.style.colorScheme = theme;
+  }catch(e){
+    document.documentElement.setAttribute("data-theme", "light");
+  }
+})();
+</script>
+<style>
+:root, html[data-theme="light"]{
+  --bg:#fbfbfa; --panel:#ffffff; --panel-elevated:#ffffff; --ink:#1c1c1e; --muted:#86868b; --line:#e5e5ea;
+  --accent:#e74c3c; --accent2:#0071e3; --accent3:#34c759; --gold:#ff9500; --purple:#af52de;
+  --chip:#f2f2f7; --card-bg:#ffffff; --shadow:0 2px 8px rgba(0,0,0,0.06); --badge-bg:rgba(0,113,227,0.1);
+  --success-bg:rgba(52,199,89,0.12); --warning-bg:rgba(255,149,0,0.12); --danger-bg:rgba(231,76,60,0.12);
+  --terminal-bg:#1e1e1e; --terminal-ink:#d4d4d4;
+}
+html[data-theme="dark"]{
+  --bg:#1c1c1e; --panel:#2c2c2e; --panel-elevated:#3a3a3c; --ink:#f5f5f7; --muted:#8e8e93; --line:#3a3a3c;
+  --chip:#3a3a3c; --card-bg:#2c2c2e; --shadow:0 4px 16px rgba(0,0,0,0.35); --badge-bg:rgba(0,113,227,0.25);
+  --success-bg:rgba(52,199,89,0.2); --warning-bg:rgba(255,149,0,0.2); --danger-bg:rgba(231,76,60,0.25);
+  --terminal-bg:#121212; --terminal-ink:#e0e0e0;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;line-height:1.5;padding:0}
+a{color:var(--accent2);text-decoration:none}
+a:hover{text-decoration:underline}
+
+/* Header */
+header{position:sticky;top:0;z-index:50;background:var(--panel);border-bottom:1px solid var(--line);box-shadow:var(--shadow);padding:10px 16px}
+.bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;max-width:1200px;margin:0 auto}
+.title{font-weight:800;font-size:16px;letter-spacing:.02em}
+
+.theme-toggle{
+  font:inherit;font-size:12.5px;font-weight:650;cursor:pointer;
+  border:1px solid var(--line);background:var(--chip);color:var(--ink);
+  border-radius:999px;padding:6px 12px;margin-left:auto
+}
+.theme-toggle:hover{border-color:var(--gold);color:var(--gold)}
+
+/* Shared Menu navigation */
+.shared-nav {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+  margin-right: auto;
+  background: var(--chip, var(--bg));
+  padding: 4px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+}
+.shared-nav a {
+  color: var(--muted);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 13px;
+  padding: 5px 10px;
+  border-radius: 7px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+.shared-nav a span { font-size: 14px; }
+.shared-nav a:hover {
+  color: var(--ink);
+  background: rgba(128,128,128,0.1);
+}
+.shared-nav a.active {
+  color: var(--ink);
+  background: var(--panel);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+/* Layout */
+.container{max-width:1200px;margin:0 auto;padding:20px 16px 40px}
+
+/* Code Start Box */
+.code-start-box{
+  background:var(--terminal-bg);
+  color:var(--terminal-ink);
+  border-radius:12px;
+  padding:16px 20px;
+  margin-bottom:20px;
+  box-shadow:var(--shadow);
+  border:1px solid rgba(255,255,255,0.1);
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.code-start-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.code-start-title{
+  font-size:13px;
+  font-weight:700;
+  color:#4ade80;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.code-start-actions{
+  display:flex;
+  gap:8px;
+  align-items:center;
+}
+.cmd-chip{
+  background:#2d2d2d;
+  color:#f1f5f9;
+  padding:8px 12px;
+  border-radius:6px;
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size:12.5px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  overflow-x:auto;
+}
+.cmd-text{color:#93c5fd;font-weight:600;}
+.btn-copy-cmd{
+  background:#3b82f6;
+  color:#fff;
+  border:none;
+  padding:4px 8px;
+  border-radius:4px;
+  font-size:11px;
+  font-weight:600;
+  cursor:pointer;
+}
+.btn-copy-cmd:hover{background:#2563eb;}
+
+/* Hero Banner */
+.hero-banner{
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:24px 28px;
+  margin-bottom:24px;
+  box-shadow:var(--shadow);
+}
+.hero-banner .kicker{
+  font-size:12px;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  color:var(--accent);
+  margin:0 0 6px;
+}
+.hero-banner h1{
+  margin:0 0 10px;
+  font-size:26px;
+  line-height:1.25;
+}
+.hero-banner p{
+  margin:0 0 18px;
+  color:var(--muted);
+  font-size:15px;
+  max-width:900px;
+}
+.hero-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  align-items:center;
+}
+.btn{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  font-size:13px;
+  font-weight:600;
+  padding:8px 14px;
+  border-radius:8px;
+  border:1px solid var(--line);
+  background:var(--chip);
+  color:var(--ink);
+  cursor:pointer;
+  transition:all .15s ease;
+  text-decoration:none;
+}
+.btn:hover{
+  background:var(--line);
+  text-decoration:none;
+}
+.btn.primary{
+  background:var(--accent2);
+  color:#fff;
+  border-color:var(--accent2);
+}
+.btn.primary:hover{background:#0060c4;}
+.btn.success{
+  background:var(--accent3);
+  color:#fff;
+  border-color:var(--accent3);
+}
+
+/* Stat Grid */
+.stat-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));
+  gap:14px;
+  margin-bottom:24px;
+}
+.stat-card{
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:16px;
+  box-shadow:var(--shadow);
+}
+.stat-card .label{
+  font-size:12px;
+  color:var(--muted);
+  font-weight:600;
+  text-transform:uppercase;
+  letter-spacing:.04em;
+  margin-bottom:4px;
+}
+.stat-card .val{
+  font-size:24px;
+  font-weight:800;
+  color:var(--ink);
+}
+.stat-card .sub{
+  font-size:11.5px;
+  color:var(--muted);
+  margin-top:2px;
+}
+
+/* Two Column Grid */
+.grid-2col{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:24px;
+  margin-bottom:24px;
+}
+@media (max-width: 900px){
+  .grid-2col{grid-template-columns:1fr;}
+}
+
+.panel{
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:20px;
+  box-shadow:var(--shadow);
+}
+.panel-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  border-bottom:1px solid var(--line);
+  padding-bottom:12px;
+  margin-bottom:16px;
+}
+.panel-header h2{
+  margin:0;
+  font-size:17px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+/* Guardrails & Checklists */
+.guardrail-item{
+  display:flex;
+  align-items:flex-start;
+  gap:12px;
+  padding:12px;
+  border-radius:8px;
+  background:var(--chip);
+  margin-bottom:10px;
+  border:1px solid var(--line);
+  transition:all .15s ease;
+}
+.guardrail-item.checked{
+  background:var(--success-bg);
+  border-color:rgba(52,199,89,0.3);
+}
+.guardrail-item input[type="checkbox"]{
+  margin-top:4px;
+  cursor:pointer;
+  width:16px;
+  height:16px;
+}
+.guardrail-item .text{
+  flex:1;
+}
+.guardrail-item .title{
+  font-size:14px;
+  font-weight:700;
+  margin-bottom:2px;
+}
+.guardrail-item .desc{
+  font-size:12.5px;
+  color:var(--muted);
+  line-height:1.4;
+}
+
+/* Guide Cards */
+.guide-step{
+  display:flex;
+  gap:12px;
+  padding:12px;
+  border-bottom:1px solid var(--line);
+}
+.guide-step:last-child{border-bottom:none;}
+.step-num{
+  width:26px;
+  height:26px;
+  border-radius:50%;
+  background:var(--accent2);
+  color:#fff;
+  font-weight:700;
+  font-size:12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-shrink:0;
+}
+.step-content h3{
+  margin:0 0 4px;
+  font-size:14px;
+  font-weight:700;
+}
+.step-content p{
+  margin:0;
+  font-size:12.5px;
+  color:var(--muted);
+}
+.code-chip{
+  display:inline-block;
+  background:var(--chip);
+  border:1px solid var(--line);
+  border-radius:4px;
+  padding:2px 6px;
+  font-family:ui-monospace,SFMono-Regular,Consolas,monospace;
+  font-size:11.5px;
+  color:var(--ink);
+}
+
+/* Log and Matrix Tables */
+.log-form{
+  display:grid;
+  grid-template-columns:1fr auto auto;
+  gap:8px;
+  margin-bottom:16px;
+}
+@media (max-width: 600px){
+  .log-form{grid-template-columns:1fr;}
+}
+.log-form input, .log-form select{
+  font:inherit;
+  font-size:13px;
+  padding:8px 12px;
+  border-radius:8px;
+  border:1px solid var(--line);
+  background:var(--bg);
+  color:var(--ink);
+}
+.log-form input:focus, .log-form select:focus{
+  outline:none;
+  border-color:var(--accent2);
+}
+
+.log-list{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  max-height:420px;
+  overflow-y:auto;
+}
+.log-item{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  background:var(--chip);
+  border:1px solid var(--line);
+  border-radius:8px;
+  padding:12px;
+}
+.log-item-top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+}
+.pill{
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  font-size:11px;
+  font-weight:700;
+  padding:3px 8px;
+  border-radius:999px;
+  text-transform:uppercase;
+  letter-spacing:.04em;
+}
+.pill.decision{background:rgba(0,113,227,0.12);color:var(--accent2);}
+.pill.cut{background:rgba(231,76,60,0.12);color:var(--accent);}
+.pill.canva{background:rgba(175,82,222,0.12);color:var(--purple);}
+.pill.flow{background:rgba(255,149,0,0.12);color:var(--gold);}
+.pill.done{background:rgba(52,199,89,0.12);color:var(--accent3);}
+
+.log-time{font-size:11px;color:var(--muted);}
+.log-body{font-size:13px;line-height:1.4;}
+.log-actions{display:flex;justify-content:flex-end;gap:6px;}
+.btn-mini{
+  font-size:11px;
+  padding:3px 7px;
+  border-radius:4px;
+  border:1px solid var(--line);
+  background:var(--panel);
+  color:var(--muted);
+  cursor:pointer;
+}
+.btn-mini:hover{color:var(--ink);border-color:var(--muted);}
+
+/* Matrix Table */
+.matrix-table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:13px;
+}
+.matrix-table th{
+  text-align:left;
+  padding:8px 10px;
+  font-size:11.5px;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.04em;
+  color:var(--muted);
+  border-bottom:1px solid var(--line);
+}
+.matrix-table td{
+  padding:10px;
+  border-bottom:1px solid var(--line);
+  vertical-align:middle;
+}
+.matrix-table tr:hover td{
+  background:rgba(128,128,128,0.04);
+}
+
+.status-badge{
+  font-size:11px;
+  font-weight:700;
+  padding:2px 8px;
+  border-radius:6px;
+  display:inline-block;
+}
+.status-ready{background:var(--success-bg);color:var(--accent3);}
+.status-flow{background:var(--warning-bg);color:var(--gold);}
+.status-canva{background:var(--badge-bg);color:var(--accent2);}
+.status-cut{background:var(--danger-bg);color:var(--accent);}
+
+/* Interactive Assistant Prompt Box */
+.ai-prompt-box{
+  background:var(--chip);
+  border:1px dashed var(--accent2);
+  border-radius:10px;
+  padding:16px;
+  margin-top:16px;
+}
+.ai-prompt-box h4{
+  margin:0 0 6px;
+  font-size:13.5px;
+  color:var(--accent2);
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+.ai-prompt-box p{
+  margin:0 0 10px;
+  font-size:12px;
+  color:var(--muted);
+}
+.copy-prompt-btn{
+  font-size:12px;
+  padding:5px 10px;
+  border-radius:6px;
+  background:var(--panel);
+  border:1px solid var(--line);
+  cursor:pointer;
+  font-weight:600;
+}
+.copy-prompt-btn:hover{background:var(--line);}
+
+/* Footer with GitHub Pages */
+footer{
+  margin-top:40px;
+  background:var(--panel);
+  border-top:1px solid var(--line);
+  padding:28px 16px;
+  color:var(--muted);
+  font-size:13px;
+}
+.footer-wrap{
+  max-width:1200px;
+  margin:0 auto;
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+}
+.footer-top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  gap:12px;
+}
+.gh-pages-pill{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  background:var(--chip);
+  border:1px solid var(--line);
+  padding:6px 12px;
+  border-radius:8px;
+  font-size:12.5px;
+}
+.gh-pages-pill a{
+  font-weight:700;
+  color:var(--accent2);
+}
+.footer-nav{
+  display:flex;
+  flex-wrap:wrap;
+  gap:12px;
+  align-items:center;
+}
+.footer-nav a{
+  color:var(--muted);
+  font-weight:500;
+}
+.footer-nav a:hover{
+  color:var(--ink);
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="bar">
+    <div class="title"><a href="index.html" style="color:inherit;text-decoration:none">WIG Animation</a></div>
+    <nav class="shared-nav" aria-label="Main Navigation">
+      <a href="index.html" class="nav-item"><span>🏠</span> Overview</a>
+      <a href="research.html" class="nav-item"><span>🎬</span> Research</a>
+      <a href="gallery.html" class="nav-item"><span>🖼️</span> Gallery</a>
+      <a href="scenes.html" class="nav-item"><span>🗂️</span> Scenes</a>
+      <a href="timeline.html" class="nav-item"><span>↔️</span> Timeline</a>
+      <a href="shotlist.html" class="nav-item"><span>📊</span> Shot List</a>
+      <a href="voice_over.html" class="nav-item"><span>📜</span> VoiceOver</a>
+      <a href="tactic.html" class="nav-item active"><span>🎯</span> Tactics</a>
+      <a href="https://canva.link/p4u3nwvsmio19jp" class="nav-item" target="_blank" rel="noopener noreferrer" style="color:var(--purple,#af52de);" title="Canva Implementation Deck"><span>🎨</span> Implementation ↗</a>
+    </nav>
+    <button type="button" class="theme-toggle" id="themeToggle" aria-label="Switch theme">Light</button>
+  </div>
+</header>
+
+<main class="container">
+
+  <!-- Code Start Command Box at the Start -->
+  <div class="code-start-box">
+    <div class="code-start-header">
+      <span class="code-start-title">🚀 Local Development &amp; Server Quick Start</span>
+      <div class="code-start-actions">
+        <span style="font-size:11.5px; color:#a1a1aa;">Local Endpoint: <strong>http://127.0.0.1:8768/tactic.html</strong></span>
+      </div>
+    </div>
+    <div class="cmd-chip">
+      <span><span style="color:#6ee7b7;">$</span> <span class="cmd-text">python3 server.py --port 8768</span></span>
+      <button class="btn-copy-cmd" onclick="copySnippet('python3 server.py --port 8768')">Copy Command</button>
+    </div>
+  </div>
+
+  <!-- Hero Banner -->
+  <div class="hero-banner">
+    <p class="kicker">⚡ Fast Delivery Strategy · Anti-Gold-Plating</p>
+    <h1>Reverse-Engineering from Canva to Code</h1>
+    <p>
+      Time is running out. Instead of endless bottom-up tweaking, we start directly from the visual Canva slide deck, 
+      reverse-engineer the absolute minimal shot requirements, cut unnecessary fluff, and log every tactical decision live.
+    </p>
+    <div class="hero-actions">
+      <a class="btn primary" href="https://canva.link/p4u3nwvsmio19jp" target="_blank" rel="noopener noreferrer">
+        🎨 Open Canva Implementation ↗
+      </a>
+      <a class="btn" href="voice_over.html">
+        📜 Voiceover Beats
+      </a>
+      <a class="btn" href="timeline.html">
+        ↔️ Horizontal Timeline
+      </a>
+      <button class="btn success" id="btnExportLog">
+        📋 Copy Action Log for AI
+      </button>
+    </div>
+  </div>
+
+  <!-- Stat Grid -->
+  <div class="stat-grid">
+    <div class="stat-card">
+      <div class="label">Canva Visual Anchors</div>
+      <div class="val" id="statCanvaCount">18</div>
+      <div class="sub">Key slides in presentation</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Total Flow Clips Ready</div>
+      <div class="val" style="color:var(--accent3);">26</div>
+      <div class="sub">Generated Google Flow clips</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Anti-Goldplating Target</div>
+      <div class="val" style="color:var(--gold);">&le; 2:58</div>
+      <div class="sub">Target runtime ceiling</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Execution Log Items</div>
+      <div class="val" id="statLogCount" style="color:var(--accent2);">4</div>
+      <div class="sub">Decisions & updates logged</div>
+    </div>
+  </div>
+
+  <!-- Two Column Grid: Guardrails & Guide -->
+  <div class="grid-2col">
+    <!-- Panel 1: Anti-Gold-Plating Guardrails -->
+    <div class="panel">
+      <div class="panel-header">
+        <h2>🛡️ Anti-Gold-Plating Guardrails</h2>
+        <span class="status-badge status-ready" id="guardrailStatus">3/5 Done</span>
+      </div>
+      <p style="font-size:13px; color:var(--muted); margin-top:0;">
+        Follow the 80/20 delivery principle: if a frame doesn't directly clarify the AI Second Brain concept in under 5 seconds, use a Canva still and keep moving.
+      </p>
+      
+      <div id="guardrailList">
+        <label class="guardrail-item checked">
+          <input type="checkbox" checked onchange="updateGuardrail(this)">
+          <div class="text">
+            <div class="title">1. Canva Still Baseline First</div>
+            <div class="desc">Default every shot to a clean Canva slide/still. Only animate when motion is essential to show data flow.</div>
+          </div>
+        </label>
+
+        <label class="guardrail-item checked">
+          <input type="checkbox" checked onchange="updateGuardrail(this)">
+          <div class="text">
+            <div class="title">2. Lock Script &amp; Voiceover Beats</div>
+            <div class="desc">Do not tweak shot timings until the primary VoiceOver audio track is laid out. Sound drives the cuts.</div>
+          </div>
+        </label>
+
+        <label class="guardrail-item checked">
+          <input type="checkbox" checked onchange="updateGuardrail(this)">
+          <div class="text">
+            <div class="title">3. Max 2 Iterations per Flow Clip</div>
+            <div class="desc">If a prompt doesn't hit in 2 tries, accept the best frame or use a Ken Burns zoom on the still.</div>
+          </div>
+        </label>
+
+        <label class="guardrail-item">
+          <input type="checkbox" onchange="updateGuardrail(this)">
+          <div class="text">
+            <div class="title">4. Ruthless Scope Cuts on Engine Details</div>
+            <div class="desc">Cut 30 seconds of internal P.A.R.A indexing weeds if it bogs down the momentum before the demo.</div>
+          </div>
+        </label>
+
+        <label class="guardrail-item">
+          <input type="checkbox" onchange="updateGuardrail(this)">
+          <div class="text">
+            <div class="title">5. Ship to Sunday Cohort On Time</div>
+            <div class="desc">A finished 85% video in front of real learners beats a 99% perfect video trapped in Premiere/Canva.</div>
+          </div>
+        </label>
+      </div>
+    </div>
+
+    <!-- Panel 2: How We Work Together (User + AI Assistant) -->
+    <div class="panel">
+      <div class="panel-header">
+        <h2>🤝 Pair-Execution Protocol</h2>
+        <span class="status-badge status-canva">Active Process</span>
+      </div>
+
+      <div class="guide-step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <h3>You Work in Canva / Direct</h3>
+          <p>Look at your Canva slides. Note what's missing, what can be simplified, or what slide represents a scene.</p>
+        </div>
+      </div>
+
+      <div class="guide-step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <h3>Tell the Assistant in Chat</h3>
+          <p>Tell me in plain text: <span class="code-chip">"Slide 4 is now the Hook, update Shot 2 and cut Shot 3"</span>.</p>
+        </div>
+      </div>
+
+      <div class="guide-step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <h3>Assistant Updates &amp; Logs</h3>
+          <p>I update the shotlist, scenes, or voiceover files, append to the tactical log, and keep you on schedule.</p>
+        </div>
+      </div>
+
+      <div class="ai-prompt-box">
+        <h4>⚡ Quick Instruction Templates</h4>
+        <p>Click any prompt template to copy it for your chat prompt:</p>
+        <div style="display:flex; flex-wrap:wrap; gap:6px;">
+          <button class="copy-prompt-btn" onclick="copyTemplate('I updated Canva slide [N]. Please reverse-engineer this into Shot [X], update the visual description, and log it.')">
+            📌 "Update Shot from Canva Slide"
+          </button>
+          <button class="copy-prompt-btn" onclick="copyTemplate('Let\'s cut non-essential shots in Scene [N] to save time and reduce gold-plating. What can we remove?')">
+            ✂️ "Cut Scope in Scene"
+          </button>
+          <button class="copy-prompt-btn" onclick="copyTemplate('I need a Google Flow prompt for Canva slide [N] showing [Visual Idea]. Keep it under 20 words.')">
+            🎬 "Generate Flow Prompt"
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Canva Reverse-Engineering Needs Matrix -->
+  <div class="panel" style="margin-bottom:24px;">
+    <div class="panel-header">
+      <h2>🎨 Canva Slide &rarr; Production Needs Matrix</h2>
+      <div style="display:flex; gap:8px;">
+        <button class="btn" id="btnExportMatrix">Export CSV</button>
+      </div>
+    </div>
+    <div style="overflow-x:auto;">
+      <table class="matrix-table">
+        <thead>
+          <tr>
+            <th>Canva Slide / Asset</th>
+            <th>Scene &amp; Shot Beat</th>
+            <th>Visual Need</th>
+            <th>Status / Strategy</th>
+            <th>Cut Risk</th>
+          </tr>
+        </thead>
+        <tbody id="matrixBody">
+          <tr>
+            <td><strong>Slide 01: Gold Brain Hook</strong></td>
+            <td>Scene 1 · Shot 01 (0:00 - 0:08)</td>
+            <td>Golden brain with cyan lightning (Flow Clip 18)</td>
+            <td><span class="status-badge status-ready">✅ Ready (Flow #18)</span></td>
+            <td><span style="color:var(--muted)">None (Core)</span></td>
+          </tr>
+          <tr>
+            <td><strong>Slide 02: 46k Notes Haystack</strong></td>
+            <td>Scene 2 · Shot 04 (0:22 - 0:34)</td>
+            <td>Endless note cards scrolling into chaos</td>
+            <td><span class="status-badge status-flow">⚡ Flow clip ready</span></td>
+            <td><span style="color:var(--muted)">Low</span></td>
+          </tr>
+          <tr>
+            <td><strong>Slide 03: Dual Agents Engine</strong></td>
+            <td>Scene 3 · Shot 09 (1:05 - 1:20)</td>
+            <td>Indexer &amp; Querier agent flow diagram</td>
+            <td><span class="status-badge status-canva">🎨 Use Canva Still</span></td>
+            <td><span style="color:var(--gold)">Anti-Goldplate</span></td>
+          </tr>
+          <tr>
+            <td><strong>Slide 04: Obsidian P.A.R.A Graph</strong></td>
+            <td>Scene 4 · Shot 14 (1:45 - 2:02)</td>
+            <td>Live obsidian node cluster linking active projects</td>
+            <td><span class="status-badge status-ready">✅ Ready (Flow #09)</span></td>
+            <td><span style="color:var(--muted)">None</span></td>
+          </tr>
+          <tr>
+            <td><strong>Slide 05: Sunday Cohort CTA</strong></td>
+            <td>Scene 5 · Shot 18 (2:35 - 2:58)</td>
+            <td>Free cohort signup invitation &amp; calendar card</td>
+            <td><span class="status-badge status-canva">🎨 Canva Graphic</span></td>
+            <td><span style="color:var(--accent3)">Keep Simple</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Live Tactical Execution Log -->
+  <div class="panel">
+    <div class="panel-header">
+      <h2>📝 Live Tactical Execution Log</h2>
+      <div style="display:flex; gap:8px;">
+        <button class="btn-mini" onclick="clearLogs()" title="Reset to default logs">Reset Logs</button>
+      </div>
+    </div>
+    
+    <!-- Add Log Entry Form -->
+    <form class="log-form" id="logForm" onsubmit="addLogEntry(event)">
+      <input type="text" id="logText" placeholder="Log a decision, cut, or requirement (e.g. 'Simplified Slide 3 to Canva still')..." required>
+      <select id="logCategory">
+        <option value="decision">🎯 Decision</option>
+        <option value="cut">✂️ Scope Cut</option>
+        <option value="canva">🎨 Canva Need</option>
+        <option value="flow">⚡ Flow Animation</option>
+        <option value="done">✅ Milestone</option>
+      </select>
+      <button type="submit" class="btn primary">Add Log</button>
+    </form>
+
+    <!-- Log Items Container -->
+    <div class="log-list" id="logList">
+      <!-- Populated by JS -->
+    </div>
+  </div>
+
+</main>
+
+<!-- Footer with Live GitHub Pages Link -->
+<footer>
+  <div class="footer-wrap">
+    <div class="footer-top">
+      <div class="gh-pages-pill">
+        <span>🌐 <strong>Live GitHub Pages:</strong></span>
+        <a href="https://rifaterdemsahin.github.io/aug-video-animation-1/tactic.html" target="_blank" rel="noopener noreferrer" id="ghPagesLink">
+          https://rifaterdemsahin.github.io/aug-video-animation-1/tactic.html ↗
+        </a>
+        <button class="btn-mini" onclick="copySnippet('https://rifaterdemsahin.github.io/aug-video-animation-1/tactic.html')">Copy Link</button>
+      </div>
+      <div>
+        <span>Repository: <a href="https://github.com/rifaterdemsahin/aug-video-animation-1" target="_blank" rel="noopener noreferrer">rifaterdemsahin/aug-video-animation-1</a></span>
+      </div>
+    </div>
+    <div class="footer-nav">
+      <span>Pages:</span>
+      <a href="index.html">Overview</a> ·
+      <a href="research.html">Research</a> ·
+      <a href="scenes.html">Scenes</a> ·
+      <a href="timeline.html">Timeline</a> ·
+      <a href="shotlist.html">Shot List</a> ·
+      <a href="voice_over.html">VoiceOver</a> ·
+      <a href="tactic.html"><strong>Tactics</strong></a>
+    </div>
+  </div>
+</footer>
+
+<script>
+// Theme Switcher
+(function initTheme() {
+  const toggle = document.getElementById("themeToggle");
+  function syncThemeBtn() {
+    const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+    toggle.textContent = isDark ? "Light" : "Dark";
+  }
+  syncThemeBtn();
+
+  toggle.addEventListener("click", () => {
+    const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+    const next = isDark ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", next);
+    document.documentElement.style.colorScheme = next;
+    try { localStorage.setItem("aug-video-theme", next); } catch(e){}
+    syncThemeBtn();
+  });
+})();
+
+// Guardrails
+function updateGuardrail(cb) {
+  const parent = cb.closest('.guardrail-item');
+  if (cb.checked) {
+    parent.classList.add('checked');
+  } else {
+    parent.classList.remove('checked');
+  }
+  const all = document.querySelectorAll('#guardrailList input[type="checkbox"]');
+  const checked = document.querySelectorAll('#guardrailList input[type="checkbox"]:checked');
+  document.getElementById('guardrailStatus').textContent = `${checked.length}/${all.length} Done`;
+}
+
+// Copy prompt helper
+function copyTemplate(text) {
+  copySnippet(text, "Copied prompt to clipboard:\n\n" + text);
+}
+
+function copySnippet(text, msg) {
+  navigator.clipboard.writeText(text).then(() => {
+    alert(msg || "Copied: " + text);
+  }).catch(() => {
+    prompt("Copy:", text);
+  });
+}
+
+// Initial Tactical Logs
+const DEFAULT_LOGS = [
+  {
+    id: 1,
+    time: "Today, 04:20",
+    category: "decision",
+    text: "Strategic pivot: Reverse-engineer video assets directly from Canva slide deck to beat deadline and eliminate gold-plating."
+  },
+  {
+    id: 2,
+    category: "cut",
+    time: "Today, 04:15",
+    text: "Decided to keep Scene 3 (Dual Agents) as clean Canva visual stills with voiceover instead of re-generating 4 custom Flow clips."
+  },
+  {
+    id: 3,
+    category: "flow",
+    time: "Today, 04:05",
+    text: "Matched 26 ready Google Flow clips with Canva story beats to maximize existing asset reuse."
+  },
+  {
+    id: 4,
+    category: "done",
+    time: "Today, 03:50",
+    text: "Setup live Tactical Execution Hub with pair-programming workflow and anti-goldplating guardrails."
+  }
+];
+
+const STORAGE_KEY = "aug_video_tactic_logs_v1";
+
+function loadLogs() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : DEFAULT_LOGS;
+  } catch(e) {
+    return DEFAULT_LOGS;
+  }
+}
+
+function saveLogs(logs) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(logs));
+  } catch(e) {}
+}
+
+function renderLogs() {
+  const logs = loadLogs();
+  const list = document.getElementById("logList");
+  list.innerHTML = "";
+  
+  document.getElementById("statLogCount").textContent = logs.length;
+
+  logs.forEach(item => {
+    const el = document.createElement("div");
+    el.className = "log-item";
+    
+    let pillClass = "decision";
+    let pillText = "🎯 Decision";
+    if (item.category === "cut") { pillClass = "cut"; pillText = "✂️ Scope Cut"; }
+    else if (item.category === "canva") { pillClass = "canva"; pillText = "🎨 Canva Need"; }
+    else if (item.category === "flow") { pillClass = "flow"; pillText = "⚡ Flow Clip"; }
+    else if (item.category === "done") { pillClass = "done"; pillText = "✅ Milestone"; }
+
+    el.innerHTML = `
+      <div class="log-item-top">
+        <span class="pill ${pillClass}">${pillText}</span>
+        <span class="log-time">${item.time || 'Just now'}</span>
+      </div>
+      <div class="log-body">${escapeHtml(item.text)}</div>
+      <div class="log-actions">
+        <button class="btn-mini" onclick="deleteLog(${item.id})">Delete</button>
+      </div>
+    `;
+    list.appendChild(el);
+  });
+}
+
+function escapeHtml(str) {
+  return str.replace(/[&<>'"]/g, 
+    tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+  );
+}
+
+function addLogEntry(e) {
+  e.preventDefault();
+  const textInput = document.getElementById("logText");
+  const catInput = document.getElementById("logCategory");
+  const text = textInput.value.trim();
+  if (!text) return;
+
+  const now = new Date();
+  const timeStr = `Today, ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+  const logs = loadLogs();
+  logs.unshift({
+    id: Date.now(),
+    time: timeStr,
+    category: catInput.value,
+    text: text
+  });
+
+  saveLogs(logs);
+  renderLogs();
+  textInput.value = "";
+}
+
+function deleteLog(id) {
+  let logs = loadLogs();
+  logs = logs.filter(l => l.id !== id);
+  saveLogs(logs);
+  renderLogs();
+}
+
+function clearLogs() {
+  if (confirm("Reset logs to default?")) {
+    saveLogs(DEFAULT_LOGS);
+    renderLogs();
+  }
+}
+
+// Export Log for AI
+document.getElementById("btnExportLog").addEventListener("click", () => {
+  const logs = loadLogs();
+  let md = "# Tactical Execution & Reverse-Engineering Log\n\n";
+  logs.forEach(l => {
+    md += `- **[${l.category.toUpperCase()}]** (${l.time}): ${l.text}\n`;
+  });
+  navigator.clipboard.writeText(md).then(() => {
+    alert("Copied Tactical Log to clipboard in Markdown format!");
+  }).catch(() => {
+    prompt("Copy this Markdown log:", md);
+  });
+});
+
+// Export CSV Matrix
+document.getElementById("btnExportMatrix").addEventListener("click", () => {
+  let csv = "Canva Slide,Beat,Visual Need,Status\n";
+  const rows = document.querySelectorAll("#matrixBody tr");
+  rows.forEach(r => {
+    const cols = Array.from(r.querySelectorAll("td")).map(td => `"${td.innerText.trim().replace(/"/g, '""')}"`);
+    csv += cols.join(",") + "\n";
+  });
+  const blob = new Blob([csv], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "canva_needs_matrix.csv";
+  a.click();
+});
+
+// Initialize
+renderLogs();
+</script>
+</body>
+</html>

@@ -1,0 +1,1245 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Asset Gallery — WIG Animation</title>
+<script>
+(function(){
+  try{
+    var theme = localStorage.getItem("aug-video-theme");
+    if(theme !== "light" && theme !== "dark"){
+      theme = window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+    }
+    document.documentElement.setAttribute("data-theme", theme);
+    document.documentElement.style.colorScheme = theme;
+  }catch(e){
+    document.documentElement.setAttribute("data-theme", "dark");
+  }
+})();
+</script>
+<style>
+:root, html[data-theme="dark"]{
+  --bg:#0c0c12; --panel:#161622; --ink:#f4f4f8; --muted:#9498a8;
+  --line:#262638; --gold:#e8b84a; --cyan:#4ed8eb; --chip:#1e1e2d;
+  --accent:#e74c3c; --accent2:#6366f1; --accent3:#27ae60; --out-scope:#e67e22;
+  --card-bg:#161622; --card-hover:#1c1c2b; --shadow:0 4px 20px rgba(0,0,0,0.35);
+  --highlight-bg:rgba(232,184,74,0.25); --highlight-ink:#ffd875;
+}
+html[data-theme="light"]{
+  --bg:#f6f6f9; --panel:#ffffff; --ink:#171727; --muted:#6c7082;
+  --line:#e3e4ed; --gold:#b37d0c; --cyan:#088395; --chip:#edf0f7;
+  --accent:#d63031; --accent2:#4f46e5; --accent3:#16a085; --out-scope:#d35400;
+  --card-bg:#ffffff; --card-hover:#fbfbfe; --shadow:0 4px 16px rgba(0,0,0,0.06);
+  --highlight-bg:rgba(232,184,74,0.3); --highlight-ink:#805300;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:var(--cyan);text-decoration:none}
+a:hover{text-decoration:underline}
+
+header{
+  position:sticky;top:0;z-index:40;
+  background:var(--panel);border-bottom:1px solid var(--line);
+  padding:10px 16px;box-shadow:0 2px 10px rgba(0,0,0,0.1);
+}
+.header-bar{
+  max-width:1440px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;
+}
+.title{font-weight:800;font-size:16px;letter-spacing:.02em;display:flex;align-items:center;gap:8px}
+.title a{color:inherit;text-decoration:none}
+
+.shared-nav {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+  margin-right: auto;
+  background: var(--chip);
+  padding: 4px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+}
+.shared-nav a {
+  color: var(--muted);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 13px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.shared-nav a:hover {
+  color: var(--cyan);
+  background: var(--panel);
+}
+.shared-nav a.active {
+  color: var(--ink);
+  background: var(--panel);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  border: 1px solid var(--line);
+}
+
+.btn{
+  font:inherit;font-size:12.5px;font-weight:650;cursor:pointer;
+  border:1px solid var(--line);background:var(--chip);color:var(--ink);
+  border-radius:8px;padding:7px 12px;display:inline-flex;align-items:center;gap:6px;
+  transition:all 0.15s ease;
+}
+.btn:hover{border-color:var(--cyan);color:var(--cyan)}
+.btn.primary{background:var(--accent2);border-color:var(--accent2);color:#fff}
+.btn.primary:hover{opacity:0.9;border-color:var(--accent2);color:#fff}
+.btn.gold{background:var(--gold);border-color:var(--gold);color:#1a1406}
+.btn.success{background:var(--accent3);border-color:var(--accent3);color:#fff}
+.btn.warning{background:var(--out-scope);border-color:var(--out-scope);color:#fff}
+
+/* Azure Status Pill */
+.azure-pill{
+  font-size:11.5px;font-weight:600;padding:5px 10px;border-radius:999px;
+  background:rgba(78,216,235,0.12);border:1px solid rgba(78,216,235,0.3);color:var(--cyan);
+  display:inline-flex;align-items:center;gap:5px;
+}
+.azure-pill.saving{
+  background:rgba(232,184,74,0.15);border-color:rgba(232,184,74,0.35);color:var(--gold);
+}
+.azure-pill.saved{
+  background:rgba(39,174,96,0.15);border-color:rgba(39,174,96,0.35);color:#27ae60;
+}
+
+/* Submenu Bar */
+.sub-bar{
+  background:var(--panel);border-bottom:1px solid var(--line);
+  padding:10px 16px;position:sticky;top:53px;z-index:30;
+}
+.sub-bar-inner{
+  max-width:1440px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;
+}
+.filter-group{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.pill-btn{
+  font-size:12px;font-weight:600;padding:5px 12px;border-radius:999px;
+  border:1px solid var(--line);background:var(--chip);color:var(--muted);cursor:pointer;
+  transition:all 0.15s ease;
+}
+.pill-btn:hover{color:var(--ink);border-color:var(--cyan)}
+.pill-btn.active{background:var(--accent2);color:#fff;border-color:var(--accent2)}
+.pill-btn.used-pill.active{background:var(--accent3);color:#fff;border-color:var(--accent3)}
+.pill-btn.out-pill.active{background:var(--out-scope);color:#fff;border-color:var(--out-scope)}
+.search-input{
+  font:inherit;font-size:13px;padding:6px 12px;border-radius:8px;
+  border:1px solid var(--line);background:var(--chip);color:var(--ink);
+  min-width:240px;outline:none;
+}
+.search-input:focus{border-color:var(--cyan)}
+.stage-select{
+  font:inherit;font-size:12.5px;padding:6px 10px;border-radius:8px;
+  border:1px solid var(--line);background:var(--chip);color:var(--ink);
+  outline:none;cursor:pointer;
+}
+
+/* Search Suggestions Bar */
+.search-suggest-row{
+  max-width:1440px;margin:8px auto 0;display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:11.5px;color:var(--muted);
+}
+.suggest-tag{
+  font-size:11px;font-weight:600;padding:3px 8px;border-radius:6px;
+  background:var(--chip);border:1px solid var(--line);color:var(--ink);cursor:pointer;
+  transition:all 0.15s ease;
+}
+.suggest-tag:hover{border-color:var(--gold);color:var(--gold);background:var(--panel)}
+
+/* Main Gallery Area */
+main{
+  max-width:1440px;margin:0 auto;padding:20px 16px 80px;
+}
+.hero-banner{
+  background:linear-gradient(135deg, rgba(99,102,241,0.12), rgba(78,216,235,0.08));
+  border:1px solid var(--line);border-radius:14px;padding:20px 24px;margin-bottom:20px;
+  display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;
+}
+.hero-text h1{margin:0 0 4px;font-size:22px;font-weight:800}
+.hero-text p{margin:0;font-size:13.5px;color:var(--muted)}
+.stats-badges{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.stat-badge{
+  background:var(--chip);border:1px solid var(--line);border-radius:8px;
+  padding:6px 14px;font-size:12.5px;color:var(--muted);
+}
+.stat-badge b{color:var(--ink);font-weight:700}
+.stat-badge.used-stat b{color:#27ae60}
+.stat-badge.out-stat b{color:var(--out-scope)}
+
+.progress-wrap{
+  display:flex;flex-direction:column;gap:3px;min-width:140px;
+}
+.progress-bar{
+  width:100%;height:8px;background:var(--line);border-radius:999px;overflow:hidden;display:flex;
+}
+.progress-fill-used{
+  height:100%;background:#27ae60;transition:width 0.3s ease;
+}
+.progress-fill-out{
+  height:100%;background:var(--out-scope);transition:width 0.3s ease;
+}
+
+.gallery-grid{
+  display:grid;grid-template-columns:repeat(auto-fill, minmax(290px, 1fr));
+  gap:18px;
+}
+
+.asset-card{
+  background:var(--card-bg);border:1px solid var(--line);border-radius:12px;
+  overflow:hidden;box-shadow:var(--shadow);transition:transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease;
+  display:flex;flex-direction:column;position:relative;
+}
+.asset-card:hover{
+  transform:translateY(-2px);border-color:var(--cyan);
+}
+.asset-card.status-used{
+  border-color:rgba(39,174,96,0.55);
+}
+.asset-card.status-used:hover{
+  border-color:#27ae60;box-shadow:0 6px 20px rgba(39,174,96,0.22);
+}
+.asset-card.status-out{
+  border-color:rgba(230,126,34,0.45);
+  opacity:0.78;
+}
+.asset-card.status-out:hover{
+  opacity:1;border-color:var(--out-scope);box-shadow:0 6px 20px rgba(230,126,34,0.2);
+}
+
+.asset-thumb-wrap{
+  position:relative;background:#000;aspect-ratio:16/9;overflow:hidden;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+}
+.asset-thumb-wrap img, .asset-thumb-wrap video{
+  width:100%;height:100%;object-fit:cover;display:block;transition:transform 0.25s ease;
+}
+.asset-thumb-wrap:hover img{
+  transform:scale(1.03);
+}
+.play-overlay{
+  position:absolute;inset:0;background:rgba(0,0,0,0.3);
+  display:flex;align-items:center;justify-content:center;opacity:0.85;
+  transition:opacity 0.2s ease, background 0.2s ease;
+}
+.play-overlay:hover{opacity:1;background:rgba(0,0,0,0.15)}
+.play-circle{
+  width:44px;height:44px;border-radius:50%;background:rgba(0,0,0,0.75);
+  border:2px solid #fff;display:flex;align-items:center;justify-content:center;
+  color:#fff;font-size:16px;box-shadow:0 4px 12px rgba(0,0,0,0.4);
+}
+.asset-kind-badge{
+  position:absolute;top:8px;left:8px;font-size:10px;font-weight:700;
+  padding:3px 8px;border-radius:6px;text-transform:uppercase;letter-spacing:0.5px;
+  color:#fff;backdrop-filter:blur(4px);
+}
+.asset-kind-badge.video{background:rgba(99,102,241,0.88)}
+.asset-kind-badge.still{background:rgba(39,174,96,0.88)}
+.asset-dur-badge{
+  position:absolute;bottom:8px;right:8px;font-size:10.5px;font-weight:700;
+  padding:2px 6px;border-radius:4px;background:rgba(0,0,0,0.8);color:#fff;
+  font-variant-numeric:tabular-nums;
+}
+
+/* Status Button Bar on Card Top Right */
+.card-status-bar{
+  position:absolute;top:8px;right:8px;z-index:10;
+  display:inline-flex;align-items:center;gap:3px;
+  padding:2px;border-radius:8px;background:rgba(0,0,0,0.75);
+  backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,0.2);
+}
+.status-pill-btn{
+  border:none;background:transparent;color:rgba(255,255,255,0.75);
+  font-size:10.5px;font-weight:700;padding:3px 7px;border-radius:5px;
+  cursor:pointer;display:inline-flex;align-items:center;gap:3px;
+  transition:all 0.15s ease;line-height:1.2;
+}
+.status-pill-btn:hover{color:#fff;background:rgba(255,255,255,0.2)}
+.status-pill-btn.active-used{
+  background:#27ae60;color:#fff;box-shadow:0 2px 6px rgba(39,174,96,0.5);
+}
+.status-pill-btn.active-out{
+  background:var(--out-scope);color:#fff;box-shadow:0 2px 6px rgba(230,126,34,0.5);
+}
+
+.asset-body{
+  padding:12px 14px 14px;display:flex;flex-direction:column;flex:1;min-width:0;
+}
+.asset-header{
+  display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px;
+}
+.asset-title{
+  font-size:13px;font-weight:700;line-height:1.35;word-break:break-word;
+  color:var(--ink);
+}
+.stage-pill{
+  font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;
+  color:#fff;white-space:nowrap;
+}
+.asset-caption{
+  font-size:11.5px;color:var(--muted);line-height:1.4;margin:4px 0 6px;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+}
+
+/* Search Match Snippet */
+.match-snippet{
+  background:rgba(232,184,74,0.12);border-left:3px solid var(--gold);
+  border-radius:4px;padding:4px 8px;margin:4px 0 8px;font-size:11px;line-height:1.35;color:var(--ink);
+}
+.match-snippet b{
+  background:var(--highlight-bg);color:var(--highlight-ink);padding:1px 3px;border-radius:3px;
+}
+
+.asset-footer{
+  margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:6px;padding-top:8px;border-top:1px solid var(--line);
+}
+.asset-path{
+  font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:10px;
+  color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px;
+}
+.asset-actions{display:flex;gap:4px}
+.icon-btn{
+  border:1px solid var(--line);background:var(--chip);color:var(--ink);
+  padding:4px 8px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;
+  transition:all 0.15s ease;display:inline-flex;align-items:center;gap:3px;
+}
+.icon-btn:hover{border-color:var(--cyan);color:var(--cyan)}
+
+/* Modal Preview */
+#assetModal{
+  position:fixed;inset:0;z-index:99;display:none;align-items:center;justify-content:center;
+  background:rgba(0,0,0,0.85);backdrop-filter:blur(6px);padding:24px;
+}
+#assetModal.open{display:flex}
+.modal-box{
+  background:var(--panel);border:1px solid var(--line);border-radius:14px;
+  max-width:960px;width:100%;max-height:90vh;display:flex;flex-direction:column;
+  overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,0.5);position:relative;
+}
+.modal-top{
+  display:flex;align-items:center;justify-content:space-between;padding:12px 18px;
+  border-bottom:1px solid var(--line);background:var(--chip);
+}
+.modal-title{font-size:14px;font-weight:700}
+.modal-close{
+  background:none;border:none;color:var(--muted);font-size:18px;font-weight:700;
+  cursor:pointer;padding:4px 8px;border-radius:6px;line-height:1;
+}
+.modal-close:hover{color:var(--accent);background:rgba(231,76,60,0.1)}
+.modal-media{
+  background:#000;display:flex;align-items:center;justify-content:center;
+  max-height:56vh;overflow:hidden;position:relative;
+}
+.modal-media video, .modal-media img{
+  max-width:100%;max-height:56vh;object-fit:contain;
+}
+.modal-details{
+  padding:16px 20px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;
+}
+.modal-desc{font-size:13px;line-height:1.5;color:var(--ink)}
+.modal-vo-box{
+  background:var(--chip);border-left:3px solid var(--accent2);
+  border-radius:4px;padding:8px 12px;font-size:12.5px;line-height:1.45;color:var(--ink);
+}
+.modal-controls-row{
+  display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;
+  padding-top:10px;border-top:1px solid var(--line);
+}
+.modal-status-group{display:flex;align-items:center;gap:8px}
+.modal-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:12px;color:var(--muted)}
+.modal-row code{background:var(--chip);padding:3px 6px;border-radius:4px;color:var(--ink)}
+
+/* Toast */
+.toast{
+  position:fixed;bottom:24px;right:24px;z-index:999;
+  background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:8px;
+  font-size:13px;font-weight:600;box-shadow:0 4px 14px rgba(0,0,0,0.3);
+  opacity:0;transform:translateY(10px);transition:opacity 0.2s ease,transform 0.2s ease;
+  pointer-events:none;
+}
+.toast.show{opacity:1;transform:translateY(0)}
+
+/* Site Footer */
+.site-footer {
+  margin-top: 48px;border-top: 1px solid var(--line);background: var(--panel);
+  color: var(--muted);padding: 24px 16px;font-size: 13px;
+}
+.site-footer-inner {
+  max-width: 1440px;margin: 0 auto;display: flex;flex-wrap: wrap;
+  align-items: center;justify-content: space-between;gap: 16px;
+}
+.site-footer-brand {display: flex;flex-direction: column;gap: 3px;}
+.site-footer-title {font-weight: 750;color: var(--ink);}
+.site-footer-desc {font-size: 12px;color: var(--muted);}
+.site-footer-links {display: flex;flex-wrap: wrap;align-items: center;gap: 10px;}
+.footer-btn {
+  display: inline-flex;align-items: center;gap: 6px;padding: 6px 12px;
+  border-radius: 8px;border: 1px solid var(--line);background: var(--chip);
+  color: var(--ink);text-decoration: none;font-size: 12.5px;font-weight: 600;
+  transition: all 0.15s ease;
+}
+.footer-btn:hover {border-color: var(--cyan);color: var(--cyan);}
+.footer-btn.live-btn {
+  background: rgba(39, 174, 96, 0.12);border-color: rgba(39, 174, 96, 0.35);color: #27ae60;
+}
+.footer-btn.live-btn:hover {background: rgba(39, 174, 96, 0.22);}
+.pulse-dot {
+  width: 7px;height: 7px;border-radius: 50%;background: #27ae60;
+  box-shadow: 0 0 0 0 rgba(39, 174, 96, 0.7);animation: pulse-green 1.8s infinite;
+}
+@keyframes pulse-green {
+  0% { box-shadow: 0 0 0 0 rgba(39, 174, 96, 0.7); }
+  70% { box-shadow: 0 0 0 6px rgba(39, 174, 96, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(39, 174, 96, 0); }
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="header-bar">
+    <div class="title"><a href="index.html">WIG Animation</a></div>
+    <nav class="shared-nav" aria-label="Main Navigation">
+      <a href="index.html" class="nav-item"><span>🏠</span> Overview</a>
+      <a href="research.html" class="nav-item"><span>🎬</span> Research</a>
+      <a href="gallery.html" class="nav-item active"><span>🖼️</span> Gallery</a>
+      <a href="scenes.html" class="nav-item"><span>🗂️</span> Scenes</a>
+      <a href="timeline.html" class="nav-item"><span>↔️</span> Timeline</a>
+      <a href="shotlist.html" class="nav-item"><span>📊</span> Shot List</a>
+      <a href="voice_over.html" class="nav-item"><span>📜</span> VoiceOver</a>
+      <a href="tactic.html" class="nav-item"><span>🎯</span> Tactics</a>
+      <a href="https://canva.link/p4u3nwvsmio19jp" class="nav-item" target="_blank" rel="noopener noreferrer" style="color:var(--purple,#af52de);" title="Canva Implementation Deck"><span>🎨</span> Implementation ↗</a>
+    </nav>
+    <a class="btn primary" href="timeline.html">↔ Timeline</a>
+    <a href="https://www.canva.com/design/DAHRZe5KBoA/OJU0sL318CozUaTBpkdT2g/edit" class="btn" target="_blank" rel="noopener noreferrer" style="color:var(--purple,#af52de);border-color:rgba(175,82,222,0.35);background:rgba(175,82,222,0.1);" title="Open Canva Document">🎨 Canva Document ↗</a>
+    <div class="azure-pill" id="azureStat" title="Status of Azure Blob sync">☁️ Azure Synced</div>
+    <button type="button" class="btn" id="themeToggle">Toggle Theme</button>
+  </div>
+</header>
+
+<div class="sub-bar">
+  <div class="sub-bar-inner">
+    <div class="filter-group">
+      <button type="button" class="pill-btn active" data-type="all">All Assets (<span id="countAll">0</span>)</button>
+      <button type="button" class="pill-btn" data-type="video">🎬 Videos (<span id="countVideos">26</span>)</button>
+      <button type="button" class="pill-btn" data-type="still">🖼️ Stills (<span id="countStills">105</span>)</button>
+      <button type="button" class="pill-btn used-pill" data-type="used">✅ Used (<span id="countUsed">0</span>)</button>
+      <button type="button" class="pill-btn out-pill" data-type="out_of_scope">🚫 Out of Scope (<span id="countOutOfScope">0</span>)</button>
+      <button type="button" class="pill-btn" data-type="available">⏳ Available (<span id="countAvailable">0</span>)</button>
+      <select class="stage-select" id="stageFilter">
+        <option value="all">All Stages (00–16)</option>
+        <option value="16">Stage 16 · Video Flow (26 clips)</option>
+        <option value="00">Stage 00 · Index</option>
+        <option value="01">Stage 01 · Architecture</option>
+        <option value="02">Stage 02 · Plan</option>
+        <option value="03">Stage 03 · Assets</option>
+        <option value="04">Stage 04 · Cohort</option>
+        <option value="05">Stage 05 · Gaps</option>
+        <option value="06">Stage 06 · Assembly</option>
+        <option value="07">Stage 07 · Polish</option>
+        <option value="08">Stage 08 · Refinement</option>
+        <option value="09">Stage 09 · Audio</option>
+        <option value="10">Stage 10 · Edit Color</option>
+        <option value="11">Stage 11 · Thumbnail</option>
+        <option value="12">Stage 12 · Export</option>
+        <option value="13">Stage 13 · Metadata</option>
+        <option value="15">Stage 15 · Tactics</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <input type="search" class="search-input" id="searchInput" placeholder="Search: e.g. 46k Notes Haystack, Obsidian, Dual-agent…">
+      <button type="button" class="btn" id="btnRemoveAllUsed" style="color:var(--accent);border-color:rgba(231,76,60,0.35);background:rgba(231,76,60,0.08);" title="Remove all Used marks from all assets and sync to Azure">🗑️ Remove All Used</button>
+      <button type="button" class="btn" id="btnCopyAllPaths" title="Copy list of all paths">📋 Copy Paths</button>
+      <button type="button" class="btn" id="btnCopyAllMd" title="Copy markdown embeds">📋 Copy Markdown</button>
+      <a href="https://www.canva.com/design/DAHRZe5KBoA/OJU0sL318CozUaTBpkdT2g/edit" target="_blank" rel="noopener noreferrer" class="btn" style="color:var(--purple,#af52de);" title="Canva Deck">🎨 Canva Doc ↗</a>
+    </div>
+  </div>
+  <div class="search-suggest-row">
+    <span>💡 Quick search:</span>
+    <span class="suggest-tag" onclick="quickSearch('46k Notes Haystack')">46k Notes Haystack</span>
+    <span class="suggest-tag" onclick="quickSearch('Obsidian Vault')">Obsidian Vault</span>
+    <span class="suggest-tag" onclick="quickSearch('Dual Agent')">Dual Agent</span>
+    <span class="suggest-tag" onclick="quickSearch('Tell Show Do Apply')">Tell Show Do Apply</span>
+    <span class="suggest-tag" onclick="quickSearch('Golden Brain')">Golden Brain</span>
+    <span class="suggest-tag" onclick="quickSearch('Cohort Sunday')">Cohort Sunday</span>
+    <span class="suggest-tag" onclick="quickSearch('B-roll')">B-roll</span>
+  </div>
+</div>
+
+<main>
+  <div class="hero-banner">
+    <div class="hero-text">
+      <h1>Visual Asset Gallery</h1>
+      <p>Search footage, voiceover, prompts, and stills. Mark assets as <b>Used</b> or <b>Out of Scope</b> with Azure cloud sync.</p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;align-items:flex-end;">
+      <div class="stats-badges">
+        <div class="stat-badge">Total: <b id="statTotal">131</b></div>
+        <div class="stat-badge used-stat">✅ Used: <b id="statUsed">0</b></div>
+        <div class="stat-badge out-stat">🚫 Out of Scope: <b id="statOutOfScope">0</b></div>
+        <div class="stat-badge">⏳ Available: <b id="statAvailable">0</b></div>
+        <div class="stat-badge progress-wrap" title="Green: Used · Orange: Out of Scope">
+          <span style="font-size:11px;">Coverage: <b id="statUsedPct">0%</b></span>
+          <div class="progress-bar">
+            <div class="progress-fill-used" id="progressFillUsed"></div>
+            <div class="progress-fill-out" id="progressFillOut"></div>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <a href="https://www.canva.com/design/DAHRZe5KBoA/OJU0sL318CozUaTBpkdT2g/edit" target="_blank" rel="noopener noreferrer" class="btn gold" style="font-weight:700;">🎨 Open Canva Document ↗</a>
+        <a href="research.html" class="btn">🎬 Research View</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="gallery-grid" id="galleryGrid"></div>
+</main>
+
+<!-- Asset Modal Viewer -->
+<div id="assetModal" role="dialog" aria-modal="true">
+  <div class="modal-box">
+    <div class="modal-top">
+      <span class="modal-title" id="modalTitle">Asset Preview</span>
+      <button type="button" class="modal-close" id="modalClose">✕</button>
+    </div>
+    <div class="modal-media" id="modalMedia"></div>
+    <div class="modal-details">
+      <div class="modal-desc" id="modalDesc"></div>
+      <div class="modal-vo-box" id="modalVo" style="display:none;"></div>
+      <div class="modal-controls-row">
+        <div class="modal-status-group">
+          <span style="font-size:12px;font-weight:700;color:var(--muted);">Status:</span>
+          <button type="button" class="btn sm" id="btnModalSetUsed">✅ Mark Used</button>
+          <button type="button" class="btn sm" id="btnModalSetOut">🚫 Out of Scope</button>
+          <button type="button" class="btn sm" id="btnModalSetAvailable">⏳ Available (Reset)</button>
+        </div>
+        <div class="modal-row">
+          <span>Path:</span>
+          <code id="modalPath"></code>
+          <button type="button" class="icon-btn" id="btnModalCopyPath">📋 Copy Path</button>
+          <button type="button" class="icon-btn" id="btnModalCopyMd">📋 Copy Markdown</button>
+          <a id="btnModalOpen" class="icon-btn" target="_blank" rel="noopener">↗ Open File</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<footer class="site-footer">
+  <div class="site-footer-inner">
+    <div class="site-footer-brand">
+      <span class="site-footer-title">WIG Animation · AI Second Brain</span>
+      <span class="site-footer-desc">Complete asset library — video loops &amp; stage stills</span>
+    </div>
+    <div class="site-footer-links">
+      <a href="https://www.canva.com/design/DAHRZe5KBoA/OJU0sL318CozUaTBpkdT2g/edit" target="_blank" rel="noopener noreferrer" class="footer-btn" style="color:var(--purple,#af52de);">
+        <span>🎨</span> Canva Document
+      </a>
+      <a href="https://aug-video-animation-1.fly.dev/gallery.html" target="_blank" rel="noopener" class="footer-btn live-btn">
+        <span class="pulse-dot"></span> Live App (Fly.io)
+      </a>
+      <a href="https://rifaterdemsahin.github.io/aug-video-animation-1/gallery.html" target="_blank" rel="noopener" class="footer-btn">
+        <span>📄</span> GitHub Pages
+      </a>
+      <a href="https://github.com/rifaterdemsahin/aug-video-animation-1" target="_blank" rel="noopener" class="footer-btn">
+        <span>🐙</span> Source Code
+      </a>
+    </div>
+  </div>
+</footer>
+
+<script>
+const VIDEO_FLOW_DATA = [
+  {seq:1, file:"01_colorful-file-icons-background.mp4", slug:"colorful-file-icons-background", title:"Colorful File Icons Background", desc:"Chaotic workspace and floating file icons for hook and intro.", vo:"I was drowning in 46,000 notes across Obsidian. Every search felt like looking for a needle in a digital haystack. And then I realized—the problem wasn't the number of notes. It was that they weren't working for me.", prompt:"Scene 1 — Hook: chaotic dark workspace, 46,000 note-icons, needle in digital haystack, red accent (#e74c3c), zoom to red-X transition.", tags:["46k", "46000", "46,000", "notes", "haystack", "digital haystack", "needle", "obsidian", "chaos", "hook", "scene1", "icons", "floating files"]},
+  {seq:2, file:"02_futuristic-network-grid.mp4", slug:"futuristic-network-grid", title:"Futuristic Network Grid", desc:"Connected cyber grid and nodes for architecture visualization.", vo:"Plan. Assets. Assembly. Polish. Publish. Each stage has one job, and one tool that does it.", prompt:"Futuristic network grid showing neural nodes and data paths.", tags:["architecture", "network", "grid", "nodes", "pipeline", "diagram"]},
+  {seq:3, file:"03_data-vault-galaxy.mp4", slug:"data-vault-galaxy", title:"Data Vault Galaxy", desc:"Swirling nebula of data and knowledge vault items.", vo:"46,000 notes, 210 live projects — the numbers on screen aren't mockups. That's my actual second brain, queried live.", prompt:"Swirling nebula of 46,000 notes in digital vault space.", tags:["46k", "46000", "notes", "vault", "galaxy", "nebula", "second brain", "assets", "para"]},
+  {seq:4, file:"04_black-diamond-vortex.mp4", slug:"black-diamond-vortex", title:"Black Diamond Vortex", desc:"Geometric vortex transition and abstract depth.", vo:"Transition between problem setup and AI-native solution.", prompt:"Rotating black diamond vortex warp transition.", tags:["transition", "vortex", "diamond", "warp", "interrupt"]},
+  {seq:5, file:"05_bright-light-in-darkness.mp4", slug:"bright-light-in-darkness", title:"Bright Light In Darkness", desc:"Insight / illumination moment bursting through dark space.", vo:"The gap is context. Low-context AI hallucinates. Feed it your history, your preferences, your own archive — and it stops guessing and starts knowing you.", prompt:"Bright beam of light piercing through digital darkness representing breakthrough insight.", tags:["insight", "realization", "gaps", "context", "illumination", "light"]},
+  {seq:6, file:"06_abstract-geometry-animation.mp4", slug:"abstract-geometry-animation", title:"Abstract Geometry Animation", desc:"Rotating 3D wireframe solids and structural shapes.", vo:"The foundation is the P.A.R.A. method—four zones that AI understands instantly: Projects, Areas, Resources, Archive.", prompt:"Rotating 3D geometric wireframe solids organizing data zones.", tags:["geometry", "wireframe", "para", "structure", "3d"]},
+  {seq:7, file:"07_sparkling-light-explosion.mp4", slug:"sparkling-light-explosion", title:"Sparkling Light Explosion", desc:"Particle burst representing synthesis and AI compute.", vo:"Raw knowledge isn't power—applied knowledge is.", prompt:"Sparkling light burst and particle energy explosion.", tags:["particles", "explosion", "compute", "energy", "synthesis"]},
+  {seq:8, file:"08_gray-diagonal-plane.mp4", slug:"gray-diagonal-plane", title:"Gray Diagonal Plane", desc:"Minimal clean diagonal motion graphic.", vo:"Refinement is where I cut what doesn't earn its seconds.", prompt:"Minimalist clean gray diagonal motion graphics.", tags:["minimal", "motion", "plane", "clean", "refinement"]},
+  {seq:9, file:"09_dark-screen-teal-bar.mp4", slug:"dark-screen-teal-bar", title:"Dark Screen Teal Bar", desc:"Tech progress indicator and cyber line sweep.", vo:"Voiceover at minus six, music bed at minus eighteen to minus twenty-four.", prompt:"Dark HUD interface with pulsing teal status bar.", tags:["hud", "teal", "cyber", "progress", "audio"]},
+  {seq:10, file:"10_glowing-red-horizon.mp4", slug:"glowing-red-horizon", title:"Glowing Red Horizon", desc:"Tension / pain point red horizon graphic.", vo:"I was drowning in 46,000 notes. Every search felt like looking for a needle in a digital haystack.", prompt:"Glowing red horizon line representing pain point and friction.", tags:["red", "horizon", "pain", "haystack", "tension", "hook"]},
+  {seq:11, file:"11_blue-title-card-garbled-text.mp4", slug:"blue-title-card-garbled-text", title:"Blue Title Card Garbled Text", desc:"Glitch text decoding into clarity.", vo:"And here's the best part: it's designed to prepare you for modern AI certifications, like the Claude Certified Architect Professional exam.", prompt:"Glitch blue title card decoding from garbled cyber text into crystal clear title.", tags:["title", "glitch", "claude", "certification", "text"]},
+  {seq:12, file:"12_dark-grid-visualization.mp4", slug:"dark-grid-visualization", title:"Dark Grid Visualization", desc:"Deep perspective grid representing structured knowledge.", vo:"AI agents can navigate structured vaults 100x faster than messy folders.", prompt:"Infinite perspective dark grid with glowing coordinates.", tags:["grid", "perspective", "vault", "structure", "speed"]},
+  {seq:13, file:"13_red-code-glitch.mp4", slug:"red-code-glitch", title:"Red Code Glitch", desc:"Terminal / matrix style code stream glitch.", vo:"Drowning in notes — chaos, low context, and manual digging.", prompt:"Red matrix code glitching and falling in terminal screen.", tags:["code", "glitch", "matrix", "red", "chaos", "terminal"]},
+  {seq:14, file:"14_data-interface-dashboard.mp4", slug:"data-interface-dashboard", title:"Data Interface Dashboard", desc:"FUI HUD dashboard with telemetry and live streams.", vo:"Then comes the engine: a local dual-agent rig running Gemini and Claude in tandem.", prompt:"Futuristic user interface dashboard with live node telemetry.", tags:["dashboard", "fui", "hud", "telemetry", "dual-agent", "engine"]},
+  {seq:15, file:"15_gold-blue-logos-sync.mp4", slug:"gold-blue-logos-sync", title:"Gold Blue Logos Sync", desc:"Gemini Gold and Claude Blue dual-agent synchronization.", vo:"Gemini Gold and Claude Blue exchanging data, streams to GitHub, Drive, Proxmox, Vault. Automation that actually scales.", prompt:"Gold and blue glowing energy orbs synchronizing and exchanging data.", tags:["gemini", "claude", "dual-agent", "sync", "tandem", "gold", "blue", "automation"]},
+  {seq:16, file:"16_grid-interface-display.mp4", slug:"grid-interface-display", title:"Grid Interface Display", desc:"High-density interface grid layout.", vo:"Color and graphics last, once the timing already works.", prompt:"High-density modular interface display grid.", tags:["grid", "display", "modular", "interface"]},
+  {seq:17, file:"17_digital-asset-interface.mp4", slug:"digital-asset-interface", title:"Digital Asset Interface", desc:"Asset management HUD with cards and metadata.", vo:"Projects, Areas, Resources, Archive — structured for automated agent traversal.", prompt:"Digital asset management interface scanning PARA categories.", tags:["para", "assets", "hud", "cards", "categories"]},
+  {seq:18, file:"18_golden-brain-lightning.mp4", slug:"golden-brain-lightning", title:"Golden Brain Lightning", desc:"Iconic AI Second Brain with cyan neural lightning bolt.", vo:"So I engineered something different: a machine-readable, AI-native knowledge engine.", prompt:"Golden 3D brain model with pulsating cyan lightning bolt through neural pathways.", tags:["golden brain", "brain", "lightning", "cyan", "second brain", "ai", "flagship"]},
+  {seq:19, file:"19_tell-show-animation.mp4", slug:"tell-show-animation", title:"Tell Show Animation", desc:"Visual progression of the 4-step workflow (Tell Show Do Apply).", vo:"Tell your thoughts into Obsidian. Show concepts visually in Canva. Do—turn that into slides. Apply—ship it as code in GitHub.", prompt:"Four kinetic boxes animating in sequence: Tell, Show, Do, Apply with checkmarks and arrows.", tags:["tell", "show", "do", "apply", "workflow", "4 steps", "obsidian", "canva", "github"]},
+  {seq:20, file:"20_golden-brain-lightning-2.mp4", slug:"golden-brain-lightning-2", title:"Golden Brain Lightning Pt.2", desc:"Dynamic pulsating golden neural network.", vo:"Imagine your knowledge base talking back to you.", prompt:"Close up of golden brain neural network surging with electrical current.", tags:["brain", "neural", "pulse", "current", "second brain"]},
+  {seq:21, file:"21_glowing-arrow-motion.mp4", slug:"glowing-arrow-motion", title:"Glowing Arrow Motion", desc:"Kinetic directional motion and action CTA.", vo:"From chaos to execution in four steps. Links in the comments. Let's go.", prompt:"Kinetic glowing arrows shooting forward indicating speed and action.", tags:["arrow", "motion", "action", "cta", "speed", "flow"]},
+  {seq:22, file:"22_animated-arrow-grid.mp4", slug:"animated-arrow-grid", title:"Animated Arrow Grid", desc:"Grid of kinetic arrows guiding user flow.", vo:"Tactics are the small, unglamorous reps — the actual hands-on-keyboard work that makes the other fifteen steps real.", prompt:"Synchronized grid of pulsing directional arrows moving in harmony.", tags:["arrows", "grid", "tactics", "flow", "execution"]},
+  {seq:23, file:"23_golden-brain-animation.mp4", slug:"golden-brain-animation", title:"Golden Brain Animation", desc:"Flagship AI Second Brain golden loop.", vo:"This isn't just about note-taking anymore. It's about building a second brain that actually works for you.", prompt:"Slow rotating golden metallic brain surrounded by orbiting cert, vault, and code icons.", tags:["golden brain", "second brain", "orbit", "flagship", "core"]},
+  {seq:24, file:"24_golden-brain-apps.mp4", slug:"golden-brain-apps", title:"Golden Brain Apps", desc:"Second Brain connecting to GitHub, Canva, Notion, Obsidian.", vo:"While you're working, these agents are running in the background—syncing across GitHub, Google Drive, Proxmox. You focus on execution.", prompt:"Golden brain at the center with branching neural data streams feeding into app icons.", tags:["apps", "github", "canva", "notion", "obsidian", "drive", "proxmox", "brain", "sync"]},
+  {seq:25, file:"25_golden-brain-animation-2.mp4", slug:"golden-brain-animation-2", title:"Golden Brain Animation Pt.2", desc:"Refined golden brain neural core.", vo:"Unlock real AI execution skills. Links in the comments.", prompt:"Golden brain neural core pulsing with gold and cyan lighting.", tags:["brain", "core", "gold", "execution"]},
+  {seq:26, file:"26_geometric-play-button-background.mp4", slug:"geometric-play-button-background", title:"Geometric Play Button", desc:"Closing outro card with geometric play symbol.", vo:"Join the hands-on cohort. Links in the comments below. Let's go.", prompt:"Geometric glowing play button with subtle motion background for YouTube outro.", tags:["play", "button", "outro", "cta", "end screen", "subscribe"]}
+];
+
+const STILLS_VO_MAP = {
+  "00_index.png": "Every video I make now runs through the same sixteen-step pipeline. This is the map.",
+  "01_architecture.png": "Plan. Assets. Assembly. Polish. Publish. Each stage has one job, and one tool that does it.",
+  "02_plan_00_cover-title.png": "AI Second Brain Video Script — Complete Production Guide. 6 scenes, 2:58 total.",
+  "02_plan_02_timing-table.png": "Scene timing table — 6 scenes, 2:58 total, ~475 words at 140-160 wpm.",
+  "02_plan_03_voiceover-1.png": "I was drowning in 46,000 notes across Obsidian. Every search felt like looking for a needle in a digital haystack. And then I realized—the problem wasn't the number of notes. It was that they weren't working for me. So I engineered something different: a machine-readable, AI-native knowledge engine.",
+  "02_plan_04_voiceover-2.png": "Raw knowledge isn't power—applied knowledge is. Tell your thoughts into Obsidian. Show concepts visually in Canva. Do. Apply. From chaos to execution in four steps. Links in the comments. Let's go.",
+  "02_plan_05_anim-prompts-1.png": "Scene 1 — Hook: chaotic dark workspace, 46,000 note-icons, digital haystack, red accent (#e74c3c), zoom to red-X transition. Scene 2: vault organizes.",
+  "02_plan_06_anim-prompts-2.png": "Scene 2 closes; Scene 3 — P.A.R.A. four zones AI understands instantly: Projects, Areas, Resources, Archive.",
+  "02_plan_07_anim-prompts-3.png": "Scene 4 — dual-agent engine, Gemini and Claude in tandem, syncing GitHub, Drive, Proxmox.",
+  "02_plan_08_anim-prompts-4.png": "Scene 5 — 4-Step Workflow: Tell, Show, Do, Apply. Scene 6 — Call to action: Join the hands-on cohort.",
+  "03_assets_01_para-vault-counts.png": "46,000 notes, 210 live projects — the numbers on screen aren't mockups. That's my actual second brain, queried live.",
+  "03_assets_02_dashboard-screenshot.png": "Then comes the engine: a local dual-agent rig running Gemini and Claude in tandem — live on the Second Brain dashboard.",
+  "04_cohort_00_week7-notes.png": "Every Sunday, 9 to 11PM UK time, free — I open my screen and we push AI to its limits together. No experience required.",
+  "04_cohort_02_schedule.png": "Every Sunday, 9 to 11PM UK time, free. That's not a tagline — that's Week 7's calendar invite.",
+  "05_gaps_00_hallucination-vs-context.png": "The gap is context. Low-context AI hallucinates. Feed it your history, your preferences, your own archive.",
+  "06_assembly_00_scene1-2-stills.png": "Scene 1 & 2 stills — Hook and problem setup: 46k notes, digital haystack, chaos to clarity."
+};
+
+const SCENE_COLORS = {
+  "00":"#3498db","01":"#9b59b6","02":"#e67e22","03":"#1abc9c","04":"#e74c3c",
+  "05":"#2980b9","06":"#16a085","07":"#8e44ad","08":"#f39c12","09":"#27ae60",
+  "10":"#c0392b","11":"#2c3e50","12":"#d35400","13":"#7f8c8d","14":"#e91e63","15":"#00bcd4",
+  "16":"#6366f1"
+};
+
+let allAssets = [];
+let filteredAssets = [];
+let currentFilterType = "all";
+let currentStage = "all";
+let searchQuery = "";
+let currentModalAsset = null;
+
+let appState = null;
+let assetStatus = {}; // { [file]: 'used' | 'out_of_scope' | 'available' }
+
+function escapeHtml(s){
+  return String(s == null ? "" : s)
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+
+let toastTimer = null;
+function showToast(msg){
+  const el = document.getElementById("toast");
+  if(!el) return;
+  el.textContent = msg;
+  el.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove("show"), 2600);
+}
+
+async function copyText(text, label){
+  try{
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      await navigator.clipboard.writeText(text);
+    } else {
+      const ta = document.createElement("textarea");
+      ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+      document.body.appendChild(ta); ta.select(); document.execCommand("copy"); document.body.removeChild(ta);
+    }
+    showToast(label ? `Copied ${label} to clipboard!` : "Copied to clipboard!");
+  }catch(e){
+    showToast("Copy failed: " + e.message);
+  }
+}
+
+async function loadAzureState(){
+  try{
+    const res = await fetch("/api/state", { cache: "no-store" });
+    if(res.ok){
+      const data = await res.json();
+      if(data && data.ok && data.found && data.state){
+        return data.state;
+      }
+    }
+  }catch(e){}
+  return null;
+}
+
+function loadLocalState(){
+  try{
+    const raw = localStorage.getItem("wiganimation_shotlist_v2") || localStorage.getItem("wiganimation_storyboard_v1");
+    return raw ? JSON.parse(raw) : null;
+  }catch(e){ return null; }
+}
+
+function initAssetStatus(state){
+  assetStatus = {};
+  if(state && state.assetStatus && typeof state.assetStatus === "object"){
+    Object.assign(assetStatus, state.assetStatus);
+  }
+  if(state && state.outOfScopeAssets && typeof state.outOfScopeAssets === "object"){
+    for(let k in state.outOfScopeAssets){
+      if(state.outOfScopeAssets[k]) assetStatus[k] = "out_of_scope";
+    }
+  }
+  if(state && Array.isArray(state.shots)){
+    state.shots.forEach(s => {
+      if(!s || s.hidden) return;
+      if(s.file && !assetStatus[s.file]) assetStatus[s.file] = "used";
+      if(Array.isArray(s.media)){
+        s.media.forEach(m => {
+          if(m && m.src && !assetStatus[m.src]) assetStatus[m.src] = "used";
+          if(m && m.poster && !assetStatus[m.poster]) assetStatus[m.poster] = "used";
+        });
+      }
+    });
+  }
+  if(state && state.usedAssets && typeof state.usedAssets === "object"){
+    for(let k in state.usedAssets){
+      if(state.usedAssets[k] && !assetStatus[k]) assetStatus[k] = "used";
+    }
+  }
+}
+
+let saveAzureTimer = null;
+async function saveToAzure(note){
+  const azureStat = document.getElementById("azureStat");
+  if(azureStat){
+    azureStat.className = "azure-pill saving";
+    azureStat.textContent = "☁️ Saving to Azure…";
+  }
+
+  if(!appState) appState = {};
+  appState.assetStatus = assetStatus;
+  
+  appState.usedAssets = {};
+  appState.outOfScopeAssets = {};
+  for(let k in assetStatus){
+    if(assetStatus[k] === "used") appState.usedAssets[k] = true;
+    else if(assetStatus[k] === "out_of_scope") appState.outOfScopeAssets[k] = true;
+  }
+  appState.savedAt = new Date().toISOString();
+
+  try{
+    localStorage.setItem("wiganimation_shotlist_v2", JSON.stringify(appState));
+  }catch(e){}
+
+  clearTimeout(saveAzureTimer);
+  saveAzureTimer = setTimeout(async () => {
+    try{
+      const res = await fetch("/api/state", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ state: appState, backup: false })
+      });
+      const data = await res.json();
+      if(data && data.ok){
+        if(azureStat){
+          azureStat.className = "azure-pill saved";
+          azureStat.textContent = "☁️ Saved to Azure · " + new Date().toLocaleTimeString();
+        }
+      } else {
+        if(azureStat){
+          azureStat.className = "azure-pill";
+          azureStat.textContent = "☁️ Saved locally";
+        }
+      }
+    }catch(e){
+      if(azureStat){
+        azureStat.className = "azure-pill";
+        azureStat.textContent = "☁️ Saved locally";
+      }
+    }
+  }, 400);
+}
+
+function getAssetStatus(item){
+  if(!item) return "available";
+  return assetStatus[item.file] || assetStatus[item.src] || (item.poster && assetStatus[item.poster]) || "available";
+}
+
+function setAssetStatus(filePath, newStatus, e){
+  if(e) e.stopPropagation();
+  const current = assetStatus[filePath] || "available";
+  if(current === newStatus){
+    assetStatus[filePath] = "available";
+  } else {
+    assetStatus[filePath] = newStatus;
+  }
+  const finalStatus = assetStatus[filePath] || "available";
+  
+  const statusLabels = {
+    used: "✅ Marked as Used (saved to Azure)",
+    out_of_scope: "🚫 Marked as Out of Scope (saved to Azure)",
+    available: "⏳ Marked as Available (saved to Azure)"
+  };
+  
+  saveToAzure(`Set ${filePath} -> ${finalStatus}`);
+  showToast(statusLabels[finalStatus] || "Status updated (saved to Azure)");
+  
+  updateCounts();
+  filterAndRender();
+
+  if(currentModalAsset && currentModalAsset.file === filePath){
+    updateModalControls();
+  }
+}
+
+function quickSearch(term){
+  const input = document.getElementById("searchInput");
+  if(input){
+    input.value = term;
+    searchQuery = term;
+    filterAndRender();
+  }
+}
+
+// Smart Search & Scoring
+function scoreAssetMatch(item, rawQuery){
+  if(!rawQuery) return { score: 1, matchText: "" };
+  
+  const qClean = rawQuery.toLowerCase().trim();
+  const tokens = qClean.split(/[\s,–—\-+]+/).filter(Boolean);
+  if(!tokens.length) return { score: 1, matchText: "" };
+
+  // Expand synonyms / numbers
+  const expandedTokens = [];
+  tokens.forEach(tok => {
+    expandedTokens.push(tok);
+    if(tok === "46k" || tok === "46000" || tok === "46,000"){
+      expandedTokens.push("46k", "46,000", "46000", "46");
+    }
+    if(tok === "haystack" || tok === "needle"){
+      expandedTokens.push("haystack", "needle");
+    }
+    if(tok === "secondbrain" || tok === "brain"){
+      expandedTokens.push("second brain", "brain");
+    }
+    if(tok === "dualagent" || tok === "dual-agent"){
+      expandedTokens.push("dual-agent", "gemini", "claude");
+    }
+  });
+
+  const searchableFields = [
+    { text: item.title || "", weight: 10, label: "Title" },
+    { text: item.vo || "", weight: 8, label: "VO" },
+    { text: item.prompt || "", weight: 7, label: "Prompt" },
+    { text: (item.tags || []).join(" "), weight: 6, label: "Tags" },
+    { text: item.caption || "", weight: 5, label: "Caption" },
+    { text: item.file || "", weight: 4, label: "File" },
+    { text: item.stageName || "", weight: 3, label: "Stage" }
+  ];
+
+  let totalScore = 0;
+  let matchedSnippet = "";
+  let matchedLabel = "";
+
+  const allCombined = searchableFields.map(f => f.text).join(" ").toLowerCase();
+
+  // Check full exact substring match
+  if(allCombined.includes(qClean)){
+    totalScore += 50;
+  }
+
+  // Check how many of the original user tokens match
+  let tokensMatchedCount = 0;
+  tokens.forEach(tok => {
+    const isMatched = searchableFields.some(f => f.text.toLowerCase().includes(tok));
+    if(isMatched){
+      tokensMatchedCount++;
+      totalScore += 15;
+    }
+  });
+
+  // Check expanded tokens
+  expandedTokens.forEach(tok => {
+    searchableFields.forEach(f => {
+      if(f.text.toLowerCase().includes(tok)){
+        totalScore += f.weight;
+        if(!matchedSnippet && f.text){
+          matchedSnippet = f.text;
+          matchedLabel = f.label;
+        }
+      }
+    });
+  });
+
+  // If none of the user tokens matched, score is 0
+  if(tokensMatchedCount === 0 && !allCombined.includes(qClean)){
+    return { score: 0, matchText: "" };
+  }
+
+  // Format snippet with highlighted words
+  let highlightedSnippet = "";
+  if(matchedSnippet){
+    // create short excerpt around match
+    let snippetLower = matchedSnippet.toLowerCase();
+    let firstIdx = -1;
+    for(let tok of tokens){
+      let idx = snippetLower.indexOf(tok);
+      if(idx >= 0 && (firstIdx === -1 || idx < firstIdx)) firstIdx = idx;
+    }
+    if(firstIdx < 0) firstIdx = 0;
+    let start = Math.max(0, firstIdx - 25);
+    let end = Math.min(matchedSnippet.length, start + 120);
+    let excerpt = (start > 0 ? "…" : "") + matchedSnippet.slice(start, end) + (end < matchedSnippet.length ? "…" : "");
+    
+    // highlight words
+    let safeExcerpt = escapeHtml(excerpt);
+    tokens.forEach(tok => {
+      if(tok.length >= 2){
+        const reg = new RegExp(`(${tok.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, "gi");
+        safeExcerpt = safeExcerpt.replace(reg, "<b>$1</b>");
+      }
+    });
+    highlightedSnippet = `🎯 Matched in ${matchedLabel}: ${safeExcerpt}`;
+  }
+
+  return { score: totalScore, matchText: highlightedSnippet };
+}
+
+async function loadAssets(){
+  const local = loadLocalState();
+  const remote = await loadAzureState();
+  appState = remote || local || {};
+  initAssetStatus(appState);
+
+  const videoAssets = VIDEO_FLOW_DATA.map(v => {
+    const stem = v.file.replace(/\.mp4$/i, "");
+    return {
+      kind: "video",
+      file: "video_flow/" + v.file,
+      src: "video_flow/" + v.file,
+      poster: "video_flow/_first_frames/" + stem + ".jpg",
+      stage: "16",
+      stageName: "Video Flow",
+      title: v.title,
+      slug: v.slug,
+      caption: v.desc,
+      vo: v.vo || "",
+      prompt: v.prompt || "",
+      tags: v.tags || [],
+      dur: "4s"
+    };
+  });
+
+  let stillAssets = [];
+  try{
+    const res = await fetch("stills/images_manifest.json");
+    if(res.ok){
+      const list = await res.json();
+      if(Array.isArray(list)){
+        stillAssets = list.map(item => {
+          const fileName = item.file.split("/").pop() || "";
+          const vo = STILLS_VO_MAP[fileName] || item.caption || "";
+          const stageName = item.stageName || ("Stage " + item.stage);
+          return {
+            kind: "still",
+            file: item.file,
+            src: item.file,
+            poster: item.file,
+            stage: item.stage || "00",
+            stageName: stageName,
+            title: fileName.replace(/\.[^.]+$/,"").replace(/^[0-9]+_[a-z]+_/i,"").replace(/[-_]/g," "),
+            slug: fileName,
+            caption: item.caption || "",
+            vo: vo,
+            prompt: item.caption || "",
+            tags: [stageName, item.stage, fileName.includes("haystack") ? "haystack" : "", fileName.includes("voiceover") ? "voiceover" : ""].filter(Boolean),
+            dur: ""
+          };
+        });
+      }
+    }
+  }catch(e){
+    console.warn("Could not load stills/images_manifest.json via fetch", e);
+  }
+
+  allAssets = [...videoAssets, ...stillAssets];
+  updateCounts();
+  filterAndRender();
+}
+
+function updateCounts(){
+  const videoCount = allAssets.filter(a => a.kind === "video").length;
+  const stillCount = allAssets.filter(a => a.kind === "still").length;
+  const usedCount = allAssets.filter(a => getAssetStatus(a) === "used").length;
+  const outCount = allAssets.filter(a => getAssetStatus(a) === "out_of_scope").length;
+  const availCount = allAssets.filter(a => getAssetStatus(a) === "available").length;
+  
+  const usedPct = allAssets.length ? Math.round((usedCount / allAssets.length) * 100) : 0;
+  const outPct = allAssets.length ? Math.round((outCount / allAssets.length) * 100) : 0;
+
+  document.getElementById("countAll").textContent = String(allAssets.length);
+  document.getElementById("countVideos").textContent = String(videoCount);
+  document.getElementById("countStills").textContent = String(stillCount);
+  document.getElementById("countUsed").textContent = String(usedCount);
+  document.getElementById("countOutOfScope").textContent = String(outCount);
+  document.getElementById("countAvailable").textContent = String(availCount);
+
+  document.getElementById("statTotal").textContent = String(allAssets.length);
+  document.getElementById("statUsed").textContent = `${usedCount} (${usedPct}%)`;
+  document.getElementById("statOutOfScope").textContent = `${outCount} (${outPct}%)`;
+  document.getElementById("statAvailable").textContent = String(availCount);
+  document.getElementById("statUsedPct").textContent = `${usedPct}%`;
+  
+  const fillUsed = document.getElementById("progressFillUsed");
+  if(fillUsed) fillUsed.style.width = `${usedPct}%`;
+  const fillOut = document.getElementById("progressFillOut");
+  if(fillOut) fillOut.style.width = `${outPct}%`;
+}
+
+function filterAndRender(){
+  const q = searchQuery.trim();
+  
+  // Filter & score assets
+  const scoredList = [];
+  allAssets.forEach(item => {
+    const status = getAssetStatus(item);
+    if(currentFilterType === "video" && item.kind !== "video") return;
+    if(currentFilterType === "still" && item.kind !== "still") return;
+    if(currentFilterType === "used" && status !== "used") return;
+    if(currentFilterType === "out_of_scope" && status !== "out_of_scope") return;
+    if(currentFilterType === "available" && status !== "available") return;
+    if(currentStage !== "all" && item.stage !== currentStage) return;
+
+    const { score, matchText } = scoreAssetMatch(item, q);
+    if(score > 0){
+      scoredList.push({ item, score, matchText });
+    }
+  });
+
+  // Sort by search score descending when query exists
+  if(q){
+    scoredList.sort((a, b) => b.score - a.score);
+  }
+
+  filteredAssets = scoredList.map(s => s.item);
+
+  const grid = document.getElementById("galleryGrid");
+  if(!scoredList.length){
+    grid.innerHTML = `<div style="grid-column:1/-1;padding:60px 16px;text-align:center;color:var(--muted);font-size:15px;">
+      No assets match "<b>${escapeHtml(q)}</b>". Try searching keywords like <i>46k</i>, <i>haystack</i>, <i>obsidian</i>, <i>brain</i>, or <i>workflow</i>.
+    </div>`;
+    return;
+  }
+
+  grid.innerHTML = scoredList.map((entry, idx) => {
+    const item = entry.item;
+    const isVid = item.kind === "video";
+    const status = getAssetStatus(item);
+    const stageColor = SCENE_COLORS[item.stage] || "#3498db";
+    const displayName = item.title ? item.title.replace(/\b\w/g, l => l.toUpperCase()) : item.file;
+    const cardStatusClass = status === "used" ? "status-used" : (status === "out_of_scope" ? "status-out" : "");
+    
+    return `
+      <div class="asset-card ${cardStatusClass}" data-idx="${idx}">
+        <div class="asset-thumb-wrap" onclick="openModal(${idx})">
+          <img src="${escapeHtml(item.poster)}" alt="${escapeHtml(displayName)}" loading="lazy">
+          ${isVid ? `
+            <div class="play-overlay">
+              <div class="play-circle">▶</div>
+            </div>
+            <span class="asset-dur-badge">0:04 · MP4</span>
+          ` : ""}
+          <span class="asset-kind-badge ${item.kind}">${item.kind === "video" ? "🎬 Video Flow" : "🖼️ Still"}</span>
+          
+          <div class="card-status-bar" onclick="event.stopPropagation()">
+            <button type="button" class="status-pill-btn ${status === "used" ? "active-used" : ""}" onclick="setAssetStatus('${escapeHtml(item.file)}', 'used', event)" title="Mark as Used">
+              <span>✓</span> Used
+            </button>
+            <button type="button" class="status-pill-btn ${status === "out_of_scope" ? "active-out" : ""}" onclick="setAssetStatus('${escapeHtml(item.file)}', 'out_of_scope', event)" title="Mark as Out of Scope">
+              <span>✕</span> Out
+            </button>
+          </div>
+        </div>
+        <div class="asset-body">
+          <div class="asset-header">
+            <div class="asset-title" title="${escapeHtml(displayName)}">${escapeHtml(displayName)}</div>
+            <span class="stage-pill" style="background:${stageColor}">St ${item.stage}</span>
+          </div>
+          <div class="asset-caption" title="${escapeHtml(item.caption)}">${escapeHtml(item.caption || "(No caption)")}</div>
+          ${entry.matchText ? `<div class="match-snippet">${entry.matchText}</div>` : ""}
+          <div class="asset-footer">
+            <div class="asset-path" title="${escapeHtml(item.file)}">${escapeHtml(item.file)}</div>
+            <div class="asset-actions">
+              <button type="button" class="icon-btn" onclick="copyAssetPath('${escapeHtml(item.file)}', event)" title="Copy path">📋 Path</button>
+              <button type="button" class="icon-btn" onclick="copyAssetMd('${escapeHtml(item.file)}', '${escapeHtml(displayName)}', event)" title="Copy Markdown embed">🖼️ Md</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+function updateModalControls(){
+  if(!currentModalAsset) return;
+  const status = getAssetStatus(currentModalAsset);
+  const btnUsed = document.getElementById("btnModalSetUsed");
+  const btnOut = document.getElementById("btnModalSetOut");
+  const btnAvail = document.getElementById("btnModalSetAvailable");
+
+  if(btnUsed){
+    btnUsed.className = "btn sm " + (status === "used" ? "success" : "");
+    btnUsed.innerHTML = status === "used" ? "✅ Used in Storyboard" : "✓ Mark Used";
+  }
+  if(btnOut){
+    btnOut.className = "btn sm " + (status === "out_of_scope" ? "warning" : "");
+    btnOut.innerHTML = status === "out_of_scope" ? "🚫 Marked Out of Scope" : "✕ Out of Scope";
+  }
+  if(btnAvail){
+    btnAvail.style.display = status !== "available" ? "inline-flex" : "none";
+  }
+}
+
+function openModal(idx){
+  const asset = filteredAssets[idx];
+  if(!asset) return;
+  currentModalAsset = asset;
+  document.getElementById("modalTitle").textContent = (asset.title || asset.file) + " — Stage " + asset.stage + " (" + asset.stageName + ")";
+  document.getElementById("modalDesc").textContent = asset.caption || "No extra description provided.";
+  
+  const voBox = document.getElementById("modalVo");
+  if(asset.vo){
+    voBox.style.display = "block";
+    voBox.innerHTML = `<b>Voiceover Script:</b><br>${escapeHtml(asset.vo)}`;
+  } else {
+    voBox.style.display = "none";
+  }
+
+  document.getElementById("modalPath").textContent = asset.file;
+  document.getElementById("btnModalOpen").href = asset.file;
+  updateModalControls();
+
+  const mediaBox = document.getElementById("modalMedia");
+  mediaBox.innerHTML = "";
+  if(asset.kind === "video"){
+    const v = document.createElement("video");
+    v.src = asset.src;
+    v.poster = asset.poster;
+    v.controls = true;
+    v.autoplay = true;
+    v.loop = true;
+    v.playsInline = true;
+    mediaBox.appendChild(v);
+  } else {
+    const img = document.createElement("img");
+    img.src = asset.src;
+    img.alt = asset.title;
+    mediaBox.appendChild(img);
+  }
+
+  document.getElementById("assetModal").classList.add("open");
+}
+
+function closeModal(){
+  document.getElementById("assetModal").classList.remove("open");
+  const mediaBox = document.getElementById("modalMedia");
+  mediaBox.innerHTML = "";
+  currentModalAsset = null;
+}
+
+function copyAssetPath(file, e){
+  if(e) e.stopPropagation();
+  copyText(file, "file path");
+}
+
+function copyAssetMd(file, title, e){
+  if(e) e.stopPropagation();
+  const md = `![${title || "Asset"}](${file})`;
+  copyText(md, "Markdown embed");
+}
+
+// Wire Event Listeners
+document.querySelectorAll(".pill-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".pill-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    currentFilterType = btn.dataset.type;
+    filterAndRender();
+  });
+});
+
+document.getElementById("stageFilter").addEventListener("change", (e) => {
+  currentStage = e.target.value;
+  filterAndRender();
+});
+
+document.getElementById("searchInput").addEventListener("input", (e) => {
+  searchQuery = e.target.value;
+  filterAndRender();
+});
+
+function removeAllUsed(){
+  const usedKeys = Object.keys(assetStatus).filter(k => assetStatus[k] === "used");
+  if(usedKeys.length === 0){
+    showToast("No assets are currently marked as used.");
+    return;
+  }
+
+  const confirmed = confirm(`Are you sure you want to remove the 'Used' mark from all ${usedKeys.length} assets?\nThis will set their status back to Available and save the update to Azure.`);
+  if(!confirmed) return;
+
+  for(let k of usedKeys){
+    assetStatus[k] = "available";
+  }
+
+  saveToAzure("Removed all used marks");
+  showToast(`✓ Removed all ${usedKeys.length} used marks (saved to Azure)`);
+  
+  updateCounts();
+  filterAndRender();
+
+  if(currentModalAsset){
+    updateModalControls();
+  }
+}
+
+document.getElementById("btnRemoveAllUsed").addEventListener("click", removeAllUsed);
+
+document.getElementById("btnCopyAllPaths").addEventListener("click", () => {
+  const paths = filteredAssets.map(a => a.file).join("\n");
+  copyText(paths, `all ${filteredAssets.length} asset paths`);
+});
+
+document.getElementById("btnCopyAllMd").addEventListener("click", () => {
+  const mds = filteredAssets.map(a => `![${a.title || a.file}](${a.file})`).join("\n\n");
+  copyText(mds, `all ${filteredAssets.length} markdown embeds`);
+});
+
+document.getElementById("modalClose").addEventListener("click", closeModal);
+document.getElementById("assetModal").addEventListener("click", (e) => {
+  if(e.target.id === "assetModal") closeModal();
+});
+document.addEventListener("keydown", (e) => {
+  if(e.key === "Escape") closeModal();
+});
+
+document.getElementById("btnModalSetUsed").addEventListener("click", () => {
+  if(currentModalAsset) setAssetStatus(currentModalAsset.file, "used");
+});
+document.getElementById("btnModalSetOut").addEventListener("click", () => {
+  if(currentModalAsset) setAssetStatus(currentModalAsset.file, "out_of_scope");
+});
+document.getElementById("btnModalSetAvailable").addEventListener("click", () => {
+  if(currentModalAsset) setAssetStatus(currentModalAsset.file, "available");
+});
+
+document.getElementById("btnModalCopyPath").addEventListener("click", () => {
+  if(currentModalAsset) copyText(currentModalAsset.file, "file path");
+});
+document.getElementById("btnModalCopyMd").addEventListener("click", () => {
+  if(currentModalAsset) copyText(`![${currentModalAsset.title || "Asset"}](${currentModalAsset.file})`, "Markdown embed");
+});
+
+document.getElementById("themeToggle").addEventListener("click", () => {
+  const cur = document.documentElement.getAttribute("data-theme") || "dark";
+  const nxt = cur === "dark" ? "light" : "dark";
+  document.documentElement.setAttribute("data-theme", nxt);
+  document.documentElement.style.colorScheme = nxt;
+  try{ localStorage.setItem("aug-video-theme", nxt); }catch(e){}
+});
+
+// Boot
+loadAssets();
+</script>
+</body>
+</html>

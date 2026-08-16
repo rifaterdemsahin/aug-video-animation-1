@@ -818,17 +818,28 @@ html[data-theme="dark"] .tag-add-btn:hover,html[data-theme="dark"] .tag-add[open
     <nav class="shared-nav" aria-label="Main Navigation">
       <a href="index.html" class="nav-item"><span>🏠</span> Overview</a>
       <a href="research.html" class="nav-item active"><span>🎬</span> Research</a>
+      <a href="gallery.html" class="nav-item"><span>🖼️</span> Gallery</a>
       <a href="scenes.html" class="nav-item"><span>🗂️</span> Scenes</a>
       <a href="timeline.html" class="nav-item"><span>↔️</span> Timeline</a>
       <a href="shotlist.html" class="nav-item"><span>📊</span> Shot List</a>
       <a href="voice_over.html" class="nav-item"><span>📜</span> VoiceOver</a>
+      <a href="tactic.html" class="nav-item"><span>🎯</span> Tactics</a>
+      <a href="https://canva.link/p4u3nwvsmio19jp" class="nav-item" target="_blank" rel="noopener noreferrer" style="color:var(--purple,#af52de);" title="Canva Implementation Deck"><span>🎨</span> Implementation ↗</a>
     </nav>
     <a class="btn primary" href="timeline.html" title="Open horizontal timeline view">↔ Horizontal</a>
     <details class="menu" id="toolsMenu">
       <summary>🧰 Tools ▾</summary>
       <div class="menu-panel">
-        <a href="https://www.canva.com/design/DAHRZe5KBoA/OJU0sL318CozUaTBpkdT2g/edit" target="_blank" rel="noopener noreferrer">
-          🎨 Canva design
+        <a class="menu-item" href="gallery.html">
+          🖼️ Asset Gallery
+          <small>Thumbnails of all 26 videos + 105+ stills</small>
+        </a>
+        <button type="button" class="menu-item" id="btnJumpVideoFlow">
+          🎥 Jump to Video Flow
+          <small>26 Google Flow animation clips on Stage 16</small>
+        </button>
+        <a href="https://canva.link/p4u3nwvsmio19jp" target="_blank" rel="noopener noreferrer">
+          🎨 Canva Implementation
           <small>Edit the source deck in Canva</small>
         </a>
         <button type="button" class="menu-item" id="btnAzureSave">
@@ -913,6 +924,20 @@ html[data-theme="dark"] .tag-add-btn:hover,html[data-theme="dark"] .tag-add[open
     <span id="saveMsg"></span>
   </div>
 </header>
+<div class="research-subnav" style="background:var(--panel);border-bottom:1px solid var(--line);padding:7px 16px;position:sticky;top:53px;z-index:20;">
+  <div style="max-width:1440px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;">
+    <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;">
+      <button type="button" class="btn sm primary" id="btnSubnavShotlist">🎬 Shotlist</button>
+      <button type="button" class="btn sm" id="btnSubnavVideoFlow" style="background:rgba(99,102,241,0.14);border-color:rgba(99,102,241,0.3);color:var(--ink);" title="Jump to Stage 16 Video Flow clips">🎥 Video Flow (26 Clips)</button>
+      <a href="gallery.html" class="btn sm" style="background:rgba(39,174,96,0.14);border-color:rgba(39,174,96,0.3);color:var(--ink);" title="Open complete Asset Gallery in thumbnail form">🖼️ Asset Gallery (131) ↗</a>
+      <button type="button" class="btn sm" id="btnSubnavVo">🎙️ Voiceover</button>
+      <button type="button" class="btn sm" id="btnSubnavMeta">📦 Metadata</button>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center;font-size:12px;color:var(--muted);">
+      <span>🎬 26 Flow Videos (Stage 16) + 105 Stills</span>
+    </div>
+  </div>
+</div>
 <div class="azure-banner" id="azureBanner">☁️ Shotlist is backed up to <b>Azure Blob</b> when you Save — status: <b id="azureBannerStatus">checking…</b></div>
 <aside class="bookmark-rail" id="bookmarkRail" aria-label="Bookmark navigator">
   <form class="bookmark-form" id="bookmarkForm">
@@ -1585,6 +1610,9 @@ function ensureVideoFlowMedia(shot){
   }
 }
 function mergeVideoFlowShots(){
+  if(scenes["16"]){
+    scenes["16"].hidden = false;
+  }
   const kept = [];
   const byClip = new Map();
   shots.forEach(s => {
@@ -1596,12 +1624,12 @@ function mergeVideoFlowShots(){
     const id = videoFlowShotId(clip);
     const prev = byClip.get(id);
     if(prev){
-      if(s.hidden) prev.hidden = true;
       return;
     }
     s.id = id;
     s.file = clip.src;
     if(!s.stage) s.stage = "16";
+    s.hidden = false;
     ensureVideoFlowMedia(s);
     byClip.set(id, s);
     kept.push(s);
@@ -1611,6 +1639,7 @@ function mergeVideoFlowShots(){
     const id = videoFlowShotId(clip);
     if(byClip.has(id)) return;
     const extra = buildVideoFlowShot(clip);
+    extra.hidden = false;
     shots.push(extra);
     byClip.set(id, extra);
   });
@@ -4078,6 +4107,42 @@ document.getElementById("btnBmDelete").addEventListener("click", () => {
 document.getElementById("bookmarkSelect").addEventListener("change", (e) => {
   if(e.target.value) jumpToBookmark(e.target.value);
 });
+function jumpToVideoFlow(){
+  if(scenes["16"]){
+    scenes["16"].hidden = false;
+    scenes["16"].minimized = false;
+    sceneOpen["16"] = true;
+  }
+  shots.forEach(s => {
+    if(s.stage === "16" || (s.file && String(s.file).includes("video_flow"))) s.hidden = false;
+  });
+  if(currentView !== "shotlist") setView("shotlist");
+  else renderShotlist();
+  flash("Stage 16 · Video Flow (26 clips active)");
+  setTimeout(() => {
+    const el = document.querySelector('.scene[data-stage="16"]');
+    if(el){
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+      el.classList.add("is-selected");
+    }
+  }, 100);
+}
+
+const btnJumpVf = document.getElementById("btnJumpVideoFlow");
+if(btnJumpVf) btnJumpVf.addEventListener("click", () => { closeTools(); jumpToVideoFlow(); });
+
+const btnSubnavVf = document.getElementById("btnSubnavVideoFlow");
+if(btnSubnavVf) btnSubnavVf.addEventListener("click", jumpToVideoFlow);
+
+const btnSubnavSl = document.getElementById("btnSubnavShotlist");
+if(btnSubnavSl) btnSubnavSl.addEventListener("click", () => setView("shotlist"));
+
+const btnSubnavVo = document.getElementById("btnSubnavVo");
+if(btnSubnavVo) btnSubnavVo.addEventListener("click", () => setView("voiceover"));
+
+const btnSubnavMeta = document.getElementById("btnSubnavMeta");
+if(btnSubnavMeta) btnSubnavMeta.addEventListener("click", () => setView("metadata"));
+
 document.getElementById("btnJumpBookmark").addEventListener("click", () => {
   closeTools();
   const latest = latestBookmark();
