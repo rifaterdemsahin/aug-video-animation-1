@@ -535,8 +535,8 @@ header{
             <button type="button" class="btn purple" id="btnRunAIGen" onclick="runAIGeneration()" style="background:linear-gradient(135deg, #8e44ad, #6366f1); border-color:#8e44ad; color:#fff; font-weight:800;">
               🚀 Generate Voiceover (Gemini)
             </button>
-            <button type="button" class="btn" id="btnRunFalGen" onclick="runFalAudioGeneration()" style="background:#f59e0b; border-color:#d97706; color:#000; font-weight:800;">
-              ⚡ Generate Audio (Fal.ai)
+            <button type="button" class="btn" id="btnRunFalGen" onclick="runFalAudioGeneration()" style="background:#f59e0b; border-color:#d97706; color:#000; font-weight:800;" title="Generate speech for all 200 seconds of the voiceover script using Fal.ai">
+              ⚡ Generate All Audio (Fal.ai)
             </button>
             <button type="button" class="btn success" id="btnApplyAIGen" onclick="applyAIGeneratedScript()" style="display:none;">
               💾 Apply to Master Script &amp; Save
@@ -899,19 +899,32 @@ async function runFalAudioGeneration(){
   const outputEl = document.getElementById("aiPreviewOutput");
   const player = document.getElementById("aiAudioPlayer");
   const btnRun = document.getElementById("btnRunFalGen");
-  const testText = "I was drowning in 46,000 notes across Obsidian. So I engineered an AI knowledge engine.";
+  
+  // Extract all spoken text across all 6 scenes (full 200s duration)
+  const fullScript = (outputEl?.value || document.getElementById("guruScriptArea")?.value || "").trim();
+  const allSpokenText = fullScript.split('\n')
+    .filter(l => l.trim() && !l.startsWith('#') && !l.startsWith('>'))
+    .map(l => l.replace(/^\[\d{2}:\d{2}\]\s*(\[[^\]]+\]\s*)?(\([^)]*\)\s*)?/, '').trim())
+    .filter(Boolean)
+    .join(' ');
 
-  if(statusEl) statusEl.textContent = "⏳ Generating Fal.ai audio via Azure Key Vault...";
+  if(!allSpokenText){
+    alert("Please ensure the voiceover script contains text before generating all audio.");
+    return;
+  }
+
+  const wordCount = allSpokenText.split(/\s+/).length;
+  if(statusEl) statusEl.textContent = `⏳ Generating Fal.ai audio for ALL ${wordCount} words (200s timeline)...`;
   if(btnRun){
     btnRun.disabled = true;
-    btnRun.textContent = "⚡ Generating Fal Audio...";
+    btnRun.textContent = "⚡ Generating All Audio...";
   }
 
   try {
     const res = await fetch("/api/ai/tts", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ engine: "fal", text: testText }),
+      body: JSON.stringify({ engine: "fal", text: allSpokenText }),
     });
     const data = await res.json();
     if(data.ok){
@@ -921,18 +934,20 @@ async function runFalAudioGeneration(){
         player.style.display = "block";
         player.play();
       }
-      if(outputEl) outputEl.value = `⚡ Fal.ai Voiceover Audio Stream Ready!\nEngine: ${data.engine}\nSource: ${data.key_source}\nText: "${data.text}"`;
-      if(statusEl) statusEl.textContent = `✅ Fal.ai Audio Generated successfully!`;
+      if(outputEl) outputEl.value = `⚡ COMPLETE FAL.AI VOICEOVER GENERATED (ALL 200s / ${wordCount} WORDS)!\nEngine: ${data.engine}\nSource: ${data.key_source}\nAudio Stream: ${audioSrc ? "Ready & Playing" : "Generated"}\n\n---\nFull Spoken Voiceover Script:\n${allSpokenText}`;
+      if(statusEl) statusEl.textContent = `✅ Fal.ai Generated ALL Audio (${wordCount} words)!`;
 
-      // Save Fal generation to Azure with versioning
+      // Save complete audio generation to Azure with versioning
       try {
         const saveRes = await fetch("/api/state", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             lastTestedEngine: "fal.ai",
-            testType: "fal_full_tts",
-            testInput: testText,
+            testType: "fal_full_200s_audio",
+            audioEngine: "fal.ai",
+            fullSpokenText: allSpokenText,
+            wordCount: wordCount,
             savedAt: new Date().toISOString(),
             backup: true
           })
@@ -951,7 +966,7 @@ async function runFalAudioGeneration(){
   } finally {
     if(btnRun){
       btnRun.disabled = false;
-      btnRun.textContent = "⚡ Generate Audio (Fal.ai)";
+      btnRun.textContent = "⚡ Generate All Audio (Fal.ai)";
     }
   }
 }
