@@ -31,74 +31,52 @@ DEFAULT_MD_DOC = "3_Simulation/rawexport/voiceover_rewrite_workbench.md"
 DEFAULT_HTML_DOC = "3_Simulation/rawexport/voiceover_inspector.html"
 DEFAULT_MANIFEST = "3_Simulation/rawexport/frames_manifest.json"
 
-# Master Script Scenes Reference
-MASTER_SCENES = [
-    {
-        "stage": "01",
-        "scene": 1,
-        "name": "Hook & Problem Setup",
-        "start": 0,
-        "end": 15,
-        "base_vo": "I was drowning in 46,000 notes across Obsidian. Every search felt like looking for a needle in a digital haystack. And then I realized—the problem wasn't the number of notes. It was that they weren't working for me.",
-        "ai_punchy": "46,000 notes in Obsidian, zero clarity. Every search was a needle in a digital haystack. The problem wasn't the notes—they just weren't working for me.",
-        "ai_strategic": "I had accumulated over 46,000 notes in Obsidian, but finding relevant insights was impossible. Chaos isn't a scaling strategy—structure is.",
-        "ai_conversational": "Ever felt buried under your own notes? With 46,000 files in Obsidian, every search was painful. Here is how I fixed it."
-    },
-    {
-        "stage": "02",
-        "scene": 2,
-        "name": "The Realization Moment",
-        "start": 15,
-        "end": 45,
-        "base_vo": "So I engineered something different: a machine-readable, AI-native knowledge engine. No more chaos. No more manual digging. Instead, I built a system where AI agents can query, synthesize, and update my entire knowledge base—automatically. And here's the best part: it's designed to prepare you for modern AI certifications, like the Claude Certified Architect Professional exam.",
-        "ai_punchy": "So I built an AI-native second brain. No manual digging. AI agents query, synthesize, and update my entire vault automatically—prepping you for top AI certs.",
-        "ai_strategic": "The breakthrough: transform raw markdown into a machine-readable graph. Autonomous agents index and synthesize your history 100x faster.",
-        "ai_conversational": "Instead of organizing files by hand, I let AI do the heavy lifting. Now my agents query, connect, and update my notes while I sleep."
-    },
-    {
-        "stage": "03",
-        "scene": 3,
-        "name": "P.A.R.A. Method Framework",
-        "start": 45,
-        "end": 80,
-        "base_vo": "The foundation is the P.A.R.A. method—four zones that AI understands instantly: Projects—short-term efforts with deadlines. Areas—long-term responsibilities you own. Resources—reference material and topics of interest. And Archive—everything inactive. Why this works: AI agents can navigate structured vaults 100x faster than messy folders. Imagine your knowledge base talking back to you.",
-        "ai_punchy": "The engine runs on P.A.R.A: Projects, Areas, Resources, and Archive. Structured four-zone taxonomy that AI agents parse in milliseconds.",
-        "ai_strategic": "P.A.R.A provides deterministic boundaries for LLM context windows. Four clean zones eliminate ambiguity and hallucination.",
-        "ai_conversational": "Four simple folders: Projects, Areas, Resources, and Archive. Clean structure means AI agents find answers in seconds."
-    },
-    {
-        "stage": "04",
-        "scene": 4,
-        "name": "The Engine: Dual-Agent System",
-        "start": 80,
-        "end": 115,
-        "base_vo": "Then comes the engine: a local dual-agent rig running Gemini and Claude in tandem. While you're working, these agents are running in the background—syncing across GitHub, Google Drive, Proxmox. Generating changelogs. Maintaining structure. You focus on execution. They handle the busywork. It's automation that actually scales.",
-        "ai_punchy": "The horsepower: Gemini Gold and Claude Blue working in tandem. Background sync across GitHub, Drive, and Proxmox. Automation that actually scales.",
-        "ai_strategic": "A local dual-agent orchestration rig. One agent handles indexing and consistency; the other queries and synthesizes in real time.",
-        "ai_conversational": "Meet the dual-agent engine: Gemini and Claude running in parallel. They handle syncing and changelogs so you can focus on shipping."
-    },
-    {
-        "stage": "05",
-        "scene": 5,
-        "name": "The 4-Step Workflow",
-        "start": 115,
-        "end": 145,
-        "base_vo": "Raw knowledge isn't power—applied knowledge is. So I built a 4-step workflow: Tell your thoughts into Obsidian. Brain-dump raw context. Show concepts visually in Canva—map relationships, refine structure. Do—turn that into slides and presentations. Make it consumable. Apply—ship it as code, assets, or implementations in GitHub. From chaos to execution in four steps.",
-        "ai_punchy": "Knowledge is only power when applied. The 4-step loop: Tell into Obsidian, Show in Canva, Do in slides, Apply in GitHub. Chaos to execution.",
-        "ai_strategic": "A closed-loop operational pipeline: Tell, Show, Do, Apply. From unstructured brain-dumps to production code repositories.",
-        "ai_conversational": "Four steps from thought to execution: Tell your thoughts, Show the visuals, Do the deck, and Apply the code in GitHub."
-    },
-    {
-        "stage": "06",
-        "scene": 6,
-        "name": "Call to Action & Closing",
-        "start": 145,
-        "end": 178,
-        "base_vo": "This isn't just about note-taking anymore. It's about building a second brain that actually works for you. And if you're serious about AI skills—whether you're prepping for certifications or just want to think faster—this system accelerates everything. We're launching a hands-on cohort where you'll build this from scratch, master the framework, and unlock real AI execution skills. Links in the comments. Let's go.",
-        "ai_punchy": "Build a second brain that actually works for you. Join our free hands-on Sunday cohort and master agentic workflows from scratch. Links below. Let's go.",
-        "ai_strategic": "Accelerate your AI engineering readiness. Join the live weekly cohort, build the architecture hands-on, and earn your certification.",
-        "ai_conversational": "Ready to build your AI second brain? Join our live Sunday cohort and build this system with us. Check the links below—let's go!"
-    }
+# Comprehensive Master Beats (Mapped across all 200 seconds: 00:00 to 03:20)
+MASTER_BEATS = [
+    # Scene 1: Hook & Problem Setup (0:00 - 0:18)
+    {"start": 0, "end": 4, "scene": 1, "stage": "01", "name": "Hook & Problem Setup", "beat": "Drowning in Notes", "visual": "Dark workspace with glowing vault icon swirled by chaotic notes.", "base_vo": "I was drowning in 46,000 notes across Obsidian.", "ai_punchy": "46,000 Obsidian notes. Total digital chaos.", "ai_strategic": "I had accumulated over 46,000 notes with zero structure.", "ai_conversational": "Ever felt completely buried under your own Obsidian notes?"},
+    {"start": 4, "end": 8, "scene": 1, "stage": "01", "name": "Hook & Problem Setup", "beat": "Digital Haystack", "visual": "46,000 note icons swirling into a digital vortex with search timeouts.", "base_vo": "Every search felt like looking for a needle in a digital haystack.", "ai_punchy": "Every search was a needle in a digital haystack.", "ai_strategic": "Unstructured search queries produced massive latency and noise.", "ai_conversational": "Searching for anything felt like looking for a needle in a haystack."},
+    {"start": 8, "end": 13, "scene": 1, "stage": "01", "name": "Hook & Problem Setup", "beat": "The Root Cause", "visual": "Glitch red distortion on search bar with flashing red-X alert.", "base_vo": "And then I realized—the problem wasn't the number of notes.", "ai_punchy": "The problem wasn't the note count.", "ai_strategic": "The failure was architectural, not a volume limitation.", "ai_conversational": "And then it hit me: the problem wasn't having too many notes."},
+    {"start": 13, "end": 19, "scene": 1, "stage": "01", "name": "Hook & Problem Setup", "beat": "Notes Working For You", "visual": "Camera zooms into locked vault core with red accent transition.", "base_vo": "It was that they weren't working for me.", "ai_punchy": "They just weren't working for me.", "ai_strategic": "Static notes generate zero leverage without active synthesis.", "ai_conversational": "It was that my notes simply weren't working for me."},
+
+    # Scene 2: The Realization Moment (0:19 - 0:48)
+    {"start": 19, "end": 24, "scene": 2, "stage": "02", "name": "The Realization Moment", "beat": "Engineering The Breakthrough", "visual": "Vault flashes gold as cybernetic graph network connects active nodes.", "base_vo": "So I engineered something different: an AI-native knowledge engine.", "ai_punchy": "So I built an AI-native second brain.", "ai_strategic": "I engineered a deterministic, machine-readable graph topology.", "ai_conversational": "So I engineered something new: an AI-native knowledge engine."},
+    {"start": 24, "end": 30, "scene": 2, "stage": "02", "name": "The Realization Moment", "beat": "No More Manual Digging", "visual": "Red chaos nodes snap cleanly into synchronized cyan clusters.", "base_vo": "No more chaos. No more manual digging.", "ai_punchy": "No more manual digging. No more chaos.", "ai_strategic": "Manual folder hierarchies are completely eliminated.", "ai_conversational": "No more endless digging or messy folder searching."},
+    {"start": 30, "end": 37, "scene": 2, "stage": "02", "name": "The Realization Moment", "beat": "Autonomous Agent Queries", "visual": "Dual agent cursors query, synthesize, and tag markdown files live.", "base_vo": "Instead, AI agents query, synthesize, and update my entire vault.", "ai_punchy": "AI agents query and synthesize everything automatically.", "ai_strategic": "Autonomous LLM agents continuously index and summarize knowledge.", "ai_conversational": "Now AI agents query and synthesize all my notes automatically."},
+    {"start": 37, "end": 43, "scene": 2, "stage": "02", "name": "The Realization Moment", "beat": "Automatic Background Sync", "visual": "Automated sync status bar reaches 100% with gold checkmark.", "base_vo": "Everything updates automatically in the background.", "ai_punchy": "Everything updates silently while you sleep.", "ai_strategic": "Background workers ensure eventual consistency across all storage nodes.", "ai_conversational": "It all updates automatically in the background while I work."},
+    {"start": 43, "end": 49, "scene": 2, "stage": "02", "name": "The Realization Moment", "beat": "AI Certification Blueprint", "visual": "Claude Certified Architect badge and exam readiness blueprint glow.", "base_vo": "And it prepares you for modern AI certifications like Claude Architect.", "ai_punchy": "Prepping you for top AI certifications like Claude Architect.", "ai_strategic": "Designed around the Claude Certified Architect Professional competency model.", "ai_conversational": "Plus it's built to prep you for top AI certs like Claude Architect."},
+
+    # Scene 3: P.A.R.A. Method Framework (0:49 - 1:24)
+    {"start": 49, "end": 54, "scene": 3, "stage": "03", "name": "P.A.R.A. Method Framework", "beat": "Four Deterministic Zones", "visual": "Screen splits into 4 clean colored zone containers (Projects, Areas, Resources, Archive).", "base_vo": "The foundation is the P.A.R.A. method—four zones AI understands instantly.", "ai_punchy": "The backbone is P.A.R.A: four clean AI zones.", "ai_strategic": "P.A.R.A establishes deterministic boundaries for LLM context retrieval.", "ai_conversational": "The foundation is simple: four zones that AI understands instantly."},
+    {"start": 54, "end": 60, "scene": 3, "stage": "03", "name": "P.A.R.A. Method Framework", "beat": "Projects Zone (Red)", "visual": "Red container #e74c3c populating active tasks and sprint deadlines.", "base_vo": "Projects: short-term efforts with strict deadlines.", "ai_punchy": "Projects: active work with deadlines.", "ai_strategic": "Projects zone houses time-bounded execution objectives.", "ai_conversational": "Projects are your short-term goals with clear deadlines."},
+    {"start": 60, "end": 66, "scene": 3, "stage": "03", "name": "P.A.R.A. Method Framework", "beat": "Areas Zone (Blue)", "visual": "Blue container #3498db with systems, infrastructure, and ops records.", "base_vo": "Areas: long-term responsibilities you own continuously.", "ai_punchy": "Areas: permanent responsibilities you own.", "ai_strategic": "Areas zone manages continuous operational domain standards.", "ai_conversational": "Areas are ongoing responsibilities you manage every day."},
+    {"start": 66, "end": 72, "scene": 3, "stage": "03", "name": "P.A.R.A. Method Framework", "beat": "Resources Zone (Green)", "visual": "Green container #27ae60 with study material, research, and prompt templates.", "base_vo": "Resources: reference guides and topics of interest.", "ai_punchy": "Resources: curated references and research.", "ai_strategic": "Resources contain reusable prompt engineering and reference artifacts.", "ai_conversational": "Resources are your reference guides, cheat sheets, and research."},
+    {"start": 72, "end": 78, "scene": 3, "stage": "03", "name": "P.A.R.A. Method Framework", "beat": "Archive Zone (Gray)", "visual": "Gray container #95a5a6 with historical records indexed for fast retrieval.", "base_vo": "And Archive: everything inactive, perfectly indexed.", "ai_punchy": "Archive: inactive history, perfectly indexed.", "ai_strategic": "Archive provides cold storage with deterministic semantic indexing.", "ai_conversational": "And Archive holds past projects, indexed so you never lose context."},
+    {"start": 78, "end": 85, "scene": 3, "stage": "03", "name": "P.A.R.A. Method Framework", "beat": "100x AI Speed Multiplier", "visual": "AI search benchmark radar graph shows 100x retrieval acceleration.", "base_vo": "AI agents navigate structured vaults 100x faster than messy folders.", "ai_punchy": "AI navigates clean structure 100x faster.", "ai_strategic": "Structured taxonomy cuts vector search latency by 99%.", "ai_conversational": "Clean structure means your AI agents find answers in seconds."},
+
+    # Scene 4: The Engine: Dual-Agent System (1:25 - 1:58)
+    {"start": 85, "end": 90, "scene": 4, "stage": "04", "name": "The Engine: Dual-Agent System", "beat": "The Local Orchestration Rig", "visual": "Terminal dashboard boots at localhost:8899 with dual agent avatars.", "base_vo": "Then comes the engine: a local dual-agent orchestration rig.", "ai_punchy": "The engine: a local dual-agent orchestration rig.", "ai_strategic": "A resilient multi-agent architecture executing locally.", "ai_conversational": "Here is the engine: a local dual-agent rig running on your machine."},
+    {"start": 90, "end": 96, "scene": 4, "stage": "04", "name": "The Engine: Dual-Agent System", "beat": "Gemini Gold & Claude Blue", "visual": "Gemini Gold and Claude Blue avatars exchange structured JSON payloads.", "base_vo": "Running Gemini and Claude in parallel tandem.", "ai_punchy": "Gemini Gold and Claude Blue working in tandem.", "ai_strategic": "Dual frontier models operate concurrently for verification and synthesis.", "ai_conversational": "Gemini and Claude work together in real-time tandem."},
+    {"start": 96, "end": 102, "scene": 4, "stage": "04", "name": "The Engine: Dual-Agent System", "beat": "Background Autonomous Work", "visual": "Background workers sync data streams silently while user writes code.", "base_vo": "Running silently in the background while you focus on work.", "ai_punchy": "Running in the background while you build.", "ai_strategic": "Asynchronous event loops handle background maintenance jobs.", "ai_conversational": "They run silently in the background while you focus on shipping."},
+    {"start": 102, "end": 108, "scene": 4, "stage": "04", "name": "The Engine: Dual-Agent System", "beat": "Multi-Cloud Synchronization", "visual": "Tri-directional sync streams to GitHub, Google Drive, and Proxmox icons.", "base_vo": "Syncing across GitHub, Google Drive, and Proxmox.", "ai_punchy": "Syncing across GitHub, Drive, and Proxmox.", "ai_strategic": "Automated pipelines replicate state across multi-cloud infrastructure.", "ai_conversational": "Syncing all your files across GitHub, Drive, and Proxmox servers."},
+    {"start": 108, "end": 114, "scene": 4, "stage": "04", "name": "The Engine: Dual-Agent System", "beat": "Changelogs & Maintenance", "visual": "Automated git commit diffs, vault changelogs, and audit logs render live.", "base_vo": "Generating changelogs and maintaining folder integrity.", "ai_punchy": "Writing changelogs and keeping structures clean.", "ai_strategic": "Autonomous auditing guarantees zero drift across documentation repositories.", "ai_conversational": "Generating clean changelogs and keeping your structure spotless."},
+    {"start": 114, "end": 119, "scene": 4, "stage": "04", "name": "The Engine: Dual-Agent System", "beat": "Execution Over Busywork", "visual": "Productivity chart spikes upward as manual busywork drops to zero.", "base_vo": "You focus on execution. They handle the busywork.", "ai_punchy": "You execute. They handle the busywork.", "ai_strategic": "Decouples high-leverage engineering from repetitive clerical tasks.", "ai_conversational": "You focus on high-impact work—they handle all the busywork."},
+
+    # Scene 5: The 4-Step Workflow (1:59 - 2:32)
+    {"start": 119, "end": 124, "scene": 5, "stage": "05", "name": "The 4-Step Workflow", "beat": "Applied Knowledge Principle", "visual": "4-step conveyor assembly line appears with vibrant colored boxes.", "base_vo": "Raw knowledge isn't power—applied knowledge is.", "ai_punchy": "Raw knowledge isn't power—applied knowledge is.", "ai_strategic": "Information retrieval without production output yields zero value.", "ai_conversational": "Raw knowledge isn't power—only applied knowledge is."},
+    {"start": 124, "end": 129, "scene": 5, "stage": "05", "name": "The 4-Step Workflow", "beat": "Step 1: Tell (Obsidian)", "visual": "Box 1 (Purple #9b59b6): Raw markdown brain-dump and voice transcription.", "base_vo": "Tell: dump your raw thoughts directly into Obsidian.", "ai_punchy": "Tell: brain-dump raw thoughts into Obsidian.", "ai_strategic": "Stage 1 captures unstructured cognitive context in Obsidian.", "ai_conversational": "Step 1 is Tell: brain-dump your thoughts into Obsidian."},
+    {"start": 129, "end": 134, "scene": 5, "stage": "05", "name": "The 4-Step Workflow", "beat": "Step 2: Show (Canva)", "visual": "Box 2 (Orange #e67e22): Visual canvas maps relationships and sticky notes.", "base_vo": "Show: map visual relationships in Canva.", "ai_punchy": "Show: visualize concepts and structure in Canva.", "ai_strategic": "Stage 2 models visual representations and spatial flow in Canva.", "ai_conversational": "Step 2 is Show: map your visual structure in Canva."},
+    {"start": 134, "end": 139, "scene": 5, "stage": "05", "name": "The 4-Step Workflow", "beat": "Step 3: Do (Slide Decks)", "visual": "Box 3 (Red #c0392b): Presentation slide layouts render into consumable decks.", "base_vo": "Do: turn concepts into consumable slide decks.", "ai_punchy": "Do: turn ideas into consumable presentations.", "ai_strategic": "Stage 3 transforms architecture into pedagogical presentation decks.", "ai_conversational": "Step 3 is Do: turn those concepts into consumable slides."},
+    {"start": 139, "end": 145, "scene": 5, "stage": "05", "name": "The 4-Step Workflow", "beat": "Step 4: Apply (GitHub Code)", "visual": "Box 4 (Green #27ae60): Git commit push, code releases, and video assets ship.", "base_vo": "Apply: ship it as production code in GitHub.", "ai_punchy": "Apply: ship code and assets in GitHub.", "ai_strategic": "Stage 4 deploys functional code and automations to GitHub.", "ai_conversational": "Step 4 is Apply: ship real code and assets in GitHub."},
+    {"start": 145, "end": 153, "scene": 5, "stage": "05", "name": "The 4-Step Workflow", "beat": "Chaos to Shipped Execution", "visual": "All 4 boxes light up with green checkmarks connecting start to finish.", "base_vo": "From chaos to execution in four clear steps.", "ai_punchy": "From chaos to execution in four steps.", "ai_strategic": "A repeatable closed-loop system from concept to deployment.", "ai_conversational": "From total chaos to finished execution in four steps."},
+
+    # Scene 6: Call to Action & Cohort Launch (2:33 - 3:20)
+    {"start": 153, "end": 159, "scene": 6, "stage": "06", "name": "Call to Action & Closing", "beat": "Building Your Second Brain", "visual": "Central AI Brain avatar pulses with golden energy and lightning arcs.", "base_vo": "This is about building an AI brain that actually works for you.", "ai_punchy": "Build an AI brain that works for you.", "ai_strategic": "Elevate your engineering capacity with autonomous agent systems.", "ai_conversational": "This is about building a second brain that truly works for you."},
+    {"start": 159, "end": 166, "scene": 6, "stage": "06", "name": "Call to Action & Closing", "beat": "Accelerate AI Readiness", "visual": "Certification pathways, study cards, and agent badges orbit the brain.", "base_vo": "Accelerate your AI skills and prepare for top certifications.", "ai_punchy": "Accelerate your AI engineering readiness.", "ai_strategic": "Systematic preparation for enterprise AI architecture certifications.", "ai_conversational": "Accelerate your skills and prep for the biggest AI certifications."},
+    {"start": 166, "end": 175, "scene": 6, "stage": "06", "name": "Call to Action & Closing", "beat": "Hands-on Sunday Cohort", "visual": "Sunday cohort schedule card highlights live weekly sessions (Every Sunday 9-11PM UK).", "base_vo": "Join our free hands-on Sunday cohort to build this live.", "ai_punchy": "Join our free weekly hands-on Sunday cohort.", "ai_strategic": "Participate in collaborative weekly live engineering workshops.", "ai_conversational": "Join our free live Sunday cohort and build this with us."},
+    {"start": 175, "end": 185, "scene": 6, "stage": "06", "name": "Call to Action & Closing", "beat": "Build Architecture Together", "visual": "Step-by-step cohort roadmap and template repository links appear.", "base_vo": "We will build this entire architecture together from scratch.", "ai_punchy": "Build this entire architecture from scratch with us.", "ai_strategic": "Hands-on implementation of the full multi-agent PARA stack.", "ai_conversational": "We'll build this complete architecture together step by step."},
+    {"start": 185, "end": 195, "scene": 6, "stage": "06", "name": "Call to Action & Closing", "beat": "Links In Comments", "visual": "Animated arrows point down to community Discord, GitHub, and registration links.", "base_vo": "Links are in the description and comments below.", "ai_punchy": "Links in the description and comments below.", "ai_strategic": "Access all repositories, templates, and registration links below.", "ai_conversational": "All the templates and links are in the description below."},
+    {"start": 195, "end": 201, "scene": 6, "stage": "06", "name": "Call to Action & Closing", "beat": "Outro & Call To Action", "visual": "Branded outro card with subscribe, GitHub star, and cohort registration buttons.", "base_vo": "Let's build together. See you this Sunday.", "ai_punchy": "Let's build together. See you Sunday. Let's go.", "ai_strategic": "Begin your architecture implementation today. See you Sunday.", "ai_conversational": "Let's build together. See you in the cohort this Sunday!"}
 ]
 
 def format_tc(seconds: int) -> str:
@@ -106,11 +84,11 @@ def format_tc(seconds: int) -> str:
     s = seconds % 60
     return f"{m:02d}:{s:02d}"
 
-def get_scene_for_sec(sec: int) -> dict:
-    for sc in MASTER_SCENES:
-        if sc["start"] <= sec < sc["end"]:
-            return sc
-    return MASTER_SCENES[-1]
+def get_beat_for_sec(sec: int) -> dict:
+    for b in MASTER_BEATS:
+        if b["start"] <= sec < b["end"]:
+            return b
+    return MASTER_BEATS[-1]
 
 def get_video_duration(video_path: str) -> float:
     try:
@@ -123,19 +101,17 @@ def get_video_duration(video_path: str) -> float:
         res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=True)
         return float(res.stdout.strip())
     except Exception as e:
-        print(f"⚠️ Could not read duration via ffprobe ({e}). Defaulting to 178s.")
-        return 178.0
+        print(f"⚠️ Could not read duration via ffprobe ({e}). Defaulting to 200s.")
+        return 200.0
 
 def find_target_video(input_dir: str, explicit_video: str = None) -> str:
     if explicit_video and os.path.exists(explicit_video):
         return explicit_video
     
-    # Check inside input_dir for mp4 or mov
     candidates = glob.glob(os.path.join(input_dir, "*.mp4")) + glob.glob(os.path.join(input_dir, "*.mov"))
     if candidates:
         return sorted(candidates)[0]
     
-    # Fallback to demo video flow clip if nothing in rawexport
     fallback_clips = glob.glob("video_flow/*.mp4")
     if fallback_clips:
         print(f"ℹ️ No video found in {input_dir}. Using sample video from video_flow/ for demonstration.")
@@ -145,7 +121,6 @@ def find_target_video(input_dir: str, explicit_video: str = None) -> str:
 
 def extract_screenshots(video_path: str, output_dir: str, fps: float = 1.0) -> list:
     os.makedirs(output_dir, exist_ok=True)
-    # Pattern: frame_%04d_sec_%03d.jpg
     out_pattern = os.path.join(output_dir, "frame_%04d.jpg")
     
     print(f"🎞️ Extracting 1 frame every {1/fps:.1f}s from: {video_path}")
@@ -172,7 +147,7 @@ def build_manifest_and_docs(video_path: str, frames: list, fps: float = 1.0):
     
     for idx, fpath in enumerate(frames, start=1):
         sec = int(round((idx - 1) / fps))
-        scene = get_scene_for_sec(sec)
+        beat = get_beat_for_sec(sec)
         rel_fpath = os.path.relpath(fpath, start=os.path.dirname(DEFAULT_MD_DOC))
         
         manifest_entries.append({
@@ -182,13 +157,15 @@ def build_manifest_and_docs(video_path: str, frames: list, fps: float = 1.0):
             "image_file": os.path.basename(fpath),
             "image_path": fpath,
             "rel_path": rel_fpath,
-            "stage": scene["stage"],
-            "scene_num": scene["scene"],
-            "scene_name": scene["name"],
-            "base_vo": scene["base_vo"],
-            "ai_punchy": scene["ai_punchy"],
-            "ai_strategic": scene["ai_strategic"],
-            "ai_conversational": scene["ai_conversational"]
+            "stage": beat["stage"],
+            "scene_num": beat["scene"],
+            "scene_name": beat["name"],
+            "beat_title": beat["beat"],
+            "visual_action": beat["visual"],
+            "base_vo": beat["base_vo"],
+            "ai_punchy": beat["ai_punchy"],
+            "ai_strategic": beat["ai_strategic"],
+            "ai_conversational": beat["ai_conversational"]
         })
     
     # Save JSON Manifest
@@ -205,15 +182,15 @@ def build_manifest_and_docs(video_path: str, frames: list, fps: float = 1.0):
     # Generate Markdown Document
     md_lines = [
         "# 🎙️ Voiceover In-Situ Rewrite Workbench",
-        f"> **Source Video**: `{video_name}` | **Extracted Frames**: {len(manifest_entries)} | **Pacing Target**: 140–160 WPM",
+        f"> **Source Video**: `{video_name}` | **Extracted Frames**: {len(manifest_entries)} | **Pacing Target**: 140–160 WPM (~3 words/sec)",
         f"> **Generated**: {datetime.now().strftime('%Y-%m-%d %H:%M')} | **Tactic**: 1-Second Frame Extraction & Visual AI Scripting",
         "",
         "---",
         "",
         "## 🛠️ How to Use This Workbench",
         "1. Inspect each **1-second screenshot** below to see exactly what visual motion graphic or Canva slide is on screen.",
-        "2. Review the **Original Scratch VO** vs. **AI-Suggested Variations** (Punchy, Strategic, Conversational).",
-        "3. Write your **Final Resonant Voiceover** directly in the `[My Resonant Take]` block.",
+        "2. Review the **Visual Action** and **AI-Suggested Variations** (Punchy, Strategic, Conversational).",
+        "3. Write your **Final Resonant Voiceover** directly in the `[My Resonant Take]` block at ~3 words/second.",
         "4. Copy the final script back to `research.html` or record directly into your microphone.",
         "",
         "---",
@@ -231,7 +208,9 @@ def build_manifest_and_docs(video_path: str, frames: list, fps: float = 1.0):
             ])
         
         md_lines.extend([
-            f"### ⏱️ Timestamp: `{entry['timecode']}` (Second {entry['second']})",
+            f"### ⏱️ Timestamp: `{entry['timecode']}` (Second {entry['second']}) · **{entry['beat_title']}**",
+            f"**Visual Action**: *{entry['visual_action']}*",
+            "",
             f"![Frame at {entry['timecode']}]({entry['rel_path']})",
             "",
             "| Option | Voiceover Candidate Text | WPM | Tone |",
@@ -242,7 +221,7 @@ def build_manifest_and_docs(video_path: str, frames: list, fps: float = 1.0):
             f"| **🔥 AI Conversational** | {entry['ai_conversational']} | ~145 | Direct & Relatable |",
             "",
             "> ✍️ **[My Resonant Take]**:",
-            "> *Click or type your custom voiceover rewrite for this visual second here...*",
+            f"> *{entry['base_vo']}*",
             "",
             "---",
             ""
@@ -488,6 +467,9 @@ header {{ position:sticky; top:0; z-index:50; background:var(--panel); border-bo
       </div>
     </div>
     <div class="slideshow-body">
+      <div id="slideVisualActionBox" style="font-size:12.5px; color:var(--muted); background:rgba(255,255,255,0.03); padding:8px 12px; border-radius:8px; border-left:3px solid var(--cyan); line-height:1.4;">
+        🎬 <b>Visual Action:</b> <span id="slideVisualAction" style="color:var(--ink);"></span>
+      </div>
       <div class="ai-pills-row">
         <button type="button" class="ai-quick-btn" id="btnSlideConv" onclick="applySlideSuggestion('conv')">
           🔥 AI Conversational
@@ -528,15 +510,23 @@ header {{ position:sticky; top:0; z-index:50; background:var(--panel); border-bo
         escaped_punchy = e['ai_punchy'].replace('`', '').replace('"', '&quot;')
         escaped_strategic = e['ai_strategic'].replace('`', '').replace('"', '&quot;')
         escaped_conv = e['ai_conversational'].replace('`', '').replace('"', '&quot;')
+        escaped_visual = e['visual_action'].replace('"', '&quot;')
         
         html_content += f"""
-    <div class="frame-card" data-sec="{e['second']}" data-scene="{e['scene_num']}">
+    <div class="frame-card" data-sec="{e['second']}" data-scene="{e['scene_num']}" data-beat="{e['beat_title']}">
       <div class="frame-thumb" onclick="openSlideAt({e['second']})" style="cursor:pointer;" title="Click to view in Slide Show Mode">
         <img src="screenshots/{e['image_file']}" alt="Second {e['second']}" loading="lazy">
         <span class="stage-badge">Scene {e['scene_num']} · {e['scene_name']}</span>
         <span class="tc-badge">{e['timecode']}</span>
       </div>
       <div class="frame-body">
+        <div style="display:flex; justify-content:space-between; align-items:center; font-size:11.5px; font-weight:700; color:var(--cyan);">
+          <span>🎯 {e['beat_title']}</span>
+          <span style="color:var(--muted); font-size:10.5px; font-weight:600;">Second {e['second']}/200</span>
+        </div>
+        <div style="font-size:11.5px; color:var(--muted); background:rgba(255,255,255,0.03); padding:5px 8px; border-radius:6px; border-left:3px solid var(--cyan); line-height:1.35;">
+          🎬 <b>Visual:</b> {escaped_visual}
+        </div>
         <div class="ai-pills-row">
           <button type="button" class="ai-quick-btn" tabindex="-1" onclick="applySuggestion({e['second']}, `{escaped_conv}`, this)" title="Click to fill conversational take">
             🔥 AI Conversational
@@ -701,12 +691,15 @@ function renderCurrentSlide(){{
   if(!item) return;
   
   document.getElementById('slideImg').src = 'screenshots/' + item.image_file;
-  document.getElementById('slideStageBadge').textContent = 'Scene ' + item.scene_num + ' · ' + item.scene_name;
+  document.getElementById('slideStageBadge').textContent = 'Scene ' + item.scene_num + ' · ' + item.scene_name + (item.beat_title ? (' | 🎯 ' + item.beat_title) : '');
   document.getElementById('slideTcBadge').textContent = item.timecode;
   document.getElementById('slideCounter').textContent = 'Frame ' + (currentSlideIndex + 1) + ' / ' + MANIFEST_DATA.length + ' (' + item.timecode + ')';
   document.getElementById('slideScrubber').value = currentSlideIndex;
   
-  document.getElementById('slideTakeLabel').textContent = '✍️ Custom Resonant Take (Second ' + item.second + '):';
+  const visEl = document.getElementById('slideVisualAction');
+  if(visEl) visEl.textContent = item.visual_action || 'Visual frame screen capture.';
+  
+  document.getElementById('slideTakeLabel').textContent = '✍️ Custom Resonant Take (Second ' + item.second + ' · ' + (item.beat_title || '') + '):';
   
   // Read value from grid textarea or localStorage
   const gridTa = document.getElementById('take_' + item.second);
