@@ -473,6 +473,7 @@ header {{ position:sticky; top:0; z-index:50; background:var(--panel); border-bo
       <a href="../../voice_over.html" class="nav-item"><span>📜</span> VoiceOver</a>
       <a href="../../tactic.html" class="nav-item"><span>🎯</span> Tactics</a>
       <a href="../../analysis.html" class="nav-item"><span>📈</span> Analysis</a>
+      <a href="../../script_guru.html" class="nav-item"><span>🧙‍♂️</span> Script Guru</a>
       <a href="voiceover_inspector.html" class="nav-item active"><span>🎙️</span> VO Inspector</a>
       <a href="https://canva.link/p4u3nwvsmio19jp" class="nav-item" target="_blank" rel="noopener noreferrer" style="color:var(--purple,#af52de);" title="Canva Implementation Deck"><span>🎨</span> Implementation ↗</a>
     </nav>
