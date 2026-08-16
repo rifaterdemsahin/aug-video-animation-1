@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Voiceover Frame Inspector — WIG Animation</title>
+<style>
+:root {
+  --bg:#0c0c12; --panel:#161622; --ink:#f4f4f8; --muted:#9498a8;
+  --line:#262638; --gold:#e8b84a; --cyan:#4ed8eb; --chip:#1e1e2d;
+  --accent:#e74c3c; --accent2:#6366f1; --accent3:#27ae60; --purple:#af52de;
+}
+* { box-sizing:border-box; }
+body { margin:0; background:var(--bg); color:var(--ink); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; line-height:1.5; }
+header { position:sticky; top:0; z-index:50; background:var(--panel); border-bottom:1px solid var(--line); padding:12px 20px; display:flex; align-items:center; justify-content:space-between; gap:12px; }
+h1 { margin:0; font-size:17px; font-weight:800; display:flex; align-items:center; gap:8px; }
+.btn { font:inherit; font-size:12px; font-weight:700; padding:6px 12px; border-radius:6px; border:1px solid var(--line); background:var(--chip); color:var(--ink); cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; gap:5px; }
+.btn.primary { background:var(--accent2); border-color:var(--accent2); color:#fff; }
+.container { max-width:1440px; margin:0 auto; padding:20px 16px 80px; }
+.inspector-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(360px, 1fr)); gap:20px; margin-top:20px; }
+.frame-card { background:var(--panel); border:1px solid var(--line); border-radius:12px; overflow:hidden; display:flex; flex-direction:column; }
+.frame-thumb { position:relative; aspect-ratio:16/9; background:#000; overflow:hidden; }
+.frame-thumb img { width:100%; height:100%; object-fit:cover; }
+.tc-badge { position:absolute; bottom:8px; right:8px; background:rgba(0,0,0,0.85); color:#fff; font-family:monospace; font-size:12px; font-weight:700; padding:3px 7px; border-radius:4px; }
+.stage-badge { position:absolute; top:8px; left:8px; background:var(--accent2); color:#fff; font-size:10.5px; font-weight:700; padding:3px 8px; border-radius:4px; }
+.frame-body { padding:14px 16px; display:flex; flex-direction:column; gap:10px; flex:1; }
+.vo-option { background:var(--chip); border:1px solid var(--line); border-radius:6px; padding:8px 10px; font-size:12px; cursor:pointer; transition:all .15s ease; }
+.vo-option:hover { border-color:var(--cyan); }
+.vo-option.selected { border-color:var(--accent3); background:rgba(39,174,96,0.12); }
+.vo-tag { font-size:10px; font-weight:800; text-transform:uppercase; color:var(--muted); margin-bottom:2px; display:flex; justify-content:space-between; }
+.custom-input { width:100%; background:var(--bg); border:1px solid var(--line); border-radius:6px; color:var(--ink); font:inherit; font-size:12.5px; padding:8px 10px; resize:vertical; min-height:55px; }
+.custom-input:focus { outline:none; border-color:var(--cyan); }
+.toast { position:fixed; bottom:20px; right:20px; background:var(--ink); color:var(--bg); padding:10px 16px; border-radius:8px; font-size:13px; font-weight:700; opacity:0; pointer-events:none; transition:opacity .2s ease; }
+.toast.show { opacity:1; }
+</style>
+</head>
+<body>
+<header>
+  <h1><span>🎬</span> Voiceover Frame Inspector <small style="font-size:12px; color:var(--muted); font-weight:500;">(01_colorful-file-icons-background.mp4)</small></h1>
+  <div style="display:flex; gap:8px; align-items:center;">
+    <button class="btn primary" onclick="copyAllScript()">📋 Copy Combined Script</button>
+    <a class="btn" href="../../tactic.html">🎯 Tactics Workbench</a>
+    <a class="btn" href="../../gallery.html">🖼️ Asset Gallery</a>
+  </div>
+</header>
+<div class="container">
+  <div style="background:var(--chip); border:1px solid var(--line); border-radius:10px; padding:16px 20px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+    <div>
+      <strong style="font-size:14px;">1-Second Screen Visual Rewrite Inspector</strong>
+      <div style="font-size:12.5px; color:var(--muted);">Total Seconds Extracted: 10 | Click any suggested VO pill or type your custom take directly.</div>
+    </div>
+    <div>
+      <input type="search" id="filterInput" oninput="filterFrames()" placeholder="Filter by scene, second, or text…" style="padding:6px 12px; font:inherit; font-size:12.5px; border-radius:6px; border:1px solid var(--line); background:var(--bg); color:var(--ink); min-width:240px;">
+    </div>
+  </div>
+
+  <div class="inspector-grid" id="grid">
+
+    <div class="frame-card" data-sec="0" data-scene="1">
+      <div class="frame-thumb">
+        <img src="screenshots/frame_0001.jpg" alt="Second 0" loading="lazy">
+        <span class="stage-badge">Scene 1 · Hook & Problem Setup</span>
+        <span class="tc-badge">00:00</span>
+      </div>
+      <div class="frame-body">
+        <div class="vo-option" onclick="selectVO(this, 0, `46,000 notes in Obsidian, zero clarity. Every search was a needle in a digital haystack. The problem wasn't the notes—they just weren't working for me.`)">
+          <div class="vo-tag"><span>⚡ AI Punchy</span><span>~165 WPM</span></div>
+          <div>"46,000 notes in Obsidian, zero clarity. Every search was a needle in a digital haystack. The problem wasn't the notes—they just weren't working for me."</div>
+        </div>
+        <div class="vo-option" onclick="selectVO(this, 0, `I had accumulated over 46,000 notes in Obsidian, but finding relevant insights was impossible. Chaos isn't a scaling strategy—structure is.`)">
+          <div class="vo-tag"><span>🧠 AI Strategic</span><span>~140 WPM</span></div>
+          <div>"I had accumulated over 46,000 notes in Obsidian, but finding relevant insights was impossible. Chaos isn't a scaling strategy—structure is."</div>
+        </div>
+        <div class="vo-option" onclick="selectVO(this, 0, `Ever felt buried under your own notes? With 46,000 files in Obsidian, every search was painful. Here is how I fixed it.`)">
+          <div class="vo-tag"><span>🔥 AI Conversational</span><span>~145 WPM</span></div>
+          <div>"Ever felt buried under your own notes? With 46,000 files in Obsidian, every search was painful. Here is how I fixed it."</div>
+        </div>
+        <div>
+          <label style="font-size:11px; font-weight:700; color:var(--cyan); display:block; margin-bottom:4px;">✍️ Custom Resonant Take (Second 0):</label>
+          <textarea class="custom-input" id="take_0" placeholder="Type your custom resonant take for this frame…">I was drowning in 46,000 notes across Obsidian. Every search felt like looking for a needle in a digital haystack. And then I realized—the problem wasn't the number of notes. It was that they weren't working for me.</textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="frame-card" data-sec="1" data-scene="1">
+      <div class="frame-thumb">
+        <img src="screenshots/frame_0002.jpg" alt="Second 1" loading="lazy">
+        <span class="stage-badge">Scene 1 · Hook & Problem Setup</span>
+        <span class="tc-badge">00:01</span>
+      </div>
+      <div class="frame-body">
+        <div class="vo-option" onclick="selectVO(this, 1, `46,000 notes in Obsidian, zero clarity. Every search was a needle in a digital haystack. The problem wasn't the notes—they just weren't working for me.`)">
+          <div class="vo-tag"><span>⚡ AI Punchy</span><span>~165 WPM</span></div>
+          <div>"46,000 notes in Obsidian, zero clarity. Every search was a needle in a digital haystack. The problem wasn't the notes—they just weren't working for me."</div>
+        </div>
+        <div class="vo-option" onclick="selectVO(this, 1, `I had accumulated over 46,000 notes in Obsidian, but finding relevant insights was impossible. Chaos isn't a scaling strategy—structure is.`)">
+          <div class="vo-tag"><span>🧠 AI Strategic</span><span>~140 WPM</span></div>
+          <div>"I had accumulated over 46,000 notes in Obsidian, but finding relevant insights was impossible. Chaos isn't a scaling strategy—structure is."</div>
+        </div>
+        <div class="vo-option" onclick="selectVO(this, 1, `Ever felt buried under your own notes? With 46,000 files in Obsidian, every search was painful. Here is how I fixed it.`)">
+          <div class="vo-tag"><span>🔥 AI Conversational</span><span>~145 WPM</span></div>
+          <div>"Ever felt buried under your own notes? With 46,000 files in Obsidian, every search was painful. Here is how I fixed it."</div>
+        </div>
+        <div>
+          <label style="font-size:11px; font-weight:700; color:var(--cyan); display:block; margin-bottom:4px;">✍️ Custom Resonant Take (Second 1):</label>
+          <textarea class="custom-input" id="take_1" placeholder="Type your custom resonant take for this frame…">I was drowning in 46,000 notes across Obsidian. Every search felt like looking for a needle in a digital haystack. And then I realized—the problem wasn't the number of notes. It was that they weren't working for me.</textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="frame-card" data-sec="2" data-scene="1">
+      <div class="frame-thumb">
+        <img src="screenshots/frame_0003.jpg" alt="Second 2" loading="lazy">
+        <span class="stage-badge">Scene 1 · Hook & Problem Setup</span>
+        <span class="tc-badge">00:02</span>
+      </div>
+      <div class="frame-body">
+        <div class="vo-option" onclick="selectVO(this, 2, `46,000 notes in Obsidian, zero clarity. Every search was a needle in a digital haystack. The problem wasn't the notes—they just weren't working for me.`)">
+          <div class="vo-tag"><span>⚡ AI Punchy</span><span>~165 WPM</span></div>
+          <div>"46,000 notes in Obsidian, zero clarity. Every search was a needle in a digital haystack. The problem wasn't the notes—they just weren't working for me."</div>
+        </div>
+        <div class="vo-option" onclick="selectVO(this, 2, `I had accumulated over 46,000 notes in Obsidian, but finding relevant insights was impossible. Chaos isn't a scaling strategy—structure is.`)">
+          <div class="vo-tag"><span>🧠 AI Strategic</span><span>~140 WPM</span></div>
+          <div>"I had accumulated over 46,000 notes in Obsidian, but finding relevant insights was impossible. Chaos isn't a scaling strategy—structure is."</div>
+        </div>
+        <div class="vo-option" onclick="selectVO(this, 2, `Ever felt buried under your own notes? With 46,000 files in Obsidian, every search was painful. Here is how I fixed it.`)">
+          <div class="vo-tag"><span>🔥 AI Conversational</span><span>~145 WPM</span></div>
+          <div>"Ever felt buried under your own notes? With 46,000 files in Obsidian, every search was painful. Here is how I fixed it."</div>
+        </div>
+        <div>
+          <label style="font-size:11px; font-weight:700; color:var(--cyan); display:block; margin-bottom:4px;">✍️ Custom Resonant Take (Second 2):</label>
+          <textarea class="custom-input" id="take_2" placeholder="Type your custom resonant take for this frame…">I was drowning in 46,000 notes across Obsidian. Every search felt like looking for a needle in a digital haystack. And then I realized—the problem wasn't the number of notes. It was that they weren't working for me.</textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="frame-card" data-sec="3" data-scene="1">
+      <div class="frame-thumb">
+        <img src="screenshots/frame_0004.jpg" alt="Second 3" loading="lazy">
+        <span class="stage-badge">Scene 1 · Hook & Problem Setup</span>
+        <span class="tc-badge">00:03</span>
+      </div>
+      <div class="frame-body">
+        <div class="vo-option" onclick="selectVO(this, 3, `46,000 notes in Obsidian, zero clarity. Every search was a needle in a digital haystack. The problem wasn't the notes—they just weren't working for me.`)">
+          <div class="vo-tag"><span>⚡ AI Punchy</span><span>~165 WPM</span></div>
+          <div>"46,000 notes in Obsidian, zero clarity. Every search was a needle in a digital haystack. The problem wasn't the notes—they just weren't working for me."</div>
+        </div>
+        <div class="vo-option" onclick="selectVO(this, 3, `I had accumulated over 46,000 notes in Obsidian, but finding relevant insights was impossible. Chaos isn't a scaling strategy—structure is.`)">
+          <div class="vo-tag"><span>🧠 AI Strategic</span><span>~140 WPM</span></div>
+          <div>"I had accumulated over 46,000 notes in Obsidian, but finding relevant insights was impossible. Chaos isn't a scaling strategy—structure is."</div>
+        </div>
+        <div class="vo-option" onclick="selectVO(this, 3, `Ever felt buried under your own notes? With 46,000 files in Obsidian, every search was painful. Here is how I fixed it.`)">
+          <div class="vo-tag"><span>🔥 AI Conversational</span><span>~145 WPM</span></div>
+          <div>"Ever felt buried under your own notes? With 46,000 files in Obsidian, every search was painful. Here is how I fixed it."</div>
+        </div>
+        <div>
+          <label style="font-size:11px; font-weight:700; color:var(--cyan); display:block; margin-bottom:4px;">✍️ Custom Resonant Take (Second 3):</label>
+          <textarea class="custom-input" id="take_3" placeholder="Type your custom resonant take for this frame…">I was drowning in 46,000 notes across Obsidian. Every search felt like looking for a needle in a digital haystack. And then I realized—the problem wasn't the number of notes. It was that they weren't working for me.</textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="frame-card" data-sec="4" data-scene="1">
+      <div class="frame-thumb">
+        <img src="screenshots/frame_0005.jpg" alt="Second 4" loading="lazy">
+        <span class="stage-badge">Scene 1 · Hook & Problem Setup</span>
+        <span class="tc-badge">00:04</span>
+      </div>
+      <div class="frame-body">
+        <div class="vo-option" onclick="selectVO(this, 4, `46,000 notes in Obsidian, zero clarity. Every search was a needle in a digital haystack. The problem wasn't the notes—they just weren't working for me.`)">
+          <div class="vo-tag"><span>⚡ AI Punchy</span><span>~165 WPM</span></div>
+          <div>"46,000 notes in Obsidian, zero clarity. Every search was a needle in a digital haystack. The problem wasn't the notes—they just weren't working for me."</div>
+        </div>
+        <div class="vo-option" onclick="selectVO(this, 4, `I had accumulated over 46,000 notes in Obsidian, but finding relevant insights was impossible. Chaos isn't a scaling strategy—structure is.`)">
+          <div class="vo-tag"><span>🧠 AI Strategic</span><span>~140 WPM</span></div>
+          <div>"I had accumulated over 46,000 notes in Obsidian, but finding relevant insights was impossible. Chaos isn't a scaling strategy—structure is."</div>
+        </div>
+        <div class="vo-option" onclick="selectVO(this, 4, `Ever felt buried under your own notes? With 46,000 files in Obsidian, every search was painful. Here is how I fixed it.`)">
+          <div class="vo-tag"><span>🔥 AI Conversational</span><span>~145 WPM</span></div>
+          <div>"Ever felt buried under your own notes? With 46,000 files in Obsidian, every search was painful. Here is how I fixed it."</div>
+        </div>
+        <div>
+          <label style="font-size:11px; font-weight:700; color:var(--cyan); display:block; margin-bottom:4px;">✍️ Custom Resonant Take (Second 4):</label>
+          <textarea class="custom-input" id="take_4" placeholder="Type your custom resonant take for this frame…">I was drowning in 46,000 notes across Obsidian. Every search felt like looking for a needle in a digital haystack. And then I realized—the problem wasn't the number of notes. It was that they weren't working for me.</textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="frame-card" data-sec="5" data-scene="1">
+      <div class="frame-thumb">
+        <img src="screenshots/frame_0006.jpg" alt="Second 5" loading="lazy">
+        <span class="stage-badge">Scene 1 · Hook & Problem Setup</span>
+        <span class="tc-badge">00:05</span>
+      </div>
+      <div class="frame-body">
+        <div class="vo-option" onclick="selectVO(this, 5, `46,000 notes in Obsidian, zero clarity. Every search was a needle in a digital haystack. The problem wasn't the notes—they just weren't working for me.`)">
+          <div class="vo-tag"><span>⚡ AI Punchy</span><span>~165 WPM</span></div>
+          <div>"46,000 notes in Obsidian, zero clarity. Every search was a needle in a digital haystack. The problem wasn't the notes—they just weren't working for me."</div>
+        </div>
+        <div class="vo-option" onclick="selectVO(this, 5, `I had accumulated over 46,000 notes in Obsidian, but finding relevant insights was impossible. Chaos isn't a scaling strategy—structure is.`)">
+          <div class="vo-tag"><span>🧠 AI Strategic</span><span>~140 WPM</span></div>
+          <div>"I had accumulated over 46,000 notes in Obsidian, but finding relevant insights was impossible. Chaos isn't a scaling strategy—structure is."</div>
+        </div>
+        <div class="vo-option" onclick="selectVO(this, 5, `Ever felt buried under your own notes? With 46,000 files in Obsidian, every search was painful. Here is how I fixed it.`)">
+          <div class="vo-tag"><span>🔥 AI Conversational</span><span>~145 WPM</span></div>
+          <div>"Ever felt buried under your own notes? With 46,000 files in Obsidian, every search was painful. Here is how I fixed it."</div>
+        </div>
+        <div>
+          <label style="font-size:11px; font-weight:700; color:var(--cyan); display:block; margin-bottom:4px;">✍️ Custom Resonant Take (Second 5):</label>
+          <textarea class="custom-input" id="take_5" placeholder="Type your custom resonant take for this frame…">I was drowning in 46,000 notes across Obsidian. Every search felt like looking for a needle in a digital haystack. And then I realized—the problem wasn't the number of notes. It was that they weren't working for me.</textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="frame-card" data-sec="6" data-scene="1">
+      <div class="frame-thumb">
+        <img src="screenshots/frame_0007.jpg" alt="Second 6" loading="lazy">
+        <span class="stage-badge">Scene 1 · Hook & Problem Setup</span>
+        <span class="tc-badge">00:06</span>
+      </div>
+      <div class="frame-body">
+        <div class="vo-option" onclick="selectVO(this, 6, `46,000 notes in Obsidian, zero clarity. Every search was a needle in a digital haystack. The problem wasn't the notes—they just weren't working for me.`)">
+          <div class="vo-tag"><span>⚡ AI Punchy</span><span>~165 WPM</span></div>
+          <div>"46,000 notes in Obsidian, zero clarity. Every search was a needle in a digital haystack. The problem wasn't the notes—they just weren't working for me."</div>
+        </div>
+        <div class="vo-option" onclick="selectVO(this, 6, `I had accumulated over 46,000 notes in Obsidian, but finding relevant insights was impossible. Chaos isn't a scaling strategy—structure is.`)">
+          <div class="vo-tag"><span>🧠 AI Strategic</span><span>~140 WPM</span></div>
+          <div>"I had accumulated over 46,000 notes in Obsidian, but finding relevant insights was impossible. Chaos isn't a scaling strategy—structure is."</div>
+        </div>
+        <div class="vo-option" onclick="selectVO(this, 6, `Ever felt buried under your own notes? With 46,000 files in Obsidian, every search was painful. Here is how I fixed it.`)">
+          <div class="vo-tag"><span>🔥 AI Conversational</span><span>~145 WPM</span></div>
+          <div>"Ever felt buried under your own notes? With 46,000 files in Obsidian, every search was painful. Here is how I fixed it."</div>
+        </div>
+        <div>
+          <label style="font-size:11px; font-weight:700; color:var(--cyan); display:block; margin-bottom:4px;">✍️ Custom Resonant Take (Second 6):</label>
+          <textarea class="custom-input" id="take_6" placeholder="Type your custom resonant take for this frame…">I was drowning in 46,000 notes across Obsidian. Every search felt like looking for a needle in a digital haystack. And then I realized—the problem wasn't the number of notes. It was that they weren't working for me.</textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="frame-card" data-sec="7" data-scene="1">
+      <div class="frame-thumb">
+        <img src="screenshots/frame_0008.jpg" alt="Second 7" loading="lazy">
+        <span class="stage-badge">Scene 1 · Hook & Problem Setup</span>
+        <span class="tc-badge">00:07</span>
+      </div>
+      <div class="frame-body">
+        <div class="vo-option" onclick="selectVO(this, 7, `46,000 notes in Obsidian, zero clarity. Every search was a needle in a digital haystack. The problem wasn't the notes—they just weren't working for me.`)">
+          <div class="vo-tag"><span>⚡ AI Punchy</span><span>~165 WPM</span></div>
+          <div>"46,000 notes in Obsidian, zero clarity. Every search was a needle in a digital haystack. The problem wasn't the notes—they just weren't working for me."</div>
+        </div>
+        <div class="vo-option" onclick="selectVO(this, 7, `I had accumulated over 46,000 notes in Obsidian, but finding relevant insights was impossible. Chaos isn't a scaling strategy—structure is.`)">
+          <div class="vo-tag"><span>🧠 AI Strategic</span><span>~140 WPM</span></div>
+          <div>"I had accumulated over 46,000 notes in Obsidian, but finding relevant insights was impossible. Chaos isn't a scaling strategy—structure is."</div>
+        </div>
+        <div class="vo-option" onclick="selectVO(this, 7, `Ever felt buried under your own notes? With 46,000 files in Obsidian, every search was painful. Here is how I fixed it.`)">
+          <div class="vo-tag"><span>🔥 AI Conversational</span><span>~145 WPM</span></div>
+          <div>"Ever felt buried under your own notes? With 46,000 files in Obsidian, every search was painful. Here is how I fixed it."</div>
+        </div>
+        <div>
+          <label style="font-size:11px; font-weight:700; color:var(--cyan); display:block; margin-bottom:4px;">✍️ Custom Resonant Take (Second 7):</label>
+          <textarea class="custom-input" id="take_7" placeholder="Type your custom resonant take for this frame…">I was drowning in 46,000 notes across Obsidian. Every search felt like looking for a needle in a digital haystack. And then I realized—the problem wasn't the number of notes. It was that they weren't working for me.</textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="frame-card" data-sec="8" data-scene="1">
+      <div class="frame-thumb">
+        <img src="screenshots/frame_0009.jpg" alt="Second 8" loading="lazy">
+        <span class="stage-badge">Scene 1 · Hook & Problem Setup</span>
+        <span class="tc-badge">00:08</span>
+      </div>
+      <div class="frame-body">
+        <div class="vo-option" onclick="selectVO(this, 8, `46,000 notes in Obsidian, zero clarity. Every search was a needle in a digital haystack. The problem wasn't the notes—they just weren't working for me.`)">
+          <div class="vo-tag"><span>⚡ AI Punchy</span><span>~165 WPM</span></div>
+          <div>"46,000 notes in Obsidian, zero clarity. Every search was a needle in a digital haystack. The problem wasn't the notes—they just weren't working for me."</div>
+        </div>
+        <div class="vo-option" onclick="selectVO(this, 8, `I had accumulated over 46,000 notes in Obsidian, but finding relevant insights was impossible. Chaos isn't a scaling strategy—structure is.`)">
+          <div class="vo-tag"><span>🧠 AI Strategic</span><span>~140 WPM</span></div>
+          <div>"I had accumulated over 46,000 notes in Obsidian, but finding relevant insights was impossible. Chaos isn't a scaling strategy—structure is."</div>
+        </div>
+        <div class="vo-option" onclick="selectVO(this, 8, `Ever felt buried under your own notes? With 46,000 files in Obsidian, every search was painful. Here is how I fixed it.`)">
+          <div class="vo-tag"><span>🔥 AI Conversational</span><span>~145 WPM</span></div>
+          <div>"Ever felt buried under your own notes? With 46,000 files in Obsidian, every search was painful. Here is how I fixed it."</div>
+        </div>
+        <div>
+          <label style="font-size:11px; font-weight:700; color:var(--cyan); display:block; margin-bottom:4px;">✍️ Custom Resonant Take (Second 8):</label>
+          <textarea class="custom-input" id="take_8" placeholder="Type your custom resonant take for this frame…">I was drowning in 46,000 notes across Obsidian. Every search felt like looking for a needle in a digital haystack. And then I realized—the problem wasn't the number of notes. It was that they weren't working for me.</textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="frame-card" data-sec="9" data-scene="1">
+      <div class="frame-thumb">
+        <img src="screenshots/frame_0010.jpg" alt="Second 9" loading="lazy">
+        <span class="stage-badge">Scene 1 · Hook & Problem Setup</span>
+        <span class="tc-badge">00:09</span>
+      </div>
+      <div class="frame-body">
+        <div class="vo-option" onclick="selectVO(this, 9, `46,000 notes in Obsidian, zero clarity. Every search was a needle in a digital haystack. The problem wasn't the notes—they just weren't working for me.`)">
+          <div class="vo-tag"><span>⚡ AI Punchy</span><span>~165 WPM</span></div>
+          <div>"46,000 notes in Obsidian, zero clarity. Every search was a needle in a digital haystack. The problem wasn't the notes—they just weren't working for me."</div>
+        </div>
+        <div class="vo-option" onclick="selectVO(this, 9, `I had accumulated over 46,000 notes in Obsidian, but finding relevant insights was impossible. Chaos isn't a scaling strategy—structure is.`)">
+          <div class="vo-tag"><span>🧠 AI Strategic</span><span>~140 WPM</span></div>
+          <div>"I had accumulated over 46,000 notes in Obsidian, but finding relevant insights was impossible. Chaos isn't a scaling strategy—structure is."</div>
+        </div>
+        <div class="vo-option" onclick="selectVO(this, 9, `Ever felt buried under your own notes? With 46,000 files in Obsidian, every search was painful. Here is how I fixed it.`)">
+          <div class="vo-tag"><span>🔥 AI Conversational</span><span>~145 WPM</span></div>
+          <div>"Ever felt buried under your own notes? With 46,000 files in Obsidian, every search was painful. Here is how I fixed it."</div>
+        </div>
+        <div>
+          <label style="font-size:11px; font-weight:700; color:var(--cyan); display:block; margin-bottom:4px;">✍️ Custom Resonant Take (Second 9):</label>
+          <textarea class="custom-input" id="take_9" placeholder="Type your custom resonant take for this frame…">I was drowning in 46,000 notes across Obsidian. Every search felt like looking for a needle in a digital haystack. And then I realized—the problem wasn't the number of notes. It was that they weren't working for me.</textarea>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+<div id="toast" class="toast"></div>
+<script>
+function selectVO(el, sec, text){
+  const parent = el.closest('.frame-body');
+  parent.querySelectorAll('.vo-option').forEach(opt => opt.classList.remove('selected'));
+  el.classList.add('selected');
+  const ta = document.getElementById('take_' + sec);
+  if(ta){
+    ta.value = text;
+    showToast(`Updated Second ${sec} script!`);
+  }
+}
+function copyAllScript(){
+  const takes = [];
+  document.querySelectorAll('.custom-input').forEach((ta, idx) => {
+    const val = ta.value.trim();
+    if(val && !takes.includes(val)){
+      takes.push(val);
+    }
+  });
+  const fullScript = takes.join("\n\n");
+  navigator.clipboard.writeText(fullScript).then(() => {
+    showToast("📋 Copied full combined voiceover script!");
+  });
+}
+function filterFrames(){
+  const q = document.getElementById('filterInput').value.toLowerCase().trim();
+  document.querySelectorAll('.frame-card').forEach(card => {
+    const text = card.textContent.toLowerCase();
+    card.style.display = (!q || text.includes(q)) ? "flex" : "none";
+  });
+}
+let toastTimer;
+function showToast(msg){
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2200);
+}
+</script>
+</body>
+</html>

@@ -702,6 +702,53 @@ header{position:sticky;top:0;z-index:50;background:var(--panel);border-bottom:1p
   line-height:1.4;
 }
 
+/* 1-Second Extractor Panel */
+.extractor-tactic-panel{
+  background:linear-gradient(135deg, rgba(231,76,60,0.08), rgba(232,184,74,0.09), rgba(99,102,241,0.08));
+  border:1px solid rgba(231,76,60,0.35);
+  border-radius:14px;
+  padding:24px 28px;
+  margin-bottom:24px;
+  box-shadow:var(--shadow);
+}
+.extractor-flow-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));
+  gap:14px;
+  margin-top:16px;
+}
+.extractor-card{
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:10px;
+  padding:16px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+.extractor-card-title{
+  font-size:13px;
+  font-weight:750;
+  color:var(--accent);
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+.extractor-cmd-box{
+  background:var(--terminal-bg, #1e1e1e);
+  color:#93c5fd;
+  border-radius:6px;
+  padding:8px 12px;
+  font-family:ui-monospace,SFMono-Regular,Consolas,monospace;
+  font-size:12px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  margin-top:10px;
+  border:1px solid rgba(255,255,255,0.1);
+}
+
 
 /* Footer with GitHub Pages */
 footer{
@@ -1152,6 +1199,69 @@ footer{
           Mirrors the <code>✅ Used</code> &amp; <code>🚫 Out of Scope</code> tagging in the local Asset Gallery, keeping your Canva canvas, shotlist, and Azure Blob storage 100% synchronized.
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- 1-Second Frame Extraction & Visual AI Scripting Engine -->
+  <div class="extractor-tactic-panel">
+    <div class="sandbox-header">
+      <div>
+        <span class="pill" style="background:rgba(231,76,60,0.15);color:var(--accent);margin-bottom:6px;">🎬 Local Visual Rewrite Engine</span>
+        <h2>1-Second Frame Extraction &amp; Visual AI Voiceover Rewrite</h2>
+        <p style="margin:4px 0 0; color:var(--muted); font-size:14px; max-width:880px;">
+          Export your raw video draft with scratch voiceover into <b><code>3_Simulation/rawexport/</code></b>. Run our local Python extractor to take frame screenshots every 1 second and generate an interactive rewrite document with AI-suggested variations tailored to the visual screen reality.
+        </p>
+      </div>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <a href="3_Simulation/rawexport/voiceover_inspector.html" target="_blank" rel="noopener noreferrer" class="btn primary" title="Open Interactive Visual Voiceover Inspector">
+          🌐 Open Visual Inspector ↗
+        </a>
+      </div>
+    </div>
+
+    <!-- Extractor Flow Steps -->
+    <div class="extractor-flow-grid">
+      <div class="extractor-card" style="border-left:4px solid var(--accent,#e74c3c);">
+        <div class="extractor-card-title">
+          <span>📥</span> 1. Drop Raw MP4 into Folder
+        </div>
+        <div style="font-size:12.5px; color:var(--muted); line-height:1.4;">
+          Export video from Canva / Premiere with scratch audio into <code>3_Simulation/rawexport/raw_video.mp4</code>.
+        </div>
+      </div>
+
+      <div class="extractor-card" style="border-left:4px solid var(--gold,#e8b84a);">
+        <div class="extractor-card-title">
+          <span>⚡</span> 2. Run Local Python Extractor
+        </div>
+        <div style="font-size:12.5px; color:var(--muted); line-height:1.4;">
+          Executes <code>ffmpeg</code> to extract 1 screenshot per second into <code>3_Simulation/rawexport/screenshots/</code>.
+        </div>
+      </div>
+
+      <div class="extractor-card" style="border-left:4px solid var(--cyan,#4ed8eb);">
+        <div class="extractor-card-title">
+          <span>🤖</span> 3. Review 3x AI Suggested Takes
+        </div>
+        <div style="font-size:12.5px; color:var(--muted); line-height:1.4;">
+          Inspects screenshots alongside <b>⚡ Punchy</b> (165 WPM), <b>🧠 Strategic</b> (140 WPM), and <b>🔥 Conversational</b> (145 WPM) takes.
+        </div>
+      </div>
+
+      <div class="extractor-card" style="border-left:4px solid var(--accent3,#27ae60);">
+        <div class="extractor-card-title">
+          <span>🎙️</span> 4. Lock Resonant Final Script
+        </div>
+        <div style="font-size:12.5px; color:var(--muted); line-height:1.4;">
+          Write custom resonant takes directly in the markdown workbench or web inspector and copy back to <code>research.html</code>.
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Run Command Box -->
+    <div class="extractor-cmd-box">
+      <span><span style="color:#4ade80;">$</span> python3 extract_and_rewrite_vo.py</span>
+      <button class="btn-copy-cmd" onclick="copySnippet('python3 extract_and_rewrite_vo.py')">Copy Command</button>
     </div>
   </div>
 
