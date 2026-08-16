@@ -370,7 +370,10 @@ function posterOf(s){
   const vid = media.find(m => m && m.kind === "video" && (m.poster || m.src));
   if(vid) return vid.poster || "";
   if(s && s.file && /\.(png|jpe?g|gif|webp)$/i.test(s.file)) return s.file;
-  return "";
+  if(s && s.file && /\.(mp4|webm|mov)$/i.test(s.file)){
+    return s.poster || "3_Simulation/rawexport/screenshots/frame_0001.jpg";
+  }
+  return "3_Simulation/rawexport/screenshots/frame_0001.jpg";
 }
 function videoOf(s){
   const media = (s && s.media) || [];

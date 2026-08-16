@@ -2152,9 +2152,14 @@ function sceneLabelChips(id, selected){
 }
 function renderSceneCard(id){
   const sc = ensureScene(id);
-  const count = shotsInScene(id).length;
+  const inSceneShots = shotsInScene(id);
+  const count = inSceneShots.length;
   const canDelete = count === 0 && STAGE_ORDER.indexOf(id) === -1;
   const placeholder = SCENE_RATIONALE[id] || "Why does this scene exist in the film? What job does it do for the viewer?";
+  
+  const sceneShotsWithImg = inSceneShots.find(s => s.file && /\.(png|jpe?g|webp)$/i.test(s.file));
+  const sceneImgSrc = sceneShotsWithImg ? sceneShotsWithImg.file : ("3_Simulation/rawexport/screenshots/frame_" + String(Math.min(200, Math.max(1, STAGE_ORDER.indexOf(id) * 30 + 1))).padStart(4, "0") + ".jpg");
+
   return `<article class="scene-card${sc.hidden ? " is-hidden" : ""}" data-scene-id="${escapeHtml(id)}" style="border-left-color:${sceneColor(id)}">
     <div class="scene-card-top">
       <span class="stage-badge" style="background:${sceneColor(id)}">${escapeHtml(id)}</span>
@@ -2173,10 +2178,19 @@ function renderSceneCard(id){
       <button type="button" class="btn sm" data-filter-scene="${escapeHtml(id)}">View shots</button>
       ${canDelete ? `<button type="button" class="btn sm danger" data-scene-del="${escapeHtml(id)}">Delete</button>` : ""}
     </div>
-    <div class="scene-field" style="margin-bottom:10px">
-      <label for="rationale-${escapeHtml(id)}">Rationale — why this scene exists</label>
-      <textarea class="scene-rationale" id="rationale-${escapeHtml(id)}" data-scene-rationale="${escapeHtml(id)}" placeholder="${escapeHtml(placeholder)}">${escapeHtml(sc.rationale || "")}</textarea>
+    
+    <div style="display:flex; flex-wrap:wrap; gap:16px; margin:12px 0 14px; align-items:flex-start;">
+      <div style="width:160px; aspect-ratio:16/9; background:#000; border-radius:8px; overflow:hidden; border:1px solid var(--line); flex-shrink:0;">
+        <img src="${escapeHtml(sceneImgSrc)}" alt="Scene ${escapeHtml(id)} Visual" loading="lazy" style="width:100%; height:100%; object-fit:cover; display:block;">
+      </div>
+      <div style="flex:1; min-width:240px;">
+        <div class="scene-field">
+          <label for="rationale-${escapeHtml(id)}">Rationale — why this scene exists</label>
+          <textarea class="scene-rationale" id="rationale-${escapeHtml(id)}" data-scene-rationale="${escapeHtml(id)}" placeholder="${escapeHtml(placeholder)}">${escapeHtml(sc.rationale || "")}</textarea>
+        </div>
+      </div>
     </div>
+
     <div class="scene-grid">
       <div class="scene-field">
         <label>Types</label>

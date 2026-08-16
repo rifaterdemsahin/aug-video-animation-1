@@ -686,13 +686,20 @@ function renderScript() {
         bodyHtml = `<p class="visual-only">📹 [Visual: ${escapeHtml(s.caption || fileBasename(s.file) || "B-roll")}]</p>`;
       }
       
+      const imgSrc = s.file || ("3_Simulation/rawexport/screenshots/frame_" + String(Math.min(200, Math.max(1, Math.round(tc.in + 1)))).padStart(4, "0") + ".jpg");
+      
       block.innerHTML = `
-        ${bodyHtml}
+        <div style="display:flex; gap:16px; align-items:flex-start; margin-bottom:12px;">
+          <img src="${escapeHtml(imgSrc)}" alt="${escapeHtml(s.caption || fileBasename(s.file) || 'Shot visual')}" loading="lazy" style="width:160px; aspect-ratio:16/9; object-fit:cover; border-radius:8px; border:1px solid var(--line); flex-shrink:0; background:#000;">
+          <div style="flex:1;">
+            ${bodyHtml}
+          </div>
+        </div>
         <div class="meta-row">
           <div class="meta-badges">
             <span class="badge">${formatTC(tc.in)}–${formatTC(tc.out)} (${tc.dur}s)</span>
             ${s.vo ? `<span class="badge">${wordCount(s.vo)} words</span>` : ''}
-            <span style="font-family:monospace; margin-left:6px;">${fileBasename(s.file) || "Text Card"}</span>
+            <span style="font-family:monospace; margin-left:6px;">${fileBasename(s.file) || "Shot Frame"}</span>
           </div>
           <div style="display:flex; align-items:center; gap:8px;">
             <span class="bookmark-star" onclick="toggleBookmark('${s.id}')" title="Toggle Bookmark">
